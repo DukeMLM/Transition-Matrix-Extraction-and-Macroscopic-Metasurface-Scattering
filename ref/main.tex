@@ -1,0 +1,216 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath, amssymb, amsfonts}
+\usepackage{physics}
+\usepackage{bm}
+\usepackage{graphicx}
+\usepackage{cite}
+\usepackage{booktabs}
+\usepackage[left=2.5cm,right=2.5cm,top=2.5cm,bottom=2.5cm]{geometry}
+\usepackage{hyperref}
+
+\title{Operational Manual: Transition Matrix Extraction and Macroscopic Metasurface Scattering}
+\author{Willie J. Padilla}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This manual outlines the execution protocol and physical theory for the computational framework designed to extract the transition matrix of isolated metamaterial unit cells and model the macroscopic scattering response of large-scale metasurfaces \cite{deng2021neural, malof2023forward}. It delineates the relationship between the finite-element near-field extraction, algebraic transition matrix projection, and macroscopic multiple-scattering aggregation.
+\end{abstract}
+
+\section{System Architecture and Input/Output Summary} \label{sec:architecture}
+The workflow is strictly partitioned into three sequential stages: finite-element near-field extraction, algebraic transition matrix projection, and macroscopic multiple-scattering aggregation. The transition matrix describes the waves scattered by the localized geometry and must not be conflated with a transfer matrix.
+
+\begin{table}[h]
+\centering
+\caption{Computational Stage I/O Summary}
+\label{tab:io_summary}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{@{}llll@{}}
+\toprule
+\textbf{Computational Stage} & \textbf{Script Name} & \textbf{Primary Inputs} & \textbf{Primary Outputs} \\ \midrule
+\textbf{1. Full-Wave Extraction} & \texttt{extract\_cst\_near\_fields\_2.py} & CST Template, $w$, $h$, $f_{max}$ & Cartesian fields, \texttt{excitation\_metadata.json} \\
+\textbf{2. T-Matrix Projection} & \texttt{compute\_t\_matrix\_projection\_2.py} & \texttt{metadata.json}, Fields, $L_{max}$, $r_{monitor}$ & Isolated T-Matrix Operator (\texttt{T\_Matrix.npy}) \\
+\textbf{3. Array Aggregation} & \textit{(Planned Architecture)} & Array of \texttt{T\_Matrix.npy}, Translations & Macroscopic S-Parameters ($S_{11}$, $S_{21}$) \\ \bottomrule
+\end{tabular}%
+}
+\end{table}
+
+\section{Operational Protocol and Execution Setup} \label{sec:protocol}
+To execute the automated pipeline, a standalone Python environment must be configured with the CST Studio Suite libraries. This is achieved via the following console command: \texttt{pip install --no-index --find-links "<CST\_STUDIO\_SUITE\_FOLDER>/Library/Python/repo/simple" cst-studio-suite-link}.
+
+\subsection{Stage 1: Full-Wave Extraction (\texttt{extract\_cst\_near\_fields\_2.py})}
+This stage automates the full-wave computational electromagnetic extraction utilizing the Frequency Domain Solver within CST Microwave Studio.
+
+\textbf{Physics Setup and Constraints:}
+\begin{itemize}
+    \item \textbf{Substrate Omission and $\mathbf{T}_{iso}$ Definition:} The computational CAD model within CST Microwave Studio must strictly omit the dielectric substrate. The primary full-wave simulation must evaluate the metallic or dielectric resonator in complete isolation. This process extracts the intrinsic transition matrix ($\mathbf{T}_{iso}$) directly, decoupling the object from the substrate to preserve the spherical symmetry requisite for the exact projection of the scattered near-fields onto the free-space vector spherical wave functions (VSWFs).
+    \item \textbf{Boundary Conditions:} The unit cell must be simulated strictly in isolation. The enforcement of periodic boundary conditions (Floquet modes) is mathematically erroneous for extracting a localized multipole response. Perfectly Matched Layers (PMLs), designated as "Open (add space)", must be applied on all six sides of the bounding box to allow scattered fields to radiate freely in $4\pi$ steradians.
+    \item \textbf{Spherical Field Monitor Placement:} To project the simulated fields onto the orthogonal VSWF basis, a discrete spherical monitor surface, $S$, must be defined. This sphere must be positioned exclusively within the bounding box and inside the PML boundaries. To prevent intersection with the physical scatterer while simultaneously avoiding non-physical absorption artifacts from the PML, the radius of the monitor, $r_{monitor}$, is mathematically constrained to $r_{scatterer} < r_{monitor} < r_{PML}$.
+\end{itemize}
+
+\textbf{Execution Routine and Lebedev Quadrature:} 
+The script generates a discrete spectrum of incident plane waves distributed across the solid angle utilizing a rigorous Lebedev quadrature grid. Lebedev grids are constructed utilizing the symmetries of the octahedral rotation group, where the number of nodal points, $N_{nodes}$, is strictly dictated by the required algebraic degree of precision, $p$. To guarantee exact numerical integration for the spherical harmonic basis up to the truncation limit, the precision must satisfy $p \ge 2L_{max}$. 
+
+The specific configurations of nodal points relative to the algebraic precision are detailed in Table \ref{tab:lebedev}. It iteratively computes the response and exports the complex electric and magnetic Cartesian near-fields alongside an \texttt{excitation\_metadata.json} manifest.
+
+\begin{table}[h]
+\centering
+\caption{Lebedev Quadrature Nodal Points ($N_{nodes}$) for Given Algebraic Degrees of Precision ($p$)}
+\label{tab:lebedev}
+\begin{tabular}{|c|c||c|c|}
+\hline
+\multicolumn{2}{|c||}{\textbf{Low/Mid-Order Grids}} & \multicolumn{2}{c|}{\textbf{High-Order Grids}} \\
+\hline
+Precision ($p$) & Nodes ($N_{nodes}$) & Precision ($p$) & Nodes ($N_{nodes}$) \\
+\hline
+3 & 6 & 19 & 146 \\
+5 & 14 & 21 & 170 \\
+7 & 26 & 23 & 194 \\
+9 & 38 & 25 & 230 \\
+11 & 50 & 27 & 266 \\
+13 & 74 & 29 & 302 \\
+15 & 86 & 31 & 350 \\
+17 & 110 & 35 & 434 \\
+\hline
+\end{tabular}
+\end{table}
+
+\textbf{Symmetry Reduction:} For metamaterial architectures exhibiting an $xy$ reflection plane of symmetry under normal incidence ($z$-propagating waves), it is not strictly necessary to evaluate incident plane waves from the full $4\pi$ steradian geometry. The extraction framework provides an option to enforce this symmetry, restricting the Lebedev nodal points to a $2\pi$ hemispherical geometry. This systematically decreases the total finite-element simulation time by a factor of two while preserving the full rigorousness of the calculated scattering response.
+
+\subsection{Stage 2: Transition Matrix Projection (\texttt{compute\_t\_matrix\_projection\_2.py})}
+This script executes the linear algebra necessary to project the exported near-fields onto the orthogonal VSWF basis.
+
+\textbf{Physics Setup and Constraints:}
+\begin{itemize}
+    \item \textbf{Numerical Integration:} Cartesian trilinear interpolators evaluate the complex fields on the discrete spherical monitor surface. The script utilizes a Gauss-Legendre quadrature grid for numerical surface integration to evaluate the expansion coefficients.
+    \item \textbf{Continuous Substrate Integration:} The macroscopic continuous supporting substrate slab, explicitly omitted in Stage 1 to preserve spherical symmetry, is systematically reintroduced during this algebraic phase using rigorous analytical matrix operations \cite{tsang2001scattering}. 
+\end{itemize}
+
+\subsubsection*{Analytical Construction of the Reflection Matrix ($\mathbf{R}$)}
+The rigorous derivation of the reflection matrix $\mathbf{R}$ demands the spectral decomposition of the localized multipole fields. The outward-propagating Vector Spherical Wave Functions (VSWFs) radiating from the isolated scatterer are mapped to a continuous basis of vector plane waves via the Weyl identity. The matrix elements of $\mathbf{R}$ connecting an incident mode $\mu = (n', m', \tau')$ to a scattered mode $\nu = (n, m, \tau)$---where the polarization index $\tau \in \{1, 2\}$ denotes the magnetic (TE) and electric (TM) multipoles---are obtained by integrating the macroscopic plane-wave reflection tensor $\overline{\overline{\mathbf{r}}}(\mathbf{k}_{\parallel})$ over the Sommerfeld integration contour in the complex spectral domain \cite{tsang2001scattering}:
+\begin{equation}
+    R_{\nu \mu} = \iint d^2\mathbf{k}_{\parallel} \, \mathbf{D}_{\nu}^{\dagger}(\mathbf{k}_{\parallel}) \cdot \overline{\overline{\mathbf{r}}}(\mathbf{k}_{\parallel}) \cdot \mathbf{D}_{\mu}(\mathbf{k}_{\parallel})
+\end{equation}
+where $\mathbf{k}_{\parallel} = (k_x, k_y)$ represents the transverse wavevector.
+
+The transformation dyadics $\mathbf{D}_{\nu}(\mathbf{k}_{\parallel})$ and $\mathbf{D}_{\mu}(\mathbf{k}_{\parallel})$ project the discrete vector spherical harmonics onto the orthogonal transverse plane-wave basis states. To find these operators, we define the plane-wave wavevector $\mathbf{k}^{\pm} = k_x \hat{x} + k_y \hat{y} \pm k_z \hat{z}$, where the axial component is $k_z = \sqrt{k^2 - k_x^2 - k_y^2}$. The branch cut is strictly chosen such that $\operatorname{Im}(k_z) \le 0$ to satisfy the Sommerfeld radiation condition \cite{jackson1999classical}. The angular coordinates $(\theta_k, \phi_k)$ in momentum space become complex in the evanescent regime ($k_x^2 + k_y^2 > k^2$).
+
+Evaluating the vector spherical harmonics at these complex momentum angles, the exact projection operators for the magnetic ($\tau=1$) and electric ($\tau=2$) modes are mathematically defined as \cite{tsang2001scattering}:
+\begin{align}
+    \mathbf{D}_{nm}^{(1)}(\mathbf{k}_{\parallel}) &= \frac{(-j)^n}{2\pi k k_z} \gamma_{nm} \left[ \frac{j m P_n^m(\cos\theta_k)}{\sin\theta_k} \hat{\theta}_k - \frac{\partial P_n^m(\cos\theta_k)}{\partial\theta_k} \hat{\phi}_k \right] e^{jm\phi_k} \\
+    \mathbf{D}_{nm}^{(2)}(\mathbf{k}_{\parallel}) &= \frac{(-j)^{n-1}}{2\pi k k_z} \gamma_{nm} \left[ \frac{\partial P_n^m(\cos\theta_k)}{\partial\theta_k} \hat{\theta}_k + \frac{j m P_n^m(\cos\theta_k)}{\sin\theta_k} \hat{\phi}_k \right] e^{jm\phi_k}
+\end{align}
+where $\gamma_{nm}$ is the orthonormal normalization constant inherent to the specific VSWF basis defined in Section~\ref{subsec:vsh}.
+
+The plane-wave reflection tensor evaluates the continuous dielectric interface and is defined for each transverse spectral component as a $2 \times 2$ matrix:
+\begin{equation}
+    \overline{\overline{\mathbf{r}}}(\mathbf{k}_{\parallel}) = \begin{bmatrix} r^{TE,TE} & r^{TE,TM} \\ r^{TM,TE} & r^{TM,TM} \end{bmatrix}
+\end{equation}
+To accommodate arbitrary supporting structures, including homogeneous infinite half-spaces or stratified biaxial materials, $\overline{\overline{\mathbf{r}}}(\mathbf{k}_{\parallel})$ is rigorously derived utilizing Yeh's $4 \times 4$ transfer matrix method or the admittance-based characteristic matrix formalism. The transfer matrix formulation evaluates the one-dimensional propagation of plane waves through the continuous stratified layers, which is mathematically and physically distinct from the transition matrix governing the discrete, three-dimensional scatterer. 
+
+Once $\mathbf{R}$ is computationally integrated across the spectral plane, it is algebraically coupled to the intrinsic transition matrix ($\mathbf{T}_{iso}$) to capture the local resonant interactions, including vertical Fabry-Perot reflections, between the scatterer and the supporting slab. The aggregate coupled transition matrix for the scatterer-substrate system is defined exactly as:
+\begin{equation}
+    \mathbf{T}_{coupled} = \left[ \mathbf{I} - \mathbf{T}_{iso}\mathbf{R} \right]^{-1} \mathbf{T}_{iso}
+\end{equation}
+
+\textbf{Execution Routine:} 
+By ingesting the serialized \texttt{excitation\_metadata.json}, the script reconstructs the exact orthogonal incident polarization vectors. It constructs the scattered $[\mathbf{F}]$ and incident $[\mathbf{A}]$ coefficient matrices and rigorously extracts the invariant $\mathbf{T}_{iso}$ operator utilizing the Moore-Penrose pseudoinverse. The analytical reflection matrix $\mathbf{R}$ is subsequently calculated through spectral integration and applied via the algebraic coupling equation to yield the final $\mathbf{T}_{coupled}$ operator for macroscopic array aggregation.
+
+\subsection{Stage 3: Macroscopic Array Aggregation (Planned)}
+The final stage manages the multi-scale aggregation of the sparse scatterer ensembles. The localized unit-cell transition matrices ($\mathbf{T}^j$) are aggregated using the Foldy-Lax multiple scattering equations \cite{foldy1945multiple, tsang2001scattering}. The scattered VSWFs from each cell are analytically projected onto the local coordinate systems of neighboring cells via the translation addition theorems ($\mathbf{A}^{ij}$) \cite{tsang2001scattering}. The inversion of this global coupled block matrix yields the total macroscopic scattered field. This field is projected onto specific propagating plane waves to extract the standard network scattering parameters ($S_{21}, S_{11}$) for the full metasurface.
+
+\section{Theoretical Foundations} \label{sec:theory}
+The following sections detail the exact theoretical formalisms governing the transition matrix evaluation for modeling and designing large-scale metasurfaces.
+
+\subsection{Vector Spherical Harmonics and Multi-Pole Expansion} \label{subsec:vsh}
+The macroscopic scattering environment is modeled using the transition matrix method, which necessitates the expansion of incident and scattered fields into vector spherical harmonics \cite{waterman1965matrix, mishchenko2002scattering}. For spherical expansions, the generating scalar function $\psi_{nm}$ solves the scalar Helmholtz equation in spherical coordinates and is expressed as a product of radial and angular dependencies \cite{jackson1999classical}:
+\begin{equation}
+    \psi_{nm}^{(c)}(r, \theta, \phi) = z_n^{(c)}(kr) P_n^m(\cos\theta) e^{jm\phi} \label{eq:scalar_spherical}
+\end{equation}
+Substituting the scalar Debye potential $\psi_{nm}$ into the vector wave formulation, and utilizing the radial position vector $\mathbf{r}$ as the pilot vector, we obtain the magnetic (TE) and electric (TM) vector spherical wave functions (VSWFs) \cite{mishchenko1996tmatrix}:
+\begin{align}
+    \mathbf{M}_{nm}^{(c)}(\mathbf{r}) &= \nabla \times \left( \mathbf{r} \psi_{nm}^{(c)}(\mathbf{r}) \right) \label{eq:M_spherical} \\
+    \mathbf{N}_{nm}^{(c)}(\mathbf{r}) &= \frac{1}{k} \nabla \times \mathbf{M}_{nm}^{(c)}(\mathbf{r}) \label{eq:N_spherical}
+\end{align}
+Consequently, any arbitrary incident electric field $\mathbf{E}_{inc}(\mathbf{r})$ interacting with an environmental scatterer can be rigorously expanded as \cite{waterman1965matrix}:
+\begin{equation}
+    \mathbf{E}_{inc}(\mathbf{r}) = \sum_{n=1}^{n_{max}} \sum_{m=-n}^{n} \left[ a_{nm}\mathbf{M}_{nm}^{(1)}(\mathbf{r}) + b_{nm}\mathbf{N}_{nm}^{(1)}(\mathbf{r}) \right] \label{eq:E_inc_expansion}
+\end{equation}
+The resulting scattered field $\mathbf{E}_{sca}(\mathbf{r})$ is analogously expanded utilizing the outward-propagating basis functions $\mathbf{M}_{nm}^{(3)}$ and $\mathbf{N}_{nm}^{(3)}$:
+\begin{equation}
+    \mathbf{E}_{sca}(\mathbf{r}) = \sum_{n=1}^{n_{max}} \sum_{m=-n}^{n} \left[ f_{nm}\mathbf{M}_{nm}^{(3)}(\mathbf{r}) + g_{nm}\mathbf{N}_{nm}^{(3)}(\mathbf{r}) \right] \label{eq:E_sca_expansion}
+\end{equation}
+
+\subsection{Multipole Truncation and the Size Parameter} \label{subsec:truncation}
+The infinite VSWF series must be numerically truncated at a maximum order, $L_{max}$ \cite{mishchenko2002scattering}. This limit is governed by the dimensionless size parameter $x_{max} = k_{max}a$. It is mathematically critical that $a$ represents the radius of the minimum circumscribing sphere enclosing the physical metamaterial geometry. $L_{max}$ is determined via Wiscombe's bounds \cite{mishchenko2002scattering}:
+
+\noindent For $0.02 \le x_{max} \le 8$:
+\begin{equation}
+    L_{max} = \lceil x_{max} + 4 x_{max}^{1/3} + 1 \rceil
+    \label{eq:wiscombe_1}
+\end{equation}
+For $8 < x_{max} < 4200$:
+\begin{equation}
+    L_{max} = \lceil x_{max} + 4.05 x_{max}^{1/3} + 2 \rceil
+    \label{eq:wiscombe_2}
+\end{equation}
+For $x_{max} \ge 4200$:
+\begin{equation}
+    L_{max} = \lceil x_{max} + 4 x_{max}^{1/3} + 2 \rceil
+    \label{eq:wiscombe_3}
+\end{equation}
+
+The strictly proportional $x^{1/3}$ scaling factor originates from the asymptotic expansion of the Riccati-Bessel functions for large arguments. At the transition boundary ($l \approx x_{max}$), these functions are approximated by Airy functions, wherein the mathematical argument directly scales as $(l - x_{max}) / x_{max}^{1/3}$. To preclude dimensional instability during broadband tensor analysis, $L_{max}$ must be calculated at $f_{max}$ and held constant across the entire spectrum. Excluding the non-physical monopole, the total number of unknown VSWF coefficients for both electric and magnetic polarizations is defined by the dimension $N$ \cite{mishchenko1996tmatrix}:
+\begin{equation}
+    N = 2 \sum_{l=1}^{L_{max}} (2l+1) = 2L_{max}(L_{max} + 2)
+    \label{eq:unknown_dimension}
+\end{equation}
+
+\subsection{The Transition Matrix (T-Matrix) Method} \label{subsec:t_matrix}
+The transition matrix encapsulates the complete electromagnetic scattering properties of an object \cite{waterman1965matrix}. To formulate the linear operator $\mathbf{T}$, the complex expansion coefficients are vertically concatenated into block column vectors. The input vector $\mathbf{a}$ and output vector $\mathbf{f}$ are defined as:
+\begin{equation}
+    \mathbf{a} = \begin{bmatrix} a_{nm} \\ b_{nm} \end{bmatrix}, \quad \mathbf{f} = \begin{bmatrix} f_{nm} \\ g_{nm} \end{bmatrix} \label{eq:coefficient_vectors}
+\end{equation}
+The scattering process is thereby governed by the rigorous linear relation \cite{waterman1971symmetry}:
+\begin{equation}
+    \mathbf{f} = \mathbf{T} \mathbf{a} \label{eq:t_matrix_relation}
+\end{equation}
+Because the vectors $\mathbf{a}$ and $\mathbf{f}$ contain both TE and TM mode coefficients, the T-matrix operator $\mathbf{T}$ assumes a partitioned $2 \times 2$ block matrix structure \cite{mishchenko1996tmatrix}:
+\begin{equation}
+    \mathbf{T} = \begin{bmatrix} \mathbf{T}^{11} & \mathbf{T}^{12} \\ \mathbf{T}^{21} & \mathbf{T}^{22} \end{bmatrix} \label{eq:t_matrix_blocks}
+\end{equation}
+Because the VSWF basis inherently fulfills the Helmholtz equation, $\mathbf{T}$ depends exclusively on the particle's geometry, permittivity tensor, and the excitation frequency, rendering it strictly invariant to the incident field profile.
+
+\subsection{Multiple Scattering Theory and Array Aggregation} \label{subsec:multiple_scattering}
+For an array comprised of $N$ localized unit cells, the self-consistent local exciting field coefficients for the $i$-th unit cell, $\mathbf{a}^i$, are rigorously defined by the Foldy-Lax multiple scattering equations \cite{foldy1945multiple}:
+\begin{equation}
+    \mathbf{a}^i = \mathbf{a}_{inc}^i + \sum_{j \neq i}^N \mathbf{A}^{ij} \mathbf{f}^j
+    \label{eq:foldy_lax}
+\end{equation}
+Yielding a coupled algebraic system governing the macroscopic array \cite{tsang2001scattering}:
+\begin{equation}
+    \mathbf{a}^i - \sum_{j \neq i}^N \mathbf{A}^{ij} \mathbf{T}^j \mathbf{a}^j = \mathbf{a}_{inc}^i
+    \label{eq:coupled_system}
+\end{equation}
+
+\subsection{Extraction of S-Parameters from Macroscopic Scattering} \label{subsec:sparameters}
+Assuming the metasurface array is illuminated by an incident plane wave characterized by a wavevector $\mathbf{k}_{inc}$ and a polarization state $\hat{\mathbf{e}}_{inc}$, the complex forward transmission coefficient ($S_{21}$) is extracted utilizing the forward scattering theorem \cite{jackson1999classical, mishchenko2002scattering}:
+\begin{equation}
+    S_{21} = 1 + \frac{j 2\pi}{k A \cos\theta_{inc}} \hat{\mathbf{e}}_{inc}^* \cdot \mathbf{S}(\mathbf{k}_{inc})
+    \label{eq:s21_transmission}
+\end{equation}
+Similarly, the reflection parameter $S_{11}$ is determined by evaluating the scattering amplitude in the specular reflection direction, $\mathbf{k}_{ref}$ \cite{jackson1999classical}:
+\begin{equation}
+    S_{11} = \frac{j 2\pi}{k A \cos\theta_{inc}} \hat{\mathbf{e}}_{ref}^* \cdot \mathbf{S}(\mathbf{k}_{ref})
+    \label{eq:s11_reflection}
+\end{equation}
+
+\bibliographystyle{ieeetr}
+\bibliography{references}
+
+\end{document}

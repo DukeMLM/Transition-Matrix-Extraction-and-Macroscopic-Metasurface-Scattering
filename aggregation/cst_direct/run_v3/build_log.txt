@@ -1,0 +1,36 @@
+[2026-08-05T17:26:00] saw unit cell build -> run_v3
+[2026-08-05T17:26:00] design (um): {"pitch": 2.0, "r_out": 0.7193, "w_ring": 0.1611, "gap": 0.5627, "w": 0.3624, "t_mm": 0.1}
+[2026-08-05T17:26:00] opening CST DesignEnvironment...
+[2026-08-05T17:26:19] history applied + verified:
+[2026-08-05T17:26:19]     [ 1] saw: Step 1 Units
+[2026-08-05T17:26:19]     [ 2] saw: Step 2 Freq range
+[2026-08-05T17:26:19]     [ 3] saw: Step 3 Boundary
+[2026-08-05T17:26:19]     [ 4] saw: Step 4 Background
+[2026-08-05T17:26:19]     [ 5] saw: Step 5 Au material
+[2026-08-05T17:26:19]     [ 6] saw: Step 6 Geometry
+[2026-08-05T17:26:19]     [ 7] saw: Step 7 Floquet ports
+[2026-08-05T17:26:19]     [ 8] saw: Step 8 Freq samples
+[2026-08-05T17:26:19]     [ 9] saw: Step 9 Mesh adaptation
+[2026-08-05T17:26:19]     [10] saw: Step 10 Local mesh on metal
+[2026-08-05T17:26:20] starting FD solver...
+[2026-08-05T17:27:23] FDSolver finished after 63s
+[2026-08-05T17:27:30] reading S-parameters...
+[2026-08-05T17:27:30]   1D Results\S-Parameters\SZmax(1),Zmax(1)
+[2026-08-05T17:27:30]   1D Results\S-Parameters\SZmax(1),Zmax(2)
+[2026-08-05T17:27:30]   1D Results\S-Parameters\SZmax(1),Zmin(1)
+[2026-08-05T17:27:30]   1D Results\S-Parameters\SZmax(1),Zmin(2)
+[2026-08-05T17:27:30]   1D Results\S-Parameters\SZmax(2),Zmax(1)
+[2026-08-05T17:27:30]   1D Results\S-Parameters\SZmax(2),Zmax(2)
+[2026-08-05T17:27:30]   1D Results\S-Parameters\SZmax(2),Zmin(1)
+[2026-08-05T17:27:30]   1D Results\S-Parameters\SZmax(2),Zmin(2)
+[2026-08-05T17:27:30]   1D Results\S-Parameters\SZmin(1),Zmax(1)
+[2026-08-05T17:27:30]   1D Results\S-Parameters\SZmin(1),Zmax(2)
+[2026-08-05T17:27:30]   1D Results\S-Parameters\SZmin(1),Zmin(1)
+[2026-08-05T17:27:30]   1D Results\S-Parameters\SZmin(1),Zmin(2)
+[2026-08-05T17:27:30]   1D Results\S-Parameters\SZmin(2),Zmax(1)
+[2026-08-05T17:27:30]   1D Results\S-Parameters\SZmin(2),Zmax(2)
+[2026-08-05T17:27:30]   1D Results\S-Parameters\SZmin(2),Zmin(1)
+[2026-08-05T17:27:30]   1D Results\S-Parameters\SZmin(2),Zmin(2)
+[2026-08-05T17:27:30]   mode 1: std|S11|=0.05734
+[2026-08-05T17:27:30]   mode 2: std|S11|=0.05734
+[2026-08-05T17:27:30] wrote run_v3\s_params_complex.csv (1001 points); |S11| range [0.1205, 0.3192], |S21| range [0.9415, 0.9912]
