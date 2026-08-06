@@ -1,0 +1,609 @@
+<meta charset="utf-8">
+<title>tmat.h5 — saw_gold_wl15p01um</title>
+<style>
+:root {
+  color-scheme: light;
+  --bg: #F5F6F8; --surface: #FFFFFF; --ink: #14181D; --muted: #58616B;
+  --line: #DCE1E7; --accent: #2a78d6; --accent-soft: #e8f0fa;
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100;
+  --ramp0: #eef4fb; --ramp1: #9cc0ea; --ramp2: #2a78d6; --ramp3: #16395f;
+  --ph0: #2a78d6; --ph1: #aab2bc; --ph2: #eb6834;
+}
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) {
+    color-scheme: dark;
+    --bg: #101318; --surface: #171B21; --ink: #E7EAEE; --muted: #98A1AC;
+    --line: #2A3138; --accent: #3987e5; --accent-soft: #1c2836;
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
+    --ramp0: #131c28; --ramp1: #1f4c85; --ramp2: #3987e5; --ramp3: #c8def7;
+    --ph0: #3987e5; --ph1: #5a626d; --ph2: #d95926;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #101318; --surface: #171B21; --ink: #E7EAEE; --muted: #98A1AC;
+  --line: #2A3138; --accent: #3987e5; --accent-soft: #1c2836;
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
+  --ramp0: #131c28; --ramp1: #1f4c85; --ramp2: #3987e5; --ramp3: #c8def7;
+  --ph0: #3987e5; --ph1: #5a626d; --ph2: #d95926;
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #F5F6F8; --surface: #FFFFFF; --ink: #14181D; --muted: #58616B;
+  --line: #DCE1E7; --accent: #2a78d6; --accent-soft: #e8f0fa;
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100;
+  --ramp0: #eef4fb; --ramp1: #9cc0ea; --ramp2: #2a78d6; --ramp3: #16395f;
+  --ph0: #2a78d6; --ph1: #aab2bc; --ph2: #eb6834;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font: 14px/1.5 "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+.mono { font-family: "Cascadia Mono", Consolas, ui-monospace, monospace;
+        font-variant-numeric: tabular-nums; }
+.wrap { max-width: 1240px; margin: 0 auto; padding: 20px 20px 48px; }
+.eyebrow { font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase;
+           color: var(--muted); font-weight: 600; }
+header.top { display: flex; flex-wrap: wrap; align-items: baseline;
+             gap: 10px 18px; padding: 6px 2px 16px; }
+header.top h1 { font-size: 21px; margin: 0; font-weight: 650;
+                text-wrap: balance; }
+header.top h1 .ext { color: var(--muted); font-weight: 400; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font-size: 11.5px; padding: 2px 9px; border: 1px solid var(--line);
+        border-radius: 999px; background: var(--surface); color: var(--muted);
+        white-space: nowrap; }
+.chip b { color: var(--ink); font-weight: 600; }
+.grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 14px; }
+.panel { grid-column: span 12; background: var(--surface);
+         border: 1px solid var(--line); border-radius: 8px;
+         padding: 14px 16px 16px; min-width: 0; }
+.panel h2 { font-size: 13.5px; font-weight: 650; margin: 2px 0 2px; }
+.panel .sub { font-size: 12px; color: var(--muted); margin: 0 0 10px; }
+@media (min-width: 960px) {
+  .p-heat { grid-column: span 7; }
+  .p-side { grid-column: span 5; }
+  .p-spec, .p-diag { grid-column: span 6; }
+  .p-geom { grid-column: span 4; }
+  .p-modes { grid-column: span 3; }
+  .p-tree { grid-column: span 5; }
+}
+.hm-head { display: flex; justify-content: space-between; align-items: center;
+           gap: 10px; flex-wrap: wrap; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 6px;
+       overflow: hidden; }
+.seg button { border: 0; background: transparent; color: var(--muted);
+  padding: 4px 12px; font: 600 12px "Segoe UI", system-ui, sans-serif;
+  cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: #fff; }
+.seg button:focus-visible, input:focus-visible, .tree summary:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 1px; }
+.hm-body { display: flex; gap: 14px; align-items: flex-start;
+           overflow-x: auto; padding-top: 8px; }
+.freq-row { display: flex; align-items: center; gap: 14px; margin-top: 10px;
+            flex-wrap: wrap; }
+.freq-row input[type=range] { flex: 1 1 220px; accent-color: var(--accent); }
+.freq-read { font-size: 15px; }
+.freq-read small { color: var(--muted); font-size: 11.5px; }
+.kv { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.kv td { padding: 4px 0; border-bottom: 1px solid var(--line);
+         vertical-align: top; }
+.kv tr:last-child td { border-bottom: 0; }
+.kv td.k { color: var(--muted); padding-right: 12px; white-space: nowrap; }
+.kv td.v { text-align: right; }
+.bar { display: inline-block; height: 6px; border-radius: 3px;
+       background: var(--accent); vertical-align: middle; margin-left: 8px; }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; margin: 4px 0 8px;
+          font-size: 12px; color: var(--muted); }
+.legend .dot { display: inline-block; width: 9px; height: 9px;
+               border-radius: 50%; margin-right: 5px; }
+canvas.chart { width: 100%; height: 230px; display: block; }
+.tooltip { position: fixed; pointer-events: none; z-index: 10;
+  background: var(--surface); border: 1px solid var(--line); color: var(--ink);
+  border-radius: 6px; padding: 7px 10px; font-size: 12px;
+  box-shadow: 0 4px 14px rgba(0,0,0,.18); display: none; max-width: 320px; }
+.tooltip .t-h { color: var(--muted); font-size: 11px; margin-bottom: 3px; }
+.modes-scroll { max-height: 380px; overflow-y: auto; }
+table.modes { border-collapse: collapse; width: 100%; font-size: 12px; }
+table.modes th { text-align: left; color: var(--muted); font-weight: 600;
+  font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase;
+  padding: 3px 8px 5px 0; position: sticky; top: 0;
+  background: var(--surface); }
+table.modes td { padding: 2.5px 8px 2.5px 0; border-top: 1px solid var(--line); }
+.pol-e { color: var(--s1); font-weight: 600; }
+.pol-m { color: var(--s2); font-weight: 600; }
+.tree { font-size: 12.5px; }
+.tree details { margin: 2px 0; }
+.tree summary { cursor: pointer; padding: 2px 4px; border-radius: 4px; }
+.tree summary:hover { background: var(--accent-soft); }
+.tree .meta { color: var(--muted); }
+.tree .attrs { margin: 2px 0 6px 22px; padding-left: 10px;
+               border-left: 2px solid var(--line); color: var(--muted);
+               overflow-wrap: anywhere; }
+.tree .attrs b { color: var(--ink); font-weight: 600; }
+footer.conv { margin-top: 18px; padding: 14px 16px; border: 1px solid var(--line);
+  border-radius: 8px; background: var(--surface); font-size: 12.5px;
+  color: var(--muted); }
+footer.conv b { color: var(--ink); }
+.geo-fig { display: flex; justify-content: center; padding: 6px 0 10px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="eyebrow">tmat.h5 · T-matrix data file</div>
+      <h1 id="file-title">saw_gold_wl15p01um<span class="ext">.tmat.h5</span></h1>
+    </div>
+    <div class="chips" id="chips"></div>
+  </header>
+
+  <div class="grid">
+    <section class="panel p-heat">
+      <div class="hm-head">
+        <div>
+          <h2>T-matrix — <span class="mono">/tmatrix</span></h2>
+          <p class="sub">rows μ (scattered) × columns ν (incident), p = T a ·
+            hover a cell for the mode pair</p>
+        </div>
+        <div class="seg" role="group" aria-label="heatmap quantity">
+          <button id="btn-mag" aria-pressed="true">log₁₀ |T|</button>
+          <button id="btn-ph" aria-pressed="false">arg T</button>
+        </div>
+      </div>
+      <div class="hm-body">
+        <canvas id="hm" width="540" height="540"
+                style="width:540px;height:540px;flex:0 0 auto"></canvas>
+        <canvas id="cb" width="46" height="540"
+                style="width:46px;height:540px;flex:0 0 auto"></canvas>
+      </div>
+      <div class="freq-row">
+        <span class="eyebrow">frequency</span>
+        <input type="range" id="fslider" min="0" max="48" value="20"
+               aria-label="frequency index">
+        <span class="freq-read mono"><b id="lam-read"></b>
+          <small id="thz-read"></small></span>
+      </div>
+    </section>
+
+    <section class="panel p-side">
+      <h2>Extraction diagnostics — <span class="mono">/computation/analysis</span></h2>
+      <p class="sub">stored per frequency by the extraction driver ·
+        shown at the slider frequency</p>
+      <table class="kv mono" id="diag-table"></table>
+      <h2 style="margin-top:16px">Computation setup — <span class="mono">/computation</span></h2>
+      <table class="kv mono" id="comp-table"></table>
+    </section>
+
+    <section class="panel p-spec">
+      <h2>Response spectrum</h2>
+      <p class="sub">derived from <span class="mono">/tmatrix</span> ·
+        the in-plane electric dipole is the dominant channel</p>
+      <div class="legend" id="spec-legend"></div>
+      <canvas class="chart" id="spec"></canvas>
+    </section>
+
+    <section class="panel p-diag">
+      <h2>Diagnostics vs frequency</h2>
+      <p class="sub">log scale · lower is better (except cond ≈ 1 is ideal)</p>
+      <div class="legend" id="diag-legend"></div>
+      <canvas class="chart" id="diagc"></canvas>
+    </section>
+
+    <section class="panel p-geom">
+      <h2>Scatterer — <span class="mono">/scatterer</span></h2>
+      <p class="sub" id="geo-sub"></p>
+      <div class="geo-fig" id="geo-fig"></div>
+      <table class="kv mono" id="geo-table"></table>
+    </section>
+
+    <section class="panel p-modes">
+      <h2>Mode basis — <span class="mono">/modes</span></h2>
+      <p class="sub">parity basis · row/column order of T</p>
+      <div class="modes-scroll">
+        <table class="modes mono" id="mode-table"></table>
+      </div>
+    </section>
+
+    <section class="panel p-tree">
+      <h2>File structure</h2>
+      <p class="sub">every group, dataset, and attribute in the HDF5 file</p>
+      <div class="tree mono" id="tree"></div>
+    </section>
+  </div>
+
+  <footer class="conv">
+    <b>Convention</b> — <span id="conv-text"></span><br>
+    <span id="conv-meta"></span>
+  </footer>
+</div>
+<div class="tooltip mono" id="tip"></div>
+
+<script>
+const D = __DATA_JSON__;
+const NF = D.freq_thz.length, NM = D.modes.l.length;
+const css = n => getComputedStyle(document.documentElement)
+                   .getPropertyValue(n).trim();
+const $ = id => document.getElementById(id);
+const tip = $("tip");
+let fi = 20, mode = "mag";
+
+// ---------- helpers ----------
+const mLabel = i => `(${D.modes.l[i]},${D.modes.m[i] >= 0 ? "+" : ""}${D.modes.m[i]},${D.modes.pol[i][0].toUpperCase()})`;
+const fmt = (x, d = 3) => Number(x).toPrecision(d);
+function hexLerp(a, b, t) {
+  const pa = [1, 3, 5].map(i => parseInt(a.slice(i, i + 2), 16));
+  const pb = [1, 3, 5].map(i => parseInt(b.slice(i, i + 2), 16));
+  // interpolate in linear-light RGB to avoid muddy midpoints
+  const c = pa.map((v, i) => {
+    const la = (v / 255) ** 2.2, lb = (pb[i] / 255) ** 2.2;
+    return Math.round(255 * ((la + (lb - la) * t) ** (1 / 2.2)));
+  });
+  return `rgb(${c[0]},${c[1]},${c[2]})`;
+}
+function rampColor(t, stops) {          // t in [0,1]
+  const n = stops.length - 1, s = Math.min(n - 1e-9, Math.max(0, t * n));
+  return hexLerp(stops[Math.floor(s)], stops[Math.floor(s) + 1], s % 1);
+}
+const seqStops = () => [css("--ramp0"), css("--ramp1"), css("--ramp2"), css("--ramp3")];
+const phStops = () => [css("--ph0"), css("--ph1"), css("--ph2")];
+function setupCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = devicePixelRatio || 1;
+  cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr);
+  const g = cv.getContext("2d");
+  g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return [g, r.width, r.height];
+}
+function showTip(html, x, y) {
+  tip.innerHTML = html; tip.style.display = "block";
+  const w = tip.offsetWidth, h = tip.offsetHeight;
+  tip.style.left = Math.min(innerWidth - w - 8, x + 14) + "px";
+  tip.style.top = (y - h - 12 < 4 ? y + 16 : y - h - 12) + "px";
+}
+const hideTip = () => tip.style.display = "none";
+
+// ---------- header chips ----------
+{
+  const lam = D.lam_um, c = D.computation;
+  const chips = [
+    `<b>${NF}</b> freqs`,
+    `λ <b>${fmt(Math.min(...lam), 3)}–${fmt(Math.max(...lam), 3)} µm</b>`,
+    `<b>${fmt(Math.min(...D.freq_thz), 4)}–${fmt(Math.max(...D.freq_thz), 4)} THz</b>`,
+    `lmax <b>${c.lmax}</b> · <b>${NM}</b> modes`,
+    `parity basis`, `e<sup>−iωt</sup>`,
+    `embedding <b>${D.embedding.name}</b>`,
+    `<b>${D.material.name}</b>`,
+  ];
+  $("chips").innerHTML = chips.map(t => `<span class="chip">${t}</span>`).join("");
+}
+
+// ---------- heatmap ----------
+const HM = { pad: 44, cell: 0 };
+function drawHeatmap() {
+  const cv = $("hm"), [g, W, Hh] = setupCanvas(cv);
+  const pad = HM.pad, size = W - pad - 6;
+  HM.cell = size / NM;
+  g.clearRect(0, 0, W, Hh);
+  const re = D.T_re[fi], im = D.T_im[fi];
+  const stops = mode === "mag" ? seqStops() : phStops();
+  for (let r = 0; r < NM; r++) for (let c = 0; c < NM; c++) {
+    const k = r * NM + c;
+    let t;
+    if (mode === "mag") {
+      const v = Math.log10(Math.hypot(re[k], im[k]) + 1e-12);
+      t = (v + 6) / 5;                       // log10|T| in [-6,-1]
+    } else {
+      t = (Math.atan2(im[k], re[k]) / Math.PI + 1) / 2;   // (-pi,pi]
+    }
+    g.fillStyle = rampColor(Math.max(0, Math.min(1, t)), stops);
+    g.fillRect(pad + c * HM.cell, pad + r * HM.cell,
+               Math.ceil(HM.cell), Math.ceil(HM.cell));
+  }
+  // l-block separators (l = 1 | 2 | 3 at indices 6 and 16)
+  g.strokeStyle = css("--bg"); g.lineWidth = 2;
+  for (const b of [6, 16]) {
+    g.beginPath();
+    g.moveTo(pad + b * HM.cell, pad); g.lineTo(pad + b * HM.cell, pad + size);
+    g.moveTo(pad, pad + b * HM.cell); g.lineTo(pad + size, pad + b * HM.cell);
+    g.stroke();
+  }
+  // block labels
+  g.fillStyle = css("--muted");
+  g.font = "600 11px 'Segoe UI', system-ui, sans-serif";
+  g.textAlign = "center";
+  const mid = [[0, 6], [6, 16], [16, 30]];
+  mid.forEach(([a, b], i) => {
+    const p = pad + (a + b) / 2 * HM.cell;
+    g.fillText("l=" + (i + 1), p, pad - 26);
+    g.save(); g.translate(pad - 30, p); g.rotate(-Math.PI / 2);
+    g.fillText("l=" + (i + 1), 0, 0); g.restore();
+  });
+  g.font = "10.5px 'Segoe UI', system-ui, sans-serif";
+  g.fillText("incident mode ν →", pad + size / 2, pad - 10);
+  g.save(); g.translate(pad - 12, pad + size / 2); g.rotate(-Math.PI / 2);
+  g.fillText("scattered mode μ →", 0, 0); g.restore();
+  drawColorbar();
+}
+function drawColorbar() {
+  const cv = $("cb"), [g, W, Hh] = setupCanvas(cv);
+  const pad = HM.pad, size = Hh - pad - 6, bw = 14;
+  g.clearRect(0, 0, W, Hh);
+  const stops = mode === "mag" ? seqStops() : phStops();
+  for (let y = 0; y < size; y++) {
+    g.fillStyle = rampColor(1 - y / size, stops);
+    g.fillRect(2, pad + y, bw, 1.5);
+  }
+  g.fillStyle = css("--muted");
+  g.font = "10.5px Consolas, monospace"; g.textAlign = "left";
+  const ticks = mode === "mag"
+    ? [["-1", 1], ["-2", .8], ["-3", .6], ["-4", .4], ["-5", .2], ["-6", 0]]
+    : [["+π", 1], ["0", .5], ["−π", 0]];
+  for (const [lab, t] of ticks)
+    g.fillText(lab, bw + 6, pad + (1 - t) * size + 3.5);
+}
+$("hm").addEventListener("mousemove", e => {
+  const r = $("hm").getBoundingClientRect();
+  const c = Math.floor((e.clientX - r.left - HM.pad) / HM.cell);
+  const row = Math.floor((e.clientY - r.top - HM.pad) / HM.cell);
+  if (c < 0 || c >= NM || row < 0 || row >= NM) { hideTip(); return; }
+  const k = row * NM + c, re = D.T_re[fi][k], im = D.T_im[fi][k];
+  const mag = Math.hypot(re, im);
+  showTip(`<div class="t-h">T[μ ${mLabel(row)} ← ν ${mLabel(c)}]</div>` +
+    `${fmt(re, 4)} ${im >= 0 ? "+" : "−"} ${fmt(Math.abs(im), 4)}i<br>` +
+    `|T| = ${fmt(mag, 4)} · arg = ${fmt(Math.atan2(im, re), 3)} rad`,
+    e.clientX, e.clientY);
+});
+$("hm").addEventListener("mouseleave", hideTip);
+$("btn-mag").onclick = () => { mode = "mag"; setSeg(); drawHeatmap(); };
+$("btn-ph").onclick = () => { mode = "ph"; setSeg(); drawHeatmap(); };
+function setSeg() {
+  $("btn-mag").setAttribute("aria-pressed", mode === "mag");
+  $("btn-ph").setAttribute("aria-pressed", mode === "ph");
+}
+
+// ---------- diagnostics side table ----------
+const DIAG_META = [
+  ["residual", "fit residual"], ["reciprocity", "reciprocity"],
+  ["unitarity", "unitarity"], ["incident_deviation_max", "incident dev (max)"],
+  ["cond", "condition number"], ["s_max_sv", "max SV of S"],
+];
+function renderDiagTable() {
+  $("diag-table").innerHTML = DIAG_META.map(([k, lab]) => {
+    const arr = D.analysis[k], v = arr[fi];
+    const mx = Math.max(...arr);
+    const w = Math.round(46 * v / (mx || 1));
+    return `<tr><td class="k">${lab}</td><td class="v">${fmt(v, 4)}` +
+           `<span class="bar" style="width:${w}px"></span></td></tr>`;
+  }).join("");
+}
+{
+  const c = D.computation;
+  const rows = [
+    ["illuminations", c.n_illuminations + " (" + c.illumination_scheme + ")"],
+    ["monitor radius", fmt(c.monitor_radius_m * 1e6, 4) + " µm"],
+    ["quadrature grid", String(c.quadrature_grid)],
+    ["software", "CST FD solver via cst_tmatrix"],
+  ];
+  $("comp-table").innerHTML = rows.map(([k, v]) =>
+    `<tr><td class="k">${k}</td><td class="v">${v}</td></tr>`).join("");
+}
+
+// ---------- line charts ----------
+function makeLineChart(cvId, series, opts) {
+  // series: [{name, color(), values[]}], x = lambda
+  const cv = $(cvId);
+  const draw = () => {
+    const [g, W, Hh] = setupCanvas(cv);
+    const L = 46, R = 12, T = 10, B = 26;
+    const x = l => L + (l - opts.xmin) / (opts.xmax - opts.xmin) * (W - L - R);
+    const yv = opts.log
+      ? v => T + (1 - (Math.log10(v) - Math.log10(opts.ymin)) /
+                  (Math.log10(opts.ymax) - Math.log10(opts.ymin))) * (Hh - T - B)
+      : v => T + (1 - (v - opts.ymin) / (opts.ymax - opts.ymin)) * (Hh - T - B);
+    g.clearRect(0, 0, W, Hh);
+    // grid + ticks
+    g.strokeStyle = css("--line"); g.lineWidth = 1;
+    g.fillStyle = css("--muted");
+    g.font = "10.5px Consolas, monospace";
+    const yt = opts.log
+      ? [...Array(Math.round(Math.log10(opts.ymax / opts.ymin)) + 1)]
+          .map((_, i) => opts.ymin * 10 ** i)
+      : opts.yticks;
+    for (const v of yt) {
+      g.beginPath(); g.moveTo(L, yv(v)); g.lineTo(W - R, yv(v)); g.stroke();
+      g.textAlign = "right";
+      g.fillText(opts.log ? "1e" + Math.round(Math.log10(v)) : String(v),
+                 L - 5, yv(v) + 3.5);
+    }
+    for (let l = Math.ceil(opts.xmin / 2) * 2; l <= opts.xmax; l += 2) {
+      g.textAlign = "center"; g.fillText(l + "", x(l), Hh - B + 16);
+    }
+    g.fillText("wavelength (µm)", L + (W - L - R) / 2, Hh - 1);
+    // current-frequency marker
+    g.strokeStyle = css("--accent"); g.setLineDash([4, 4]); g.lineWidth = 1;
+    g.beginPath(); g.moveTo(x(D.lam_um[fi]), T);
+    g.lineTo(x(D.lam_um[fi]), Hh - B); g.stroke(); g.setLineDash([]);
+    // series
+    for (const s of series) {
+      g.strokeStyle = s.color(); g.lineWidth = 2;
+      g.beginPath();
+      D.lam_um.forEach((l, i) => {
+        const px = x(l), py = yv(Math.max(s.values[i], opts.log ? opts.ymin : -1e9));
+        i ? g.lineTo(px, py) : g.moveTo(px, py);
+      });
+      g.stroke();
+    }
+    draw.x = x;
+  };
+  cv.addEventListener("mousemove", e => {
+    const r = cv.getBoundingClientRect();
+    let best = 0, bd = 1e9;
+    D.lam_um.forEach((l, i) => {
+      const d = Math.abs(draw.x(l) - (e.clientX - r.left));
+      if (d < bd) { bd = d; best = i; }
+    });
+    const rows = series.map(s =>
+      `<span style="color:${s.color()}">●</span> ${s.name}: ` +
+      `<b>${fmt(s.values[best], 4)}</b>`).join("<br>");
+    showTip(`<div class="t-h">λ = ${D.lam_um[best]} µm · ` +
+            `${D.freq_thz[best]} THz</div>${rows}`, e.clientX, e.clientY);
+  });
+  cv.addEventListener("mouseleave", hideTip);
+  cv.addEventListener("click", e => {          // click chart -> move slider
+    const r = cv.getBoundingClientRect();
+    let best = 0, bd = 1e9;
+    D.lam_um.forEach((l, i) => {
+      const d = Math.abs(draw.x(l) - (e.clientX - r.left));
+      if (d < bd) { bd = d; best = i; }
+    });
+    setFreq(best);
+  });
+  return draw;
+}
+// response spectrum series
+const magMax = D.T_re.map((re, i) => {
+  let m = 0;
+  for (let k = 0; k < re.length; k++)
+    m = Math.max(m, Math.hypot(re[k], D.T_im[i][k]));
+  return m;
+});
+const dip = [];   // co-pol electric-dipole diagonal, mean over m = ±1
+{
+  const idx = [];
+  for (let i = 0; i < NM; i++)
+    if (D.modes.l[i] === 1 && Math.abs(D.modes.m[i]) === 1 &&
+        D.modes.pol[i].startsWith("e")) idx.push(i);
+  for (let f = 0; f < NF; f++) {
+    let s = 0;
+    for (const i of idx)
+      s += Math.hypot(D.T_re[f][i * NM + i], D.T_im[f][i * NM + i]);
+    dip.push(s / idx.length);
+  }
+}
+const specSeries = [
+  { name: "max |T| (any pair)", color: () => css("--s1"), values: magMax },
+  { name: "|T| electric dipole (1,±1,E)", color: () => css("--s2"), values: dip },
+];
+const specDraw = makeLineChart("spec", specSeries,
+  { xmin: 8, xmax: 20, ymin: 0, ymax: 0.09, yticks: [0, 0.02, 0.04, 0.06, 0.08] });
+$("spec-legend").innerHTML = specSeries.map(s =>
+  `<span><span class="dot" style="background:${s.color()}"></span>${s.name}</span>`
+).join("");
+
+const diagSeries = [
+  { name: "residual", color: () => css("--s1"), values: D.analysis.residual },
+  { name: "reciprocity", color: () => css("--s2"), values: D.analysis.reciprocity },
+  { name: "unitarity", color: () => css("--s3"), values: D.analysis.unitarity },
+  { name: "incident dev (max)", color: () => css("--s4"),
+    values: D.analysis.incident_deviation_max },
+];
+const diagDraw = makeLineChart("diagc", diagSeries,
+  { xmin: 8, xmax: 20, log: true, ymin: 1e-4, ymax: 1 });
+$("diag-legend").innerHTML = diagSeries.map(s =>
+  `<span><span class="dot" style="background:${s.color()}"></span>${s.name}</span>`
+).join("");
+
+// ---------- frequency slider ----------
+function setFreq(i) {
+  fi = i; $("fslider").value = i;
+  $("lam-read").textContent = D.lam_um[i] + " µm";
+  $("thz-read").textContent = " · " + D.freq_thz[i] + " THz";
+  drawHeatmap(); renderDiagTable(); specDraw(); diagDraw();
+}
+$("fslider").addEventListener("input", e => setFreq(+e.target.value));
+
+// ---------- geometry ----------
+{
+  const gm = D.geometry;
+  $("geo-sub").textContent = `shape: ${gm.shape} · designed for λc = ` +
+    `${gm.design_center_wavelength_um} µm`;
+  const S = 120;                       // px per µm
+  const r = gm.r * S, ri = (gm.r - gm.w_ring) * S, hw = gm.w / 2 * S,
+        tip_ = gm.gap / 2 * S, root = (gm.r - gm.w_ring / 2) * S;
+  const cx = 1.0 * S, cy = 1.0 * S, box = 2.0 * S;
+  const spoke = (x, y, w, h) =>
+    `<rect x="${cx + x}" y="${cy + y}" width="${w}" height="${h}"/>`;
+  $("geo-fig").innerHTML = `
+  <svg width="${box}" height="${box + 20}" viewBox="0 0 ${box} ${box + 20}"
+       role="img" aria-label="spoke-and-wheel resonator top view">
+    <g fill="var(--accent)" fill-opacity="0.85">
+      <path fill-rule="evenodd" d="M ${cx - r},${cy}
+        a ${r},${r} 0 1,0 ${2 * r},0 a ${r},${r} 0 1,0 ${-2 * r},0 Z
+        M ${cx - ri},${cy} a ${ri},${ri} 0 1,0 ${2 * ri},0
+        a ${ri},${ri} 0 1,0 ${-2 * ri},0 Z"/>
+      ${spoke(-hw, -root, 2 * hw, root - tip_)}
+      ${spoke(-hw, tip_, 2 * hw, root - tip_)}
+      ${spoke(tip_, -hw, root - tip_, 2 * hw)}
+      ${spoke(-root, -hw, root - tip_, 2 * hw)}
+    </g>
+    <line x1="${cx - 0.25 * S}" y1="${box + 8}" x2="${cx + 0.25 * S}"
+          y2="${box + 8}" stroke="var(--muted)" stroke-width="2"/>
+    <text x="${cx}" y="${box + 19}" text-anchor="middle" fill="var(--muted)"
+          font-size="10" font-family="Segoe UI, sans-serif">500 nm</text>
+  </svg>`;
+  const rows = [
+    ["r (outer radius)", gm.r + " µm"], ["w_ring", gm.w_ring + " µm"],
+    ["gap", gm.gap + " µm"], ["w (spoke width)", gm.w + " µm"],
+    ["thickness", gm.thickness + " µm"],
+    ["circumscribing r", fmt(Number(gm.circumscribing_radius_m) * 1e6, 4) + " µm"],
+    ["material", D.material.name],
+    ["σ", D.material.conductivity_S_per_m.toExponential(3) + " S/m"],
+  ];
+  $("geo-table").innerHTML = rows.map(([k, v]) =>
+    `<tr><td class="k">${k}</td><td class="v">${v}</td></tr>`).join("");
+}
+
+// ---------- mode table ----------
+$("mode-table").innerHTML =
+  "<tr><th>#</th><th>l</th><th>m</th><th>pol</th></tr>" +
+  D.modes.l.map((l, i) =>
+    `<tr><td>${i}</td><td>${l}</td><td>${D.modes.m[i] >= 0 ? "+" : ""}${D.modes.m[i]}</td>` +
+    `<td class="${D.modes.pol[i].startsWith("e") ? "pol-e" : "pol-m"}">` +
+    `${D.modes.pol[i]}</td></tr>`).join("");
+
+// ---------- file tree ----------
+{
+  const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  const rootAttrs = Object.entries(D.root_attrs).map(([k, v]) =>
+    `<div><b>@${esc(k)}</b> = ${esc(v)}</div>`).join("");
+  const items = D.tree.map(e => {
+    const meta = e.kind === "dataset"
+      ? ` <span class="meta">[${e.shape.join(" × ") || "scalar"} · ${e.dtype}]</span>`
+      : ` <span class="meta">(group)</span>`;
+    const at = Object.entries(e.attrs).map(([k, v]) =>
+      `<div><b>@${esc(k)}</b> = ${esc(v)}</div>`).join("");
+    const depth = e.path.split("/").length - 2;
+    return `<details style="margin-left:${depth * 16}px"${at ? "" : " class='noattr'"}>
+      <summary>${esc(e.path)}${meta}</summary>
+      ${at ? `<div class="attrs">${at}</div>`
+           : `<div class="attrs">no attributes</div>`}</details>`;
+  }).join("");
+  $("tree").innerHTML =
+    `<details open><summary>/ <span class="meta">(root)</span></summary>
+     <div class="attrs">${rootAttrs}</div></details>` + items;
+}
+
+// ---------- footer ----------
+$("conv-text").textContent = D.root_attrs.description;
+$("conv-meta").innerHTML =
+  `created with <b>${D.root_attrs.created_with}</b> · format ` +
+  `<b>${D.root_attrs.storage_format_version}</b> · CST project: ` +
+  `<span class="mono">${D.computation.cst_project}</span>`;
+
+// ---------- theme + resize redraw ----------
+function redrawAll() {
+  drawHeatmap(); specDraw(); diagDraw(); renderDiagTable();
+  $("spec-legend").querySelectorAll(".dot").forEach((d, i) =>
+    d.style.background = specSeries[i].color());
+  $("diag-legend").querySelectorAll(".dot").forEach((d, i) =>
+    d.style.background = diagSeries[i].color());
+}
+new MutationObserver(redrawAll).observe(document.documentElement,
+  { attributes: true, attributeFilter: ["data-theme"] });
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", redrawAll);
+addEventListener("resize", () => { specDraw(); diagDraw(); });
+
+setSeg();
+setFreq(20);
+</script>
