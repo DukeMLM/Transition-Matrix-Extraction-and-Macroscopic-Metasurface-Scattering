@@ -5,13 +5,20 @@ matrix (T-matrix)** of a single unit cell from one full-wave CST simulation,
 then predict the S-parameters of arbitrarily large arrays with fast linear
 algebra — no full-wave simulation of the array required.
 
-Validated end-to-end on the `dary` branch: the aggregated S-parameters agree
-with a direct CST periodic simulation to **|ΔS| ≤ 0.003** and with the
-independent [treams](https://github.com/tfp-photonics/treams) code to
-**~3×10⁻⁴** across the full 8–20 µm band.
+Validated end-to-end on the `dary` branch against direct CST periodic
+simulations and the independent [treams](https://github.com/tfp-photonics/treams)
+code, on two cells: `test/single` (pitch 2 µm, 8–20 µm) to **|ΔS| ≤ 0.003**
+and **~3×10⁻⁴** respectively, and `test/2x2` (pitch 8 µm, 10–34 THz, a
+resonant band) to **|ΔS| ≤ 0.08** — there limited by the input T-matrix, not
+by the aggregation.
 
 <p align="center">
 <img src="aggregation/results/fig7_cst_direct_comparison.png" width="85%">
+<br><em>test/single</em>
+</p>
+<p align="center">
+<img src="aggregation/results_2x2/fig1_sparams.png" width="95%">
+<br><em>test/2x2: reconstruction (blue), treams (orange), direct CST (grey)</em>
 </p>
 
 ---
@@ -38,6 +45,10 @@ subwavelength lattice collapse into the 0th diffraction order, giving
 ref/                          theory manual (LaTeX + PDF)
 test/single/                  demo unit cell: spoke-and-wheel gold resonator
   saw_gold_wl15p0025um.tmat.h5   49 freqs (8-20 um), lmax 3, tmat.h5 format
+test/2x2/                     second case: same shape scaled x4, 8 um pitch
+  saw_gold_wl13p10um_10to34THz.tmat.h5   25 freqs (10-34 THz), lmax 5
+  SAW_gold_noSub_packed.cst   packed CST project: 10-run parametric sweep
+                              over `scale`, incl. the matching periodic run
 aggregation/                  Stage 3 implementation (this branch)
   vswf.py                     VSWF engine: fields, plane waves, far field, projections
   translate.py                translation operators + lattice sums (Richardson-extrapolated)
@@ -53,6 +64,15 @@ aggregation/                  Stage 3 implementation (this branch)
   results/                    figures, CSV/NPZ spectra
   REPORT.md                   results and findings
   IMPLEMENTATION_GUIDE.md     full tutorial: how this was built from scratch
+
+  --- generic drivers: any tmat.h5 + pitch, no code edits ---
+  run_case.py                 periodic sweep + convergence/finite-array checks,
+                              with adaptive multipole truncation (--lmax auto)
+  treams_case.py              treams cross-check for the same case
+  cst_packed_reference.py     direct reference straight out of a packed *.cst
+                              (no CST install needed; --list picks the run)
+  plot_case.py                figures + agreement metrics for a results dir
+  results_2x2/                the test/2x2 case (REPORT.md, CSV/NPZ, figures)
 ```
 
 ## Conventions (read this before touching anything)
@@ -105,7 +125,44 @@ Finite arrays with arbitrary in-plane positions and per-site T-matrices:
 `aggregate.build_finite_system` + `solve_finite`, then `sparams_normal` with
 `A = N·A_cell`.
 
+### Running a new case
+
+`run_case.py` does the whole sweep for any `tmat.h5` plus a pitch, no code
+edits. The `test/2x2` case, end to end (~2 min for the sweep):
+
+```bash
+cd aggregation
+python run_case.py ../test/2x2/saw_gold_wl13p10um_10to34THz.tmat.h5 \
+    --pitch 8.0 --r0 3.0 --lmax auto --finite 2 3 5 9 --out results_2x2
+python treams_case.py ../test/2x2/saw_gold_wl13p10um_10to34THz.tmat.h5 \
+    --pitch 8.0 --out results_2x2/treams_reference.npz --lmax auto
+python cst_packed_reference.py ../test/2x2/SAW_gold_noSub_packed.cst --list
+python cst_packed_reference.py ../test/2x2/SAW_gold_noSub_packed.cst \
+    --run 6 --out results_2x2/cst_direct_reference.csv
+python plot_case.py results_2x2
+```
+
+Two things that bite on a new case:
+
+* **`--lmax auto`.** Translation operators grow like
+  `h_l⁽¹⁾(k·pitch) ~ (2l−1)!!/(k·pitch)^(l+1)`, so on a deep-subwavelength
+  lattice the high-l block of the lattice sum is enormous and amplifies
+  whatever extraction noise sits in the high-l rows of `T`. For `test/2x2`
+  (lmax 5, pitch 8 µm) `cond(I − C·T)` reaches 5×10⁵ at 11 THz and the answer
+  comes out with negative absorption. `--lmax auto` keeps, per frequency, the
+  largest truncation with `cond ≤ --cond-max` (100 by default) — lmax 3/4/5
+  across that band — which restores A ≥ 0 without touching the well-conditioned
+  part of the spectrum. See `results_2x2/REPORT.md`.
+* **Parametric sweeps in a packed `.cst`.** Signals are versioned by the 3D Run
+  ID; the newest is rarely the one you want. `--list` prints the run table
+  (parameter values per run) so you can pick. `cst_packed_reference.py` reads
+  the archive directly — it is a ZIP variant with `DE` signatures and 32-bit
+  time/date fields, holding a SQLite result store — so no CST install is
+  needed.
+
 ## Validation summary
+
+### `test/single` — spoke-and-wheel, pitch 2 µm, lmax 3
 
 | check | result |
 |---|---|
@@ -119,6 +176,25 @@ Finite arrays with arbitrary in-plane positions and per-site T-matrices:
 | lossless array over PEC mirror: R = 1 (unitarity) | exact (1.000000) |
 | **treams** (independent Ewald code), complex S, 49 freqs | ≤ 3.4×10⁻⁴ |
 | **direct CST periodic simulation**, 8–20 µm | \|ΔS21\| ≤ 0.0011, \|ΔS11\| ≤ 0.0029 |
+
+### `test/2x2` — same shape ×4, pitch 8 µm, lmax 5, 25 freqs
+
+Run with `--lmax auto`; full write-up in
+[`aggregation/results_2x2/REPORT.md`](aggregation/results_2x2/REPORT.md).
+
+| check | result |
+|---|---|
+| r₀ (×0.8) and quadrature (20×40 → 28×56) invariance | ≤ 1.3×10⁻¹⁰ |
+| lattice-sum taper length (kRc/1.4) | ≤ 4.3×10⁻³ |
+| energy balance A = 1 − R − T | ≥ 0.010 (all 25 freqs) |
+| **treams**, complex S | max 0.070, mean 0.019 |
+| **direct CST periodic simulation** (run 6 of the sweep), complex S | max 0.078 / 0.077, mean 0.022 / 0.031 (S21 / S11) |
+| resonance position vs direct CST | 13.097 µm vs 13.126 µm (0.2 %) |
+
+The looser agreement is the input file's, not the aggregation's: this
+T-matrix violates passivity by 2.8 % and reciprocity by up to 11 % (vs 0.007 %
+and 0.6–1.2 % for `test/single`), and the largest error sits exactly at the
+seam between its two merged extraction bands.
 
 ## Key physical findings for the demo cell
 
@@ -143,8 +219,11 @@ Finite arrays with arbitrary in-plane positions and per-site T-matrices:
   documented extension points, not wired in).
 * Square lattices for the periodic path; finite arrays take arbitrary
   in-plane positions.
-* Truncation inherited from the file (lmax = 3); at pitch/(2r_circ) = 1.39
-  Wiscombe suggests checking L = 5 on the extraction side.
+* Multipole truncation is a real constraint, not a formality: on a
+  deep-subwavelength lattice the Foldy–Lax system conditions like
+  `(k·pitch)^(-(2lmax+2))`, so beyond some lmax the extra modes add noise
+  rather than physics. `run_case.py --lmax auto` picks the budget per
+  frequency; `run_demo.py` keeps the file's lmax = 3, which is safe there.
 * Ground plane is an idealized PEC mirror with vacuum spacer; a layered
   substrate needs the Sommerfeld reflection operator (manual, Stage 2).
 

@@ -3,3 +3,7 @@ __pycache__/
 # CST run directories (project folders are 30-100 MB each); curated
 # artifacts from them are force-added explicitly
 aggregation/cst_direct/run_*/
+# CST working directories: opening a packed *.cst unpacks a same-named folder
+# next to it (Model/, Result/, ModelCache/ ...). The packed archive is what we
+# track; cst_packed_reference.py reads it directly.
+test/*/*/
