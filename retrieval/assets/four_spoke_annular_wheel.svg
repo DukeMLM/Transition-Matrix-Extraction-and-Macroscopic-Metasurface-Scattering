@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="560" viewBox="0 0 900 560" role="img" aria-labelledby="title desc">
+  <title id="title">Four-spoke annular wheel meta-atom</title>
+  <desc id="desc">Plan view of a gold annulus with four inward radial spokes and labels for outer radius, ring width, spoke width, and central gap.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto-start-reverse">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#222"/>
+    </marker>
+    <style>
+      .shape { fill: #f5d313; stroke: #6f5f00; stroke-width: 2; }
+      .dim { fill: none; stroke: #222; stroke-width: 2.5; marker-start: url(#arrow); marker-end: url(#arrow); }
+      .guide { fill: none; stroke: #555; stroke-width: 1.5; stroke-dasharray: 6 5; }
+      .label { fill: #181818; font: 600 24px Arial, sans-serif; }
+      .small { fill: #333; font: 19px Arial, sans-serif; }
+    </style>
+  </defs>
+
+  <rect width="900" height="560" fill="#f7f5fb"/>
+
+  <!-- The dimensions are schematic; numerical values are given in the proposal. -->
+  <g transform="translate(280 280)">
+    <circle cx="0" cy="0" r="190" style="fill:none;stroke:#f5d313;stroke-width:58"/>
+    <circle cx="0" cy="0" r="219" fill="none" stroke="#6f5f00" stroke-width="2"/>
+    <circle cx="0" cy="0" r="161" fill="none" stroke="#6f5f00" stroke-width="2"/>
+    <rect class="shape" x="-32" y="-171" width="64" height="103"/>
+    <rect class="shape" x="-32" y="68" width="64" height="103"/>
+    <rect class="shape" x="-171" y="-32" width="103" height="64"/>
+    <rect class="shape" x="68" y="-32" width="103" height="64"/>
+
+    <circle cx="0" cy="0" r="4" fill="#222"/>
+
+    <!-- outer radius -->
+    <path class="dim" d="M0,0 L0,-190"/>
+    <text class="label" x="13" y="-116">r</text>
+
+    <!-- ring width -->
+    <path class="dim" d="M-156,-120 L-132,-101"/>
+    <text class="label" x="-244" y="-136">w<tspan baseline-shift="sub" font-size="16">ring</tspan></text>
+
+    <!-- spoke width -->
+    <path class="dim" d="M68,-47 L68,47" transform="translate(40 0)"/>
+    <text class="label" x="122" y="7">w</text>
+
+    <!-- central gap -->
+    <path class="dim" d="M-48,-68 L-48,68"/>
+    <text class="label" x="-112" y="8">gap</text>
+  </g>
+
+  <g transform="translate(525 105)">
+    <text class="label" x="0" y="0">Four-spoke annular wheel</text>
+    <text class="small" x="0" y="38">Planar Au meta-atom centered at the VSWF origin</text>
+    <text class="small" x="0" y="72">C4 rotations + vertical mirrors + z mirror</text>
+    <text class="small" x="0" y="106">Free-standing symmetry group: D4h</text>
+
+    <line class="guide" x1="0" y1="142" x2="300" y2="142"/>
+
+    <text class="small" x="0" y="182">r = 0.7193 um</text>
+    <text class="small" x="0" y="216">w_ring = 0.1611 um</text>
+    <text class="small" x="0" y="250">w = 0.3624 um</text>
+    <text class="small" x="0" y="284">gap = 0.5627 um</text>
+    <text class="small" x="0" y="318">thickness = 0.1000 um</text>
+
+    <line class="guide" x1="0" y1="352" x2="300" y2="352"/>
+    <text class="small" x="0" y="392">Drawing is schematic, not a meshing file.</text>
+  </g>
+</svg>
