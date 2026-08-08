@@ -235,7 +235,102 @@ manual's §6.5.5 ladder asks for holds to round-off (40 checks in
 **Does not.** The absolute accuracy against full-wave is 2–5 % in complex S,
 and that floor belongs to the two input T-matrices, which violate passivity by
 2.1–2.8 % and reciprocity by 2–11 %. A better extraction moves this number; a
-better aggregation does not.
+better aggregation does not. The next section takes that floor apart — it is not
+one number but three mechanisms in three parts of the band.
+
+## Where the remaining 2–5 % comes from
+
+`aggregation/error_budget.py` takes any result directory and separates the two
+things that decide how much of the input T-matrix's error survives into S: how
+badly T is known (the h5's own stored `residual`, and the isolated scattering
+cross section that sets its signal-to-noise) and how hard the lattice amplifies
+it (|W| resolved by multipole order, and ‖(I − W T₀)⁻¹‖). It then propagates the
+declared uncertainty end to end — perturb every site's T by a random matrix of
+exactly the norm the file claims, re-run the whole aggregation, repeat.
+
+### The error is not monotonic in wavelength
+
+Atom A, complex |ΔS21| + |ΔS11| against its own CST run:
+
+| λ (µm) | 29.98 | 24.98 | 18.74 | **16.66** | 13.63 | **11.10** | 9.99 | 8.82 |
+|---|---|---|---|---|---|---|---|---|
+| \|ΔS\| | 0.061 | 0.042 | 0.070 | **0.127** | 0.090 | **0.038** | 0.057 | 0.096 |
+
+A U on both ends with a bump at the resonance — three different mechanisms, only
+one of which is really "long wavelength".
+
+### Long wavelength: a weak scatterer coupled through its near field
+
+Two effects compound there, and both are visible in the run:
+
+| λ (µm) | k·pitch | σ_sca (µm²) | h5 `residual` | \|W\| at l = 1 | l = 2 | l = 3 |
+|---|---|---|---|---|---|---|
+| 29.98 | 1.68 | 4.1 | **0.0240** | 4.5 | 39.8 | **1025** |
+| 21.41 | 2.35 | 27.6 | 0.0182 | 2.2 | 8.8 | 112.8 |
+| 13.63 | 3.69 | 120.9 | 0.0036 | 1.1 | 2.0 | 8.0 |
+| 8.82 | 5.70 | 12.1 | 0.0154 | 1.5 | 1.4 | 1.7 |
+
+* **The atom barely scatters.** σ_sca is 4.1 µm² at 30 µm against 121 µm² at
+  13.6 µm. The extraction solves `F = T·A` in least squares, so when the
+  scattered field is a small perturbation on the incident one, the same absolute
+  near-field export noise becomes a much larger *relative* error in T. The
+  file's own `residual` agrees: 0.0240 at 10 THz, its maximum over the band,
+  against 0.0024 at 19 THz.
+* **The lattice amplifies exactly the rows that are worst determined.** The
+  neighbour translation operator goes like `h_l⁽¹⁾(k·pitch) ~
+  (2l−1)!!/(k·pitch)^(l+1)`, and k·pitch falls from 5.70 to 1.68 across the
+  band. At 30 µm the atoms sit deep inside each other's *near* field: the l = 3
+  coupling is 620× stronger than at the short end and 227× stronger than the
+  dipole coupling at the same frequency. (This is the same effect that put
+  `--lmax auto` into the one-atom driver, and why the supercell runs at a fixed
+  lmax 3.)
+
+The two multiply. Propagating a T perturbation of the declared size predicts
+|ΔS| ≈ 0.022–0.027 at 25–30 µm against 0.0014–0.0036 above 21 THz — a factor of
+~10 from amplification alone, with the same relative input error.
+
+### The resonance: a systematic error, not noise
+
+The last column of `error_budget.py` is the ratio of observed to predicted. A
+random perturbation is the most benign error of a given size — it has no
+preferred direction, so it cannot move a resonance. Averaged over the outer
+fifths of the band:
+
+| case | long-λ fifth: observed / predicted | ratio | short-λ fifth | ratio |
+|---|---|---|---|---|
+| atom A alone | 0.0555 / 0.0231 | **2.4** | 0.0754 / 0.0034 | 22.1 |
+| atom B alone | 0.1558 / 0.0400 | **3.9** | 0.0982 / 0.0037 | 26.8 |
+| a,b;b,a supercell | 0.0727 / 0.0210 | **3.5** | 0.0961 / 0.0018 | 54.5 |
+
+At the long-wavelength end the noise model explains a quarter to a half of what
+is observed — as close as it gets anywhere. In the middle of the band the
+observed error runs 15–90× the prediction, and no perturbation of that norm can
+produce it: the dominant error there is a **systematic bias**, in practice a
+pole slightly off frequency, which shows up hardest where the response varies
+fastest. That is why atom B is the worse of the two overall — its resonance sits
+at 17.3 THz, inside its poorer extraction sub-band.
+
+### Short wavelength: the array's own Rayleigh anomaly
+
+λ_min/pitch = 1.10, so the 8 µm lattice is approaching its own diffraction edge
+at the top of the band. ‖(I − W T₀)⁻¹‖ climbs from ~1.5 near 10 µm to 20.9 for
+atom A and 27.9 for atom B. That is the *lattice* becoming resonant, not the
+atom, and no better T-matrix fixes it.
+
+### What each one would take to fix
+
+| where | cause | remedy |
+|---|---|---|
+| long λ | weak scatterer → poor extraction SNR, multiplied by a near-field lattice sum | raise the SNR of the extraction there: more illuminations, larger monitor radius, tighter mesh |
+| resonance | pole position slightly wrong in the extracted T | sample the extraction finer around the pole |
+| short λ | the array approaches λ = pitch | larger pitch, or an Ewald treatment tuned near the anomaly |
+
+None of the three is the aggregation, which reproduces an independent
+implementation to 10⁻¹² across the whole band.
+
+---
+
+## Two other things worth knowing
 
 **One thing that had to change.** The repository's Gaussian-taper + Richardson
 lattice sum does not survive a sub-lattice shift. Tapering the full displacement
@@ -293,6 +388,10 @@ python cst_supercell/read_supercell_results.py --out results_2x2_super_l3
 # figures and metrics
 python plot_supercell.py results_2x2_super_l3 --fine results_2x2_super_fine
 python plot_experiment_summary.py
+
+# where the residual disagreement comes from (any result directory)
+python error_budget.py results_A_ewald_l3
+python error_budget.py results_2x2_super_l3
 ```
 
 Long CST solves must be launched **detached** (PowerShell `Start-Process`), not
@@ -310,4 +409,5 @@ crash.
 | direct CST, de-embedded | `aggregation/results_2x2_super_l3/cst_direct_supercell*.csv` |
 | finite-cluster `T^O` | `aggregation/results_2x2_super_l3/cluster_T.npz` (not in git; regenerate with `--cluster-lmax`) |
 | the CST projects | `aggregation/cst_supercell/runs*/` (`*.cst` + model history + solver log; working directories not in git) |
+| the error budget | `aggregation/error_budget.py` — regenerates every table in "Where the remaining 2–5 % comes from" |
 | the algorithm | manual §6.5.2–6.5.5 and §7.5, implemented in `aggregation/supercell.py` |

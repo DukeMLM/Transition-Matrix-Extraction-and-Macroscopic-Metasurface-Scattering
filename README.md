@@ -48,7 +48,9 @@ Highlights: the mixed cell is **not** an interpolation of the two pure ones (its
 dips move by 5 → 3.5 THz of separation); it supports a **dark lattice resonance**
 at the supercell's own Rayleigh condition that no single-atom model can show,
 confirmed full-wave; and mixing costs **nothing** in accuracy — 0.046 mean
-|ΔS21| against 0.030 and 0.054 for the two constituents on their own.
+|ΔS21| against 0.030 and 0.054 for the two constituents on their own. The
+write-up also takes the residual 2–5 % apart into the three mechanisms that
+produce it, reproducibly (`aggregation/error_budget.py`).
 
 ---
 
