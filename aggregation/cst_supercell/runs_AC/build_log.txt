@@ -1,0 +1,23 @@
+[2026-08-08T16:10:26] design: {"pair": "AC", "atoms": {"A": {"name": "A", "scale": 4.0, "r": 2.87712, "w_ring": 0.644552, "gap": 2.8, "w": 0.8, "t": 0.2, "run": 6}, "C": {"name": "C", "scale": 3.25, "r": 2.33766, "w_ring": 0.523698, "gap": 2.275, "w": 0.65, "t": 0.2, "run": 10}}, "base_pitch": 8.0, "supercell": 16.0, "z_half": 25.0, "f_min_THz": 10.0, "f_max_THz": 34.0, "n_floquet_modes": 20, "au_sigma": 45610000.0, "layout": [[-4.0, -4.0, "A"], [4.0, 4.0, "A"], [4.0, -4.0, "C"], [-4.0, 4.0, "C"]]}
+[2026-08-08T16:10:26] Rayleigh onsets: lambda = 16.00 um (orders +-1,0 / 0,+-1; extinguished by the x,y;y,x symmetry) and 11.31 um = 26.50 THz (orders +-1,+-1)
+[2026-08-08T16:10:26] ===== building supercell =====
+[2026-08-08T16:10:26] opening CST DesignEnvironment for supercell.cst ...
+[2026-08-08T16:10:47] history applied and verified:
+[2026-08-08T16:10:47]     [ 1] sc: 1 units
+[2026-08-08T16:10:47]     [ 2] sc: 2 frequency range
+[2026-08-08T16:10:47]     [ 3] sc: 3 background
+[2026-08-08T16:10:47]     [ 4] sc: 4 boundaries (unit cell 16 um)
+[2026-08-08T16:10:47]     [ 5] sc: 5 mesh type
+[2026-08-08T16:10:47]     [ 6] sc: 6 gold
+[2026-08-08T16:10:47]     [ 7] sc: 7 component
+[2026-08-08T16:10:47]     [ 8] sc: 8.0 atom A at (-4.0, -4.0)
+[2026-08-08T16:10:47]     [ 9] sc: 8.1 atom A at (+4.0, +4.0)
+[2026-08-08T16:10:47]     [10] sc: 8.2 atom C at (+4.0, -4.0)
+[2026-08-08T16:10:47]     [11] sc: 8.3 atom C at (-4.0, +4.0)
+[2026-08-08T16:10:47]     [12] sc: 9 vacuum cell brick
+[2026-08-08T16:10:47]     [13] sc: 10 mesh adaptation
+[2026-08-08T16:10:47]     [14] sc: 11 Floquet ports
+[2026-08-08T16:10:47]     [15] sc: 12 FD solver
+[2026-08-08T16:10:48] starting FD solver ...
+[2026-08-08T17:11:51] FDSolver finished after 3663 s
+[2026-08-08T17:11:58] done

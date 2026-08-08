@@ -1,18 +1,18 @@
-"""Direct CST reference for the a,b;b,a periodic supercell (manual 6.5.5 test 4).
+"""Direct CST reference for an x,y;y,x periodic supercell (manual 6.5.5 test 4).
 
 Builds, meshes and solves a 16 x 16 um free-standing unit cell containing four
-spoke-and-wheel gold resonators in a checkerboard,
+spoke-and-wheel gold resonators in a checkerboard -- for --pair AB,
 
         (-4, +4) B     (+4, +4) A
         (-4, -4) A     (+4, -4) B
 
-with A = `scale` 4.0 and B = `scale` 5.0 of the parametric family stored in
-`test/2x2/SAW_gold_noSub_packed.cst` -- i.e. exactly the two meta-atoms whose
-isolated T-matrices are `saw_gold_wl13p10um_10to34THz.tmat.h5` and
-`saw_gold_wl17p30um_10to34THz.tmat.h5`.  Every solver, mesh, material and
-boundary setting is copied from that project's own periodic run (its
-ModelHistory.json, steps 4/5/163/169/176-179), so the comparison is like for
-like: the only difference is the cell contents.
+The atoms come from the parametric family stored in
+`test/2x2/SAW_gold_noSub_packed.cst`: A = `scale` 4.0 (3D Run ID 6),
+B = `scale` 5.0 (run 2), C = `scale` 3.25 (run 10), i.e. exactly the meta-atoms
+whose isolated T-matrices are saw_gold_wl13p10um / wl17p30um / wl10p90um.
+Every solver, mesh, material and boundary setting is copied from that project's
+own periodic run (its ModelHistory.json, steps 4/5/163/169/176-179), so the
+comparison is like for like: the only difference is the cell contents.
 
 Two projects are produced:
 
@@ -30,9 +30,13 @@ Both therefore de-embed to z = 0 with the SAME factor exp(+j (k_z,0 + k_z,G) L/2
 which `read_supercell_results.py` applies before conjugating CST's e^{+j w t}
 to this repository's e^{-i w t}.
 
-    python build_2x2_supercell.py --dry-run      # build + save, no solve
-    python build_2x2_supercell.py                # build + solve both projects
-    python build_2x2_supercell.py --only empty
+    python build_2x2_supercell.py --pair AB --dry-run   # build + save, no solve
+    python build_2x2_supercell.py --pair AB            # build + solve both
+    python build_2x2_supercell.py --pair AC --only supercell
+
+The empty companion run depends only on the cell, not on its contents, so one
+`--only empty` run serves every pair; point read_supercell_results.py --empty at
+it.
 """
 from __future__ import annotations
 
@@ -60,11 +64,16 @@ from nir.cst_helpers import HistoryBuilder, save_project_at  # noqa: E402
 HERE = Path(__file__).resolve().parent
 
 # ---- design (um), from Result/db.parmap of SAW_gold_noSub_packed.cst --------
-# 3D Run ID 6 (scale 4.0) and 2 (scale 5.0); p = 8 in every row.
-ATOM_A = dict(name="A", scale=4.0, r=2.87712, w_ring=0.644552, gap=2.8,
-              w=0.8, t=0.2)
-ATOM_B = dict(name="B", scale=5.0, r=3.59639, w_ring=0.80569, gap=3.5,
-              w=1.0, t=0.2)
+# p = 8 in every row of that sweep; `run` is the 3D Run ID whose periodic
+# solution is the direct reference for that atom on its own 8 um lattice.
+ATOMS = {
+    "A": dict(name="A", scale=4.00, r=2.87712, w_ring=0.644552, gap=2.800,
+              w=0.80, t=0.2, run=6),
+    "B": dict(name="B", scale=5.00, r=3.59639, w_ring=0.805690, gap=3.500,
+              w=1.00, t=0.2, run=2),
+    "C": dict(name="C", scale=3.25, r=2.33766, w_ring=0.523698, gap=2.275,
+              w=0.65, t=0.2, run=10),
+}
 BASE_PITCH = 8.0                     # atom-to-atom spacing
 SUPER = 2 * BASE_PITCH               # supercell period, um
 ZH = 25.0                            # half height of the vacuum cell, um
@@ -73,10 +82,11 @@ N_FLOQUET_MODES = 20                 # >= 18 propagating at 34 THz (9 orders x 2
 AU_SIGMA = 45610000.0                # S/m, packed project step 5
 AU_RHO = 19320.0
 
-LAYOUT = [(-BASE_PITCH / 2, -BASE_PITCH / 2, ATOM_A),
-          (+BASE_PITCH / 2, +BASE_PITCH / 2, ATOM_A),
-          (+BASE_PITCH / 2, -BASE_PITCH / 2, ATOM_B),
-          (-BASE_PITCH / 2, +BASE_PITCH / 2, ATOM_B)]
+def layout(pair):
+    """x,y;y,x checkerboard for a two-letter pair such as 'AB' or 'AC'."""
+    first, second = ATOMS[pair[0]], ATOMS[pair[1]]
+    h = BASE_PITCH / 2
+    return [(-h, -h, first), (+h, +h, first), (+h, -h, second), (-h, +h, second)]
 
 
 VBA_UNITS = """\
@@ -321,7 +331,9 @@ End With
     return "".join(out)
 
 
-def build(run_dir: Path, with_metal: bool, log, dry_run=False):
+def build(run_dir: Path, sites, log, dry_run=False):
+    """`sites` is a layout() list, or empty for the metal-free companion run."""
+    with_metal = bool(sites)
     run_dir.mkdir(parents=True, exist_ok=True)
     target = run_dir / ("supercell.cst" if with_metal else "empty.cst")
     if target.exists():
@@ -345,7 +357,7 @@ def build(run_dir: Path, with_metal: bool, log, dry_run=False):
         builder.add("sc: 6 gold", VBA_GOLD, expects_materials=["gold"])
         builder.add("sc: 7 component", VBA_COMPONENT)
         if with_metal:
-            for i, (cx, cy, atom) in enumerate(LAYOUT):
+            for i, (cx, cy, atom) in enumerate(sites):
                 tag = f"{atom['name'].lower()}{i}"
                 tags.append(tag)
                 builder.add(f"sc: 8.{i} atom {atom['name']} at "
@@ -393,10 +405,19 @@ def main(argv=None):
     ap = argparse.ArgumentParser(
         description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--out", type=Path, default=HERE / "runs")
+    ap.add_argument("--pair", default="AB",
+                    help="two atom letters, e.g. AB, AC, BC: the first goes on "
+                         "one diagonal of the cell and the second on the other")
+    ap.add_argument("--out", type=Path, default=None,
+                    help="default: runs_<pair>")
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--only", choices=("supercell", "empty"), default=None)
     args = ap.parse_args(argv)
+    args.pair = args.pair.upper()
+    if len(args.pair) != 2 or any(c not in ATOMS for c in args.pair):
+        ap.error(f"--pair must be two letters from {sorted(ATOMS)}")
+    if args.out is None:
+        args.out = HERE / f"runs_{args.pair}"
 
     args.out.mkdir(parents=True, exist_ok=True)
     log_path = args.out / "build_log.txt"
@@ -407,21 +428,24 @@ def main(argv=None):
         with log_path.open("a", encoding="utf-8") as fh:
             fh.write(line + "\n")
 
-    meta = dict(atom_A=ATOM_A, atom_B=ATOM_B, base_pitch=BASE_PITCH,
+    sites = layout(args.pair)
+    meta = dict(pair=args.pair,
+                atoms={c: ATOMS[c] for c in args.pair},
+                base_pitch=BASE_PITCH,
                 supercell=SUPER, z_half=ZH, f_min_THz=F_MIN, f_max_THz=F_MAX,
                 n_floquet_modes=N_FLOQUET_MODES, au_sigma=AU_SIGMA,
-                layout=[(cx, cy, a["name"]) for cx, cy, a in LAYOUT])
+                layout=[(cx, cy, a["name"]) for cx, cy, a in sites])
     (args.out / "design.json").write_text(json.dumps(meta, indent=2))
     log(f"design: {json.dumps(meta)}")
     lam_ray = SUPER / np.sqrt(2)
     log(f"Rayleigh onsets: lambda = {SUPER:.2f} um (orders +-1,0 / 0,+-1; "
-        f"extinguished by the a,b;b,a symmetry) and "
+        f"extinguished by the x,y;y,x symmetry) and "
         f"{lam_ray:.2f} um = {299.792458/lam_ray:.2f} THz (orders +-1,+-1)")
 
     todo = [args.only] if args.only else ["empty", "supercell"]
     for which in todo:
         log(f"===== building {which} =====")
-        build(args.out / which, which == "supercell", log,
+        build(args.out / which, sites if which == "supercell" else [], log,
               dry_run=args.dry_run)
     log("done")
     return 0

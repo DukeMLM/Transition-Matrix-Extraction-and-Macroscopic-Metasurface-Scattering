@@ -18,11 +18,11 @@ below.
 
 Validated end-to-end on the `dary` branch against direct CST periodic
 simulations and the independent [treams](https://github.com/tfp-photonics/treams)
-code, on three cells: `test/single` (pitch 2 µm, 8–20 µm) to **|ΔS| ≤ 0.003**
-and **~3×10⁻⁴** respectively, `test/2x2` (pitch 8 µm, 10–34 THz, a resonant
-band) to **|ΔS| ≤ 0.08**, and a mixed `a,b;b,a` supercell built from two
-*different* measured atoms to **mean |ΔS| 0.046** against its own direct CST
-simulation — in every case limited by the input T-matrix, not by the
+code: `test/single` (pitch 2 µm, 8–20 µm) to **|ΔS| ≤ 0.003** and **~3×10⁻⁴**
+respectively, three single-atom `test/2x2` lattices (pitch 8 µm, 10–34 THz, a
+resonant band) to **mean |ΔS| 0.017–0.054**, and three *mixed* supercells built
+from pairs of those measured atoms to **mean |ΔS| 0.019–0.046** against their own
+direct CST simulations — in every case limited by the input T-matrix, not by the
 aggregation, which reproduces an independent implementation to **10⁻¹²**.
 
 <p align="center">
@@ -34,28 +34,31 @@ aggregation, which reproduces an independent implementation to **10⁻¹²**.
 <br><em>test/2x2: reconstruction (blue), treams (orange), direct CST (grey)</em>
 </p>
 
-### → [`experiment.md`](experiment.md): composing a metasurface from two measured meta-atoms
+### → [`experiment.md`](experiment.md): composing metasurfaces from measured meta-atoms
 
-Two spoke-and-wheel resonators of different size, whose isolated T-matrices were
-extracted separately, are placed on a checkerboard in one repeated 16 µm cell.
-The pipeline predicts the mixed metasurface's S-parameters; a direct CST
-simulation of that metasurface then checks the prediction. Read
-[`experiment.md`](experiment.md) for the whole story — it is the shortest route
-into what this repository does and how far it can be trusted.
+Three spoke-and-wheel resonators of different size, whose isolated T-matrices
+were extracted separately, are placed two at a time on a checkerboard in one
+repeated 16 µm cell — `a,b;b,a`, `a,c;c,a`, `b,c;c,b`. The pipeline predicts each
+mixed metasurface's S-parameters; a direct CST simulation of that metasurface
+then checks the prediction. Read [`experiment.md`](experiment.md) for the whole
+story — it is the shortest route into what this repository does and how far it
+can be trusted.
 
 <p align="center">
 <img src="aggregation/results_2x2_super_l3/fig3_experiment.png" width="100%">
-<br><em>The two pure lattices and the mixed one, each over its own direct CST run
-(pale). Right: the mixed cell diffracts nothing between its two Rayleigh onsets
-— those orders are dark by symmetry, and the full-wave simulation agrees to
+<br><em>Left: the three pure lattices. Middle: the three mixed cells. Markers are
+the T-matrix prediction, pale lines the direct CST run for the same structure.
+Right: every mixed cell diffracts nothing between its two Rayleigh onsets —
+those orders are dark by symmetry, and the full-wave simulations agree to
 1.5×10⁻⁵.</em>
 </p>
 
-Highlights: the mixed cell is **not** an interpolation of the two pure ones (its
-dips move by 5 → 3.5 THz of separation); it supports a **dark lattice resonance**
-at the supercell's own Rayleigh condition that no single-atom model can show,
-confirmed full-wave; and mixing costs **nothing** in accuracy — 0.046 mean
-|ΔS21| against 0.030 and 0.054 for the two constituents on their own. The
+Highlights: a mixed cell is **not** an interpolation of its two constituents —
+each species red-shifts onto the sparser 11.31 µm sublattice, and `a,c;c,a`
+grows a hybrid resonance neither pure lattice has. All three cells support a
+**dark lattice resonance** at the supercell's own Rayleigh condition that no
+single-atom model can show, confirmed full-wave. And mixing costs **nothing** in
+accuracy: every mixed cell lands inside the range of its two constituents. The
 write-up also takes the residual 2–5 % apart into the three mechanisms that
 produce it, reproducibly (`aggregation/error_budget.py`).
 
@@ -313,25 +316,26 @@ T-matrix violates passivity by 2.8 % and reciprocity by up to 11 % (vs 0.007 %
 and 0.6–1.2 % for `test/single`), and the largest error sits exactly at the
 seam between its two merged extraction bands.
 
-### Heterogeneous supercell — `a,b;b,a` from two measured T-matrices
+### Heterogeneous supercells — three atoms, three mixed cells
 
-Full write-up in
-[`aggregation/results_2x2_super_l3/REPORT.md`](aggregation/results_2x2_super_l3/REPORT.md).
-Atoms A (`scale` 4) and B (`scale` 5) on a checkerboard, 8 µm atom pitch,
-16 µm repeated cell, 10–34 THz.
+Method and full validation ladder in
+[`aggregation/results_2x2_super_l3/REPORT.md`](aggregation/results_2x2_super_l3/REPORT.md);
+per-cell results in the sibling `results_2x2_{super,AC,BC}_l3/REPORT.md`.
+Atoms A (`scale` 4.00), B (`scale` 5.00) and C (`scale` 3.25) taken two at a
+time on a checkerboard, 8 µm atom pitch, 16 µm repeated cell, 10–34 THz.
 
 | check | result |
 |---|---|
 | M = 1 reduces to the one-atom code (coupling, `f`, S11/S21) | bit-identical |
 | 2×2 cell of four identical atoms ≡ the primitive lattice | ≤ 8×10⁻¹⁶ |
 | basis-atom relabelling / whole-cell lattice shift | ≤ 7×10⁻¹⁶ / 0 |
-| `a,b;b,a` selection rule: power in the odd (n1+n2) orders | 6×10⁻³³ |
+| checkerboard selection rule: power in the odd (n1+n2) orders, all three cells | ≤ 6×10⁻³³ |
 | all T = 0 → S = S_bg exactly (manual §8 row 7) | 0 |
 | finite-cluster T^O vs the multi-center far field, L_C = 14 | 1.9×10⁻⁹ |
-| **independent treams implementation, complex S and all open orders** | **≤ 1×10⁻¹²** |
-| direct CST supercell run: power in the dark (±1,0)/(0,±1) channels | 1.5×10⁻⁵ against a 0.987 carrier |
-| direct CST supercell run, complex S21 / S11 | max 0.205, mean 0.046 / 0.048; 0.068 / 0.063 away from the 16 µm resonance the 1 THz grid straddles |
-| direct CST, transmission-dip positions | +0.6 % and −1.8 % |
+| **independent treams implementation, complex S and all open orders, every cell** | **≤ 1×10⁻¹²** |
+| direct CST supercell runs: power in the dark (±1,0)/(0,±1) channels | 1.5×10⁻⁵ against a ~1.0 carrier |
+| direct CST, complex S21 mean \|Δ\| | 0.046 (a,b), 0.019 (a,c) |
+| direct CST, transmission-dip positions | within 0.5–1.8 % |
 
 Two things that had to change for the heterogeneous case:
 

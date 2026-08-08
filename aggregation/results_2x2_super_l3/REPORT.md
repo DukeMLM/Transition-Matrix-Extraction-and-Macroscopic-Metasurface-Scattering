@@ -522,11 +522,20 @@ the part of T the extraction resolves worst.
 | `fig2_power.png` | R/T/A and the diffracted fraction against the Rayleigh onsets |
 | `fig3_experiment.png` | the three cases together: A alone, B alone, the mix, each over its own direct CST run |
 
+This directory holds the `a,b;b,a` cell and the method common to all of them.
+Two further mixed cells were built from the same three measured atoms and are
+reported next to it — see [`../results_2x2_AC_l3/REPORT.md`](../results_2x2_AC_l3/REPORT.md)
+and [`../results_2x2_BC_l3/REPORT.md`](../results_2x2_BC_l3/REPORT.md), and
+[`../../experiment.md`](../../experiment.md) for the three-cell comparison.
+`python compare_cases.py --all` prints all six cases in one table.
+
 Sibling directories produced by the same driver:
 
 | directory | what it is |
 |---|---|
-| `results_A_ewald_l3`, `results_B_ewald_l3` | the two pure 8 µm lattices at the same truncation — the §4 references |
+| `results_A_ewald_l3`, `results_B_ewald_l3`, `results_C_ewald_l3` | the three pure 8 µm lattices at the same truncation — the §4 references |
+| `results_2x2_AC_l3`, `results_2x2_BC_l3` | the other two mixed cells, with their own CST benchmarks |
+| `results_2x2_AC_fine`, `results_2x2_BC_fine` | their refined-grid sweeps |
 | `results_A_ewald_auto` | atom A at `--lmax auto`, the regression against the published `test/2x2` numbers |
 | `results_2x2_super_l4`, `results_2x2_super_auto` | the truncation sensitivity of §5.4 |
 | `results_A_ewald_l4`, `results_B_ewald_l4` | the same two lattices at lmax 4, the single-atom half of the same truncation study |
