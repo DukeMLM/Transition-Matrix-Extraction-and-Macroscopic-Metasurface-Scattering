@@ -5,12 +5,18 @@ matrix (T-matrix)** of a single unit cell from one full-wave CST simulation,
 then predict the S-parameters of arbitrarily large arrays with fast linear
 algebra — no full-wave simulation of the array required.
 
+The repeated cell may hold **one** meta-atom or **several different** ones, so a
+metasurface can be composed out of measured atoms rather than simulated as a
+whole.
+
 Validated end-to-end on the `dary` branch against direct CST periodic
 simulations and the independent [treams](https://github.com/tfp-photonics/treams)
-code, on two cells: `test/single` (pitch 2 µm, 8–20 µm) to **|ΔS| ≤ 0.003**
-and **~3×10⁻⁴** respectively, and `test/2x2` (pitch 8 µm, 10–34 THz, a
-resonant band) to **|ΔS| ≤ 0.08** — there limited by the input T-matrix, not
-by the aggregation.
+code, on three cells: `test/single` (pitch 2 µm, 8–20 µm) to **|ΔS| ≤ 0.003**
+and **~3×10⁻⁴** respectively, `test/2x2` (pitch 8 µm, 10–34 THz, a resonant
+band) to **|ΔS| ≤ 0.08**, and a mixed `a,b;b,a` supercell built from two
+*different* measured atoms to **mean |ΔS| 0.046** against its own direct CST
+simulation — in every case limited by the input T-matrix, not by the
+aggregation, which reproduces an independent implementation to **10⁻¹²**.
 
 <p align="center">
 <img src="aggregation/results/fig7_cst_direct_comparison.png" width="85%">
@@ -20,6 +26,29 @@ by the aggregation.
 <img src="aggregation/results_2x2/fig1_sparams.png" width="95%">
 <br><em>test/2x2: reconstruction (blue), treams (orange), direct CST (grey)</em>
 </p>
+
+### → [`experiment.md`](experiment.md): composing a metasurface from two measured meta-atoms
+
+Two spoke-and-wheel resonators of different size, whose isolated T-matrices were
+extracted separately, are placed on a checkerboard in one repeated 16 µm cell.
+The pipeline predicts the mixed metasurface's S-parameters; a direct CST
+simulation of that metasurface then checks the prediction. Read
+[`experiment.md`](experiment.md) for the whole story — it is the shortest route
+into what this repository does and how far it can be trusted.
+
+<p align="center">
+<img src="aggregation/results_2x2_super_l3/fig3_experiment.png" width="100%">
+<br><em>The two pure lattices and the mixed one, each over its own direct CST run
+(pale). Right: the mixed cell diffracts nothing between its two Rayleigh onsets
+— those orders are dark by symmetry, and the full-wave simulation agrees to
+1.5×10⁻⁵.</em>
+</p>
+
+Highlights: the mixed cell is **not** an interpolation of the two pure ones (its
+dips move by 5 → 3.5 THz of separation); it supports a **dark lattice resonance**
+at the supercell's own Rayleigh condition that no single-atom model can show,
+confirmed full-wave; and mixing costs **nothing** in accuracy — 0.046 mean
+|ΔS21| against 0.030 and 0.054 for the two constituents on their own.
 
 ---
 
@@ -277,6 +306,11 @@ Two things that had to change for the heterogeneous case:
 
 ## Where to go next
 
+* **Start here — one experiment, end to end**: [`experiment.md`](experiment.md)
+  — composing a metasurface out of two separately measured meta-atoms, with the
+  full-wave check at every step
 * **Results and figures**: [`aggregation/REPORT.md`](aggregation/REPORT.md)
+* **The heterogeneous-supercell extension in detail**:
+  [`aggregation/results_2x2_super_l3/REPORT.md`](aggregation/results_2x2_super_l3/REPORT.md)
 * **How it was built, from scratch, with all the derivations and war
   stories**: [`aggregation/IMPLEMENTATION_GUIDE.md`](aggregation/IMPLEMENTATION_GUIDE.md)
