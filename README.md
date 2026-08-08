@@ -9,6 +9,13 @@ The repeated cell may hold **one** meta-atom or **several different** ones, so a
 metasurface can be composed out of measured atoms rather than simulated as a
 whole.
 
+This branch also checkpoints an **experimental inverse route** in `retrieval/`:
+recovering an isolated, symmetry-constrained T-matrix from multimode Floquet
+S-parameters, with explicit calibration and covariance gates. That route has
+reached ideal-model identifiability at 8 µm, but it has **not** yet passed the
+robust-recovery, independent-cell, or matched-speed acceptance gates described
+below.
+
 Validated end-to-end on the `dary` branch against direct CST periodic
 simulations and the independent [treams](https://github.com/tfp-photonics/treams)
 code, on three cells: `test/single` (pitch 2 µm, 8–20 µm) to **|ΔS| ≤ 0.003**
@@ -51,6 +58,65 @@ confirmed full-wave; and mixing costs **nothing** in accuracy — 0.046 mean
 |ΔS21| against 0.030 and 0.054 for the two constituents on their own. The
 write-up also takes the residual 2–5 % apart into the three mechanisms that
 produce it, reproducibly (`aggregation/error_budget.py`).
+
+---
+
+## Experimental Floquet S → full T-matrix retrieval
+
+The retrieval study asks whether a periodic CST experiment can recover the
+complete isolated `lmax = 3` T-matrix without the conventional enclosing-field
+projection. The stored matrix is 30×30; D4h symmetry plus reciprocity reduce it
+to 40 independent complex coefficients per frequency. A deliberately
+lower-symmetry cell and complete open-order Floquet S-matrix are used to expose
+otherwise dark multipole sectors.
+
+The current development incumbent is `small@8`, a six-order/24-channel design
+near 8 µm. The errors below come from same-forward-model synthetic probes whose
+families were normalized to a specular-derived discrepancy level; they are not
+measured diffractive-channel covariance. The evidence is therefore encouraging
+but still screening-level:
+
+| check | current result | interpretation |
+|---|---:|---|
+| ideal noise-free D4h recovery | rank 40/40; numerical-error T recovery | algebraic identifiability demonstrated |
+| iid perturbation | 5.15% global T error | approximately at, but not below, the 5% gate |
+| mode-mixing perturbation | 4.27% | passes this synthetic stress direction only |
+| smooth-angular / reference-plane perturbations | 19.88% / 23.99% | calibration aliases remain dominant |
+| adversarial perturbation | 40.59% | robust recovery not demonstrated |
+| nuisance-orthogonal weakest margin | about 3.5 vs required >10 | useful-direction SNR gate open |
+| cost proxy | 78.5 min vs 49.1 min reference | matched-speed gate open |
+| same approach at 20 µm | 117% iid / 801% systematic error | current per-frequency design is a no-go |
+
+The strongest physics result is a conditional nuisance-model proof of concept:
+jointly fitting the *correct* reference-plane offset reduced the `small@8`
+error from 23.99% to 1.16%. In contrast, fitting uncalibrated nuisance freedom
+raised the iid error from 5.4% to 130.6%. The next discriminating experiment is
+therefore a frozen, held-out comparison of the full 40-D baseline against an
+independently calibrated Au/geometry sector covariance and a shared-pole,
+passive-residue prior with a nonzero full-space residual. No independent
+physics-prior advantage is claimed yet.
+
+Start with:
+
+* [`retrieval/FAST_FULL_TMATRIX_WHEEL_PROPOSAL.md`](retrieval/FAST_FULL_TMATRIX_WHEEL_PROPOSAL.md) — method, milestones, and stop/go gates
+* [`retrieval/fastfull/README.md`](retrieval/fastfull/README.md) — implementation and test entry points
+* [`retrieval/results/fastfull/M1_DESIGN_STUDY.md`](retrieval/results/fastfull/M1_DESIGN_STUDY.md) — rank/SNR/cost screen
+* [`retrieval/results/fastfull/GATE_A_STUDY.md`](retrieval/results/fastfull/GATE_A_STUDY.md) — blind synthetic stress study
+* [`review.md`](review.md) — adversarial review history and unresolved evidence boundaries
+
+Validation entry points, run from `retrieval/` in the `cst_inference`
+environment:
+
+```bash
+python test_fastfull_core.py
+python test_fastfull_design.py
+python test_fastfull_ewald.py
+python test_fastfull_synthetic.py  # search-heavy; about 8 minutes on the reviewed machine
+```
+
+This Git branch contains the retrieval source, tests, compact FastFull reports,
+and small campaign metadata. Unpacked CST databases and the bulk generated
+result tree remain local and are excluded by `.gitignore`.
 
 ---
 
@@ -117,6 +183,13 @@ aggregation/                  Stage 3 implementation (this branch)
   plot_supercell.py           figures + metrics
   cst_supercell/              direct CST benchmark of the supercell
   results_2x2_super_l3/       the a,b;b,a experiment (REPORT.md, CSV/NPZ, figs)
+
+retrieval/                    experimental Floquet-S-to-isolated-T inverse route
+  FAST_FULL_TMATRIX_WHEEL_PROPOSAL.md   feasibility hypothesis and gates
+  fastfull/                   D4h basis, coded-cell design, Ewald and recovery code
+  test_fastfull_*.py          direct validation entry points
+  results/fastfull/           compact M1/M2 screening artifacts
+  cst_runs/*.json             curated campaign metadata (raw CST trees stay local)
 ```
 
 ## Conventions (read this before touching anything)
