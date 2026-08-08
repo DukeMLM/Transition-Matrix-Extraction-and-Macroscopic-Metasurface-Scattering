@@ -30,6 +30,7 @@ by the aggregation.
 | **1. Near-field extraction** | Illuminates the *isolated* unit cell with a set of plane waves in CST (frequency-domain solver, open boundaries) and exports complex E/H on a spherical monitor | `extract_cst_near_fields_2.py` | main |
 | **2. T-matrix projection** | Projects the recorded fields onto vector spherical wave functions (VSWFs) and solves F = T·A in least squares → `*.tmat.h5` | `compute_t_matrix_projection_2.py` | main |
 | **3. Array aggregation → S-parameters** | Couples the per-cell T-matrices through the Foldy–Lax multiple-scattering equations (finite arrays or infinite lattices) and projects the collective response onto plane waves → S11/S21 | `aggregation/` | **this branch** |
+| **3b. Heterogeneous supercell** | A repeated cell holding *several different* meta-atoms: pair-resolved Bloch coupling `W_st`, a block Foldy–Lax solve, and the full Floquet S-matrix over every open diffraction order | `aggregation/supercell.py` + `run_supercell.py` | **this branch** |
 
 Theory reference: `ref/main.tex` (operational manual). The physics in one
 breath: the scattering of one cell is the linear map `f = T a` between
@@ -73,6 +74,18 @@ aggregation/                  Stage 3 implementation (this branch)
                               (no CST install needed; --list picks the run)
   plot_case.py                figures + agreement metrics for a results dir
   results_2x2/                the test/2x2 case (REPORT.md, CSV/NPZ, figures)
+
+  --- Stage 3b: several different atoms in one repeated cell ---
+  supercell.py                pair-resolved Bloch sums W_st, block solve,
+                              full Floquet channels, finite-cluster T^O
+  ewald_supercell.py          the same W_st by Ewald summation (the method the
+                              heterogeneous case needs -- see below)
+  run_supercell.py            driver: any list of tmat.h5 + positions + lattice
+  treams_supercell.py         independent end-to-end treams reference
+  test_supercell.py           the manual's 6.5.5 validation ladder
+  plot_supercell.py           figures + metrics
+  cst_supercell/              direct CST benchmark of the supercell
+  results_2x2_super_l3/       the a,b;b,a experiment (REPORT.md, CSV/NPZ, figs)
 ```
 
 ## Conventions (read this before touching anything)
@@ -195,6 +208,41 @@ The looser agreement is the input file's, not the aggregation's: this
 T-matrix violates passivity by 2.8 % and reciprocity by up to 11 % (vs 0.007 %
 and 0.6–1.2 % for `test/single`), and the largest error sits exactly at the
 seam between its two merged extraction bands.
+
+### Heterogeneous supercell — `a,b;b,a` from two measured T-matrices
+
+Full write-up in
+[`aggregation/results_2x2_super_l3/REPORT.md`](aggregation/results_2x2_super_l3/REPORT.md).
+Atoms A (`scale` 4) and B (`scale` 5) on a checkerboard, 8 µm atom pitch,
+16 µm repeated cell, 10–34 THz.
+
+| check | result |
+|---|---|
+| M = 1 reduces to the one-atom code (coupling, `f`, S11/S21) | bit-identical |
+| 2×2 cell of four identical atoms ≡ the primitive lattice | ≤ 8×10⁻¹⁶ |
+| basis-atom relabelling / whole-cell lattice shift | ≤ 7×10⁻¹⁶ / 0 |
+| `a,b;b,a` selection rule: power in the odd (n1+n2) orders | 6×10⁻³³ |
+| all T = 0 → S = S_bg exactly (manual §8 row 7) | 0 |
+| finite-cluster T^O vs the multi-center far field, L_C = 14 | 1.9×10⁻⁹ |
+| **independent treams implementation, complex S and all open orders** | **≤ 1×10⁻¹²** |
+| direct CST supercell run: power in the dark (±1,0)/(0,±1) channels | 1.5×10⁻⁵ against a 0.987 carrier |
+| direct CST supercell run, complex S21 / S11 | max 0.205, mean 0.046 / 0.048; 0.068 / 0.063 away from the 16 µm resonance the 1 THz grid straddles |
+| direct CST, transmission-dip positions | +0.6 % and −1.8 % |
+
+Two things that had to change for the heterogeneous case:
+
+* **The tapered lattice sum does not survive a sub-lattice shift.** The
+  displacement-tapered blocks still satisfy `Σ_t W_st = C_p` to 10⁻¹⁵ — the
+  taper error is common to all blocks and cancels in the sum, which is why the
+  one-atom lattice was always accurate — but each *individual* block is only
+  ~4×10⁻² converged at the default `kRc = (10, 14, 20)`, and a heterogeneous
+  cell weights the blocks by different `T`s. `ewald_supercell.py` supplies them
+  by Ewald summation instead (manual §6.5.3 sanctions exactly this), which is
+  also 30× faster and reproduces the published one-atom `test/2x2` numbers
+  exactly.
+* **Diffraction is no longer optional.** A 16 µm cell has Rayleigh onsets at
+  16 µm and 11.31 µm inside a band that reaches 8.82 µm, so `run_supercell.py`
+  reports every propagating Floquet order, not a scalar S11/S21.
 
 ## Key physical findings for the demo cell
 
