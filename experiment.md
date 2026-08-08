@@ -198,7 +198,7 @@ about an hour on ~0.7–1.0 M tetrahedral DOF over ~48 adaptive frequency points
 |---|---|---|---|
 | a,b;b,a | 0.987 | **1.5×10⁻⁵** | 0.382 vs 0.310 |
 | a,c;c,a | 1.002 | **1.5×10⁻⁵** | 0.208 vs 0.216 |
-| b,c;c,b | *CST solving* | *CST solving* | — vs 0.433 |
+| b,c;c,b | 0.989 | **6.1×10⁻⁶** | 0.427 vs 0.433 |
 
 The full-wave simulation puts nothing into the odd channels over the entire
 18.7–34 THz window in which they are open — at the empty run's own noise floor.
@@ -211,12 +211,18 @@ all.
 |---|---|---|---|
 | a,b;b,a | 0.205 / 0.046 | 0.205 / 0.048 | +0.6 %, −1.8 % |
 | a,c;c,a | 0.079 / **0.019** | 0.081 / 0.020 | −0.59 %, +0.45 % |
-| b,c;c,b | *CST solving* | *CST solving* | *CST solving* |
+| b,c;c,b | 0.090 / 0.036 | 0.089 / 0.036 | **+0.44 %, +0.27 %** |
 
 For `a,b;b,a` the 0.205 maximum comes entirely from the two samples that straddle
 the 16 µm dark resonance; excluding them it is 0.068 / 0.063. For `a,c;c,a` the
 maximum comes from the A–C hybrid at 21.25 THz; excluding 20.4–21.6 THz it is
-0.064 / 0.017.
+0.064 / 0.017. `b,c;c,b` has no such spike — its 0.090 maximum is broadly
+distributed, which is why its dips are the best placed of the three while its
+mean is not the smallest.
+
+The diffracted power is reproduced to 1.4 % relative for `b,c;c,b` (0.433 against
+0.427) and 4 % for `a,c;c,a`, and `b,c;c,b` puts the least of all three into the
+dark channels: 6.1×10⁻⁶ against a 0.989 carrier.
 
 ### The headline: mixing is free
 
@@ -227,18 +233,20 @@ maximum comes from the A–C hybrid at 21.25 THz; excluding 20.4–21.6 THz it i
 | atom C alone | 0.017 | 0.020 |
 | a,b;b,a | 0.046 | 0.048 |
 | a,c;c,a | 0.019 | 0.020 |
-| b,c;c,b | *CST solving* | *CST solving* |
+| b,c;c,b | 0.036 | 0.036 |
 
-Both mixed cells benchmarked so far land within the range of their two
-constituents. `a,c;c,a` — the pair of atoms that reconstruct best individually —
-gives the best mixed cell; `a,b;b,a`, which contains the worst constituent, gives
-the worst. Aggregating two different atoms into one repeated cell costs nothing
-beyond what the input T-matrices already cost.
+Every mixed cell lands within the range of its two constituents. `a,c;c,a` — the
+pair of atoms that reconstruct best individually — gives the best mixed cell;
+`a,b;b,a`, which contains the worst constituent, gives the worst. Aggregating two
+different atoms into one repeated cell costs nothing beyond what the input
+T-matrices already cost.
 
-> The `b,c;c,b` CST benchmark is still solving at the time of writing; its
-> aggregation, treams cross-check and refined sweep are complete and are
-> reported above. This table and the two before it will be completed when it
-> lands.
+**Dilution helps the worst atom.** Atom B's resonance is placed 4.05 % wrong on
+its own dense 8 µm lattice; in a mixed cell, where it sits on the sparser
+11.31 µm sublattice, the same T-matrix places it to **+0.6 %** (`a,b;b,a`) and
+**+0.44 %** (`b,c;c,b`). The 4 % was never the atom — it was the strong
+collective shift of a dense lattice being computed from a slightly wrong T. Halve
+the areal density and the lattice amplification that produced it halves too.
 
 ---
 
@@ -318,6 +326,7 @@ fifths of the band:
 | atom C alone | 0.0165 / 0.0116 | **1.4** | 0.0225 / 0.0032 | 6.9 |
 | atom A alone | 0.0555 / 0.0231 | **2.4** | 0.0754 / 0.0034 | 22.1 |
 | atom B alone | 0.1558 / 0.0400 | **3.9** | 0.0982 / 0.0037 | 26.8 |
+| b,c;c,b | 0.0302 / 0.0215 | **1.4** | 0.0561 / 0.0017 | 32.9 |
 | a,c;c,a | 0.0374 / 0.0095 | 4.0 | 0.0330 / 0.0016 | 20.4 |
 | a,b;b,a | 0.0727 / 0.0210 | 3.5 | 0.0961 / 0.0018 | 54.5 |
 

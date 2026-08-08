@@ -19,3 +19,5 @@
 [2026-08-08T17:12:21]     [14] sc: 11 Floquet ports
 [2026-08-08T17:12:21]     [15] sc: 12 FD solver
 [2026-08-08T17:12:21] starting FD solver ...
+[2026-08-08T18:00:53] FDSolver finished after 2911 s
+[2026-08-08T18:01:00] done

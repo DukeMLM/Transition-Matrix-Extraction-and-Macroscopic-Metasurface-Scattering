@@ -56,14 +56,43 @@ python error_budget.py results_2x2_BC_l3
 
 ## Against the direct CST supercell run
 
-*Solving at the time of writing — this section is completed when it lands. The
-model is built by `build_2x2_supercell.py --pair BC` with the same settings as
-the other two cells, and shares the `runs/empty` companion run for de-embedding.*
+49 min, 48 adaptive frequency points, ~0.68 M tetrahedral DOF. Built by
+`build_2x2_supercell.py --pair BC` with the same settings as the other two
+cells, sharing the `runs/empty` companion run for de-embedding.
+
+| | max | mean |
+|---|---|---|
+| complex S21 | 0.090 | 0.036 |
+| complex S11 | 0.089 | 0.036 |
+| … excluding 18.4–20.2 THz (the dark resonance) | 0.090 / 0.089 | 0.035 / 0.035 |
+| R / T / A | 0.056 / 0.054 / 0.052 | 0.023 / 0.019 / 0.016 |
+| power in the dark orders, **direct CST** | **6.1×10⁻⁶** against a 0.989 carrier | |
+
+| feature | this repo (refined grid) | direct CST | offset |
+|---|---|---|---|
+| B-derived transmission dip | 16.655 µm, \|S21\| 0.102 | 16.729 µm, 0.053 | **+0.44 %** |
+| C-derived transmission dip | 12.363 µm, \|S21\| 0.102 | 12.396 µm, 0.086 | **+0.27 %** |
+| transparency window between them | 14.276 µm, \|S21\| 0.907 | 13.978 µm, 0.919 | — |
+| diffracted power, maximum | 0.433 | 0.427 | **1.4 % relative** |
+
+Two things stand out. **The dips are the best-placed of the three mixed cells**
+(+0.44 % and +0.27 %) even though the mean complex error is not the smallest —
+this cell has no sharp feature that the 1 THz sampling aliases, so its 0.090
+maximum is broadly distributed rather than concentrated. And **the diffracted
+power is reproduced to 1.4 % relative**, the closest of the three, which is the
+strongest single check on the multi-order output map since this is the cell that
+diffracts hardest.
+
+**Dilution rescued atom B.** On its own dense 8 µm lattice, B's resonance comes
+out 4.05 % short. Here, from the same T-matrix, the B-derived dip is placed to
++0.44 %. The 4 % was never the atom — it was the strong collective shift of a
+dense lattice being computed from a slightly wrong T; halving the areal density
+halves the lattice amplification that produced it.
 
 ## Files
 
 Same layout as `../results_2x2_super_l3/`: `periodic_results.csv` / `.npz`,
-`floquet_orders.csv`, `treams_reference.npz`, `run.json`, `fig1_sparams.png`,
-`fig2_power.png`, and `cluster_T.npz` (not tracked in git; regenerate with
+`floquet_orders.csv`, `cst_direct_supercell*.csv`, `treams_reference.npz`,
+`run.json`, `fig1_sparams.png`, `fig2_power.png`, and `cluster_T.npz` (not tracked in git; regenerate with
 `--cluster-lmax 12`). `../results_2x2_BC_fine/` holds the same sweep on a 4×
 refined frequency grid.
