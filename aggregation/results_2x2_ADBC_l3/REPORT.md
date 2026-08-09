@@ -79,13 +79,13 @@ longest and heaviest solve in the study. Built by
 `build_2x2_supercell.py --pair ADBC`, same settings as every other cell, sharing
 the `runs/empty` companion run.
 
-| | max | mean |
-|---|---|---|
-| complex S21 | 0.347 | **0.080** |
-| complex S11 | 0.342 | 0.079 |
-| R / T / A | 0.349 / 0.141 / 0.317 | 0.063 / 0.045 / 0.047 |
-| … \|ΔS21\| below 20 THz | | 0.139 |
-| … \|ΔS21\| above 20 THz | | **0.041** |
+| | MSE | max \|Δ\| | mean \|Δ\| |
+|---|---|---|---|
+| complex S21 | **0.0118** | 0.347 | 0.080 |
+| complex S11 | 0.0115 | 0.342 | 0.079 |
+| R / T / A | — | 0.349 / 0.141 / 0.317 | 0.063 / 0.045 / 0.047 |
+| … S21 below 20 THz | 0.0264 | | 0.139 |
+| … S21 above 20 THz | **0.0020** | | 0.041 |
 
 | feature | this repo (refined grid) | direct CST | offset |
 |---|---|---|---|
@@ -95,15 +95,18 @@ the `runs/empty` companion run.
 | diffracted power, maximum | 0.429 | 0.415 | 3 % relative |
 
 **The prediction made before either run finished holds.** `a,d;b,c` was expected
-to land between the two-species cells (0.019–0.046) and `a,b;c,d` (0.308) on the
-strength of its better worst-pair convergence ratio, and it does: **0.080**, a
-factor 3.8 better than `a,b;c,d` from the same four atoms. Both of its dips are
-placed to under 1 %, against −10.2 % for the D-derived dip in `a,b;c,d`.
+to land between the two-species cells (MSE 0.0007–0.0037) and `a,b;c,d`
+(0.1654) on the strength of its better worst-pair convergence ratio, and it
+does: **MSE 0.0118**, a factor **14** better than `a,b;c,d` from the same four
+atoms (3.8× on the mean absolute error — MSE separates them further because
+`a,b;c,d` fails by badly misplacing a few resonances rather than by drifting
+across the band). Both of its dips are placed to under 1 %, against −10.2 % for
+the D-derived dip in `a,b;c,d`.
 
-Above 20 THz the agreement is 0.041 — indistinguishable from the well-behaved
-two-species cells. The error is concentrated below 20 THz, where atom D
-resonates and where its rho = 0.854 pair coupling is least converged. So even
-with the widest gap of the three arrangements there is residual translation
+Above 20 THz the agreement is MSE 0.0020 — indistinguishable from the
+well-behaved two-species cells. The error is concentrated below 20 THz, where
+atom D resonates and where its rho = 0.854 pair coupling is least converged. So
+even with the widest gap of the three arrangements there is residual translation
 error; it simply is not catastrophic.
 
 Why the solve took 4.9 h against 1.8 h for `a,b;c,d`: 95 frequency points

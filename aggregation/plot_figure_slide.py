@@ -7,6 +7,10 @@ Six panels, top row spectra and bottom row the geometry that explains them:
   a  the four meta-atoms, each alone on its own 8 um lattice
   b  a,b;c,d  — T-matrix prediction against its own direct CST run
   c  a,d;b,c  — the same four atoms rearranged
+
+Panels b and c are scored by the MSE of the complex 0th-order S21,
+mean(|S21_predicted - S21_CST|^2) over the 25 stored frequencies -- on the
+complex amplitude rather than its magnitude, so a phase error counts.
   d  the four atoms drawn to scale, so the size series in (a) is visible
   e  the a,b;c,d cell, to scale, with the tightest neighbour gap marked
   f  the a,d;b,c cell, likewise
@@ -102,8 +106,9 @@ def spectra_quad(ax, case, tag):
     if cst is not None:
         ax.plot(cst["lam"], np.abs(cst["S21"]), "-", lw=1.9, color="0.35",
                 label="direct CST", zorder=2)
-        e = np.abs(r["S21"] - interp_c(r["lam"], cst["lam"], cst["S21"])).mean()
-        sub = f"\nmean |ΔS21| = {e:.3f}"
+        dz = r["S21"] - interp_c(r["lam"], cst["lam"], cst["S21"])
+        mse = float(np.mean(np.abs(dz) ** 2))
+        sub = f"\nMSE = {mse:.4f}    (RMSE {np.sqrt(mse):.3f})"
     ax.legend(frameon=False, fontsize=9, loc="lower right")
     label(ax, tag, f"2×2 — {name}{sub}")
 

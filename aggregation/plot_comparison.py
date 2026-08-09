@@ -10,9 +10,12 @@ Top row     single atoms, the two-species checkerboards, then ONE PANEL PER
 Bottom row  power into higher diffraction orders against the two Rayleigh
             onsets (the two-species cells are dark between them by symmetry,
             the four-atom cells are not); the birefringence of each four-atom
-            cell, again one panel each; and the accuracy summary -- mean |dS21|
-            against the addition theorem's convergence ratio
+            cell, again one panel each; and the accuracy summary -- the MSE of
+            complex S21 against the addition theorem's convergence ratio
             rho = (a_i + a_j)/d, maximised over the 8 um neighbour pairs.
+
+MSE is mean(|S21_predicted - S21_CST|^2) over the 25 stored frequencies, on the
+complex amplitude rather than its magnitude, so a phase error counts.
 
 Cases whose directory or CST reference is missing are skipped, so this runs
 while benchmarks are still solving.
@@ -104,9 +107,9 @@ def main():
         err = ""
         if got is not None and got[1] is not None:
             r, cst = got
-            e = np.abs(r["S21"] - interp_c(r["lam"], cst["lam"],
-                                           cst["S21"])).mean()
-            err = f" — mean |ΔS21| {e:.3f}, rho {rho(case[3]):.3f}"
+            dz = r["S21"] - interp_c(r["lam"], cst["lam"], cst["S21"])
+            err = (f" — MSE {np.mean(np.abs(dz) ** 2):.4f}, "
+                   f"rho {rho(case[3]):.3f}")
         spanel(ax[0, col], [case], f"four species: {case[1]}{err}")
 
     # ---- diffracted power -------------------------------------------------
@@ -168,8 +171,8 @@ def main():
             if got is None or got[1] is None:
                 continue
             r, cst = got
-            err = np.abs(r["S21"] - interp_c(r["lam"], cst["lam"],
-                                             cst["S21"])).mean()
+            dz = r["S21"] - interp_c(r["lam"], cst["lam"], cst["S21"])
+            err = float(np.mean(np.abs(dz) ** 2))
             x = rho(spec)
             a.plot(x, err, mk, ms=9, color=c, mec="k", mew=0.5)
             right = x > 0.92           # keep labels clear of the right edge
@@ -181,7 +184,7 @@ def main():
     a.text(0.967, 0.021, "series barely\ncontracts", fontsize=8, ha="center")
     a.set_yscale("log")
     a.set_xlabel(r"$\rho = (a_i + a_j)\,/\,d$  over the 8 um neighbour pairs")
-    a.set_ylabel("mean |ΔS21| vs direct CST")
+    a.set_ylabel(r"MSE of complex $S_{21}$ vs direct CST")
     a.set_xlim(0.55, 1.005)
     a.grid(alpha=0.3, which="both")
     a.set_title("accuracy tracks the addition theorem's convergence rate\n"

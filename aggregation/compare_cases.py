@@ -9,6 +9,10 @@ implementation (which measures the aggregation) and with the direct CST run
 observables that distinguish one cell from another: where the transmission dips
 sit, how much power leaves in higher orders, and whether the answer is passive.
 
+The CST columns are the MSE of the complex S-parameter, mean(|S_pred - S_CST|^2)
+over the 25 stored frequencies -- on the complex amplitude, not its magnitude,
+so a phase error counts.
+
 Directories without a CST reference are reported with the CST columns blank.
 """
 import argparse
@@ -55,7 +59,8 @@ def main():
 
     print(f"{'case':<10} {'vs treams':>10} {'vs CST S21':>18} "
           f"{'vs CST S11':>18} {'A range':>16} {'diffr':>7}  dips |S21| (um)")
-    print(f"{'':<10} {'max |dS|':>10} {'max / mean':>18} {'max / mean':>18}")
+    print(f"{'':<10} {'max |dS|':>10} {'MSE / max |d|':>18} "
+          f"{'MSE / max |d|':>18}")
     for d in dirs:
         p = d if os.path.isabs(d) else os.path.join(HERE, d)
         f = os.path.join(p, "periodic_results.npz")
@@ -75,8 +80,8 @@ def main():
         else:
             d21 = np.abs(m["S21"] - interp_c(lam, cst["lam"], cst["S21"]))
             d11 = np.abs(m["S11"] - interp_c(lam, cst["lam"], cst["S11"]))
-            c21 = f"{d21.max():.3f} / {d21.mean():.3f}".rjust(18)
-            c11 = f"{d11.max():.3f} / {d11.mean():.3f}".rjust(18)
+            c21 = f"{np.mean(d21 ** 2):.5f} / {d21.max():.3f}".rjust(18)
+            c11 = f"{np.mean(d11 ** 2):.5f} / {d11.max():.3f}".rjust(18)
         arange = f"[{m['A'].min():+.3f}, {m['A'].max():+.3f}]".rjust(16)
         diffr = f"{(m['R_hi'] + m['T_hi']).max():.3f}".rjust(7)
         dd = ", ".join(f"{l:.2f} ({v:.3f})" for l, v in dips(lam, m["S21"]))

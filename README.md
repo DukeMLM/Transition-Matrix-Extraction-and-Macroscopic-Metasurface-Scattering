@@ -361,17 +361,24 @@ sums over all open orders:
 | finite-cluster T^O vs the multi-center far field, L_C = 14 | 1.9×10⁻⁹ |
 | **independent treams implementation, every cell** | **≤ 1×10⁻¹²** |
 
-**Against direct CST**, mean \|ΔS21\| for each of the nine benchmarks, ordered by
+**Against direct CST**, the MSE of the complex 0th-order S21 —
+mean(\|S21_pred − S21_CST\|²) over the stored frequencies, on the complex
+amplitude so a phase error counts — for each of the nine benchmarks, ordered by
 the addition theorem's convergence ratio ρ = (aᵢ + aⱼ)/d over the 8 µm
 neighbour pairs:
 
-| case | ρ | mean \|ΔS21\| | | case | ρ | mean \|ΔS21\| |
-|---|---|---|---|---|---|---|
-| C alone | 0.584 | 0.017 | | a,b;b,a | 0.809 | 0.046 |
-| a,c;c,a | 0.652 | 0.019 | | B alone | 0.899 | 0.054 |
-| A alone | 0.719 | 0.030 | | a,d;b,c | 0.854 | 0.080 |
-| b,c;c,b | 0.742 | 0.036 | | D alone | 0.989 | **0.149** |
-| | | | | a,b;c,d | 0.944 | **0.308** |
+| case | ρ | MSE | mean \|ΔS21\| | | case | ρ | MSE | mean \|ΔS21\| |
+|---|---|---|---|---|---|---|---|---|
+| C alone | 0.584 | 0.00038 | 0.017 | | a,d;b,c | 0.854 | 0.0118 | 0.080 |
+| a,c;c,a | 0.652 | 0.00067 | 0.019 | | B alone | 0.899 | 0.0039 | 0.054 |
+| A alone | 0.719 | 0.00107 | 0.030 | | a,b;c,d | 0.944 | **0.1654** | 0.308 |
+| b,c;c,b | 0.742 | 0.00171 | 0.036 | | D alone | 0.989 | **0.0351** | 0.149 |
+| a,b;b,a | 0.809 | 0.00367 | 0.046 | | | | | |
+
+MSE is the metric the figures are scored by; it separates the two four-atom
+cells by **14×** (0.1654 against 0.0118) where the mean absolute error separates
+them by only 3.8×, because the `a,b;c,d` disagreement is concentrated in a few
+badly misplaced resonances rather than spread across the band.
 
 Seven of the nine land at 0.017–0.080, limited by the input T-matrices rather
 than by the aggregation. The two that fail are documented, with the cause

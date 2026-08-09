@@ -103,12 +103,12 @@ arrangement that separates them.
 `build_2x2_supercell.py --pair ABCD`, same settings as every other cell, sharing
 the `runs/empty` companion run for de-embedding.
 
-| | max | mean |
-|---|---|---|
-| complex S21 | 0.840 | **0.308** |
-| complex S11 | 0.833 | 0.308 |
-| … \|ΔS21\| below 20 THz | | **0.580** |
-| … \|ΔS21\| above 20 THz | | 0.126 |
+| | MSE | max \|Δ\| | mean \|Δ\| |
+|---|---|---|---|
+| complex S21 | **0.1654** | 0.840 | 0.308 |
+| complex S11 | 0.1660 | 0.833 | 0.308 |
+| … S21 below 20 THz | **0.3807** | | 0.580 |
+| … S21 above 20 THz | 0.0218 | | 0.126 |
 
 | feature | this repo (refined grid) | direct CST | offset |
 |---|---|---|---|
@@ -118,14 +118,15 @@ the `runs/empty` companion run for de-embedding.
 | dark-channel check | — | odd family **carries** 0.388 | as predicted |
 
 **This is the worst-agreeing cell in the study**, and the error is concentrated
-below 20 THz (0.580 against 0.126 above), which is exactly where atom D
-resonates and where its rho = 0.944 pair coupling with B is least converged.
-Above 20 THz, where the smaller atoms dominate, the agreement is ordinary.
+below 20 THz (MSE 0.381 against 0.022 above — a factor 17), which is exactly
+where atom D resonates and where its rho = 0.944 pair coupling with B is least
+converged. Above 20 THz, where the smaller atoms dominate, the agreement is
+ordinary.
 
 Compare `a,d;b,c` — the same four atoms rearranged so that D's 8 µm neighbour is
-A (rho = 0.854) instead of B — which reaches 0.080 and places both dips to under
-1 %. Composition, density and lattice are identical; only which atom sits next
-to which differs.
+A (rho = 0.854) instead of B — which reaches MSE 0.0118 and places both dips to
+under 1 %. Composition, density and lattice are identical; only which atom sits
+next to which differs, and it costs a factor **14** in MSE.
 
 The diffraction bookkeeping is nonetheless right even here: the odd orders that
 the checkerboards extinguished carry 0.388 in the direct run against 0.409

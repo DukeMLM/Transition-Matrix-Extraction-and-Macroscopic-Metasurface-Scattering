@@ -278,17 +278,21 @@ dark channels: 6.1×10⁻⁶ against a 0.989 carrier.
 
 ### The headline: mixing is free
 
-| case | mean \|ΔS21\| vs its own direct CST run | mean \|ΔS11\| |
-|---|---|---|
-| atom C alone | 0.017 | 0.020 |
-| a,c;c,a | 0.019 | 0.020 |
-| atom A alone | 0.030 | 0.041 |
-| b,c;c,b | 0.036 | 0.036 |
-| a,b;b,a | 0.046 | 0.048 |
-| atom B alone | 0.054 | 0.073 |
-| a,d;b,c | 0.080 | 0.079 |
-| atom D alone | 0.149 | 0.171 |
-| a,b;c,d | 0.308 | 0.308 |
+Scored by the MSE of the complex S-parameter against the cell's own direct CST
+run — mean(\|S_pred − S_CST\|²) over the stored frequencies, on the complex
+amplitude so a phase error counts — with the mean absolute error alongside:
+
+| case | MSE S21 | MSE S11 | mean \|ΔS21\| | mean \|ΔS11\| |
+|---|---|---|---|---|
+| atom C alone | 0.00038 | 0.00050 | 0.017 | 0.020 |
+| a,c;c,a | 0.00067 | 0.00068 | 0.019 | 0.020 |
+| atom A alone | 0.00107 | 0.00185 | 0.030 | 0.041 |
+| b,c;c,b | 0.00171 | 0.00166 | 0.036 | 0.036 |
+| a,b;b,a | 0.00367 | 0.00382 | 0.046 | 0.048 |
+| atom B alone | 0.00393 | 0.00647 | 0.054 | 0.073 |
+| a,d;b,c | 0.0118 | 0.0115 | 0.080 | 0.079 |
+| atom D alone | 0.0351 | 0.0446 | 0.149 | 0.171 |
+| a,b;c,d | **0.1654** | 0.1660 | 0.308 | 0.308 |
 
 Every *two-species* mixed cell lands within the range of its two constituents.
 `a,c;c,a` — the pair that reconstructs best individually — gives the best mixed
@@ -344,17 +348,17 @@ D–D at 8 µm (7.912 vs 8.000). Nothing is formally invalid. What varies is the
 addition theorem's **convergence rate**: the truncation error falls like ρ^lmax
 with ρ = (aᵢ + aⱼ)/d.
 
-| case | worst pair | ρ | ρ³ | mean \|ΔS21\| |
-|---|---|---|---|---|
-| C alone | C–C | 0.584 | 0.200 | 0.017 |
-| a,c;c,a | A–C | 0.652 | 0.277 | 0.019 |
-| A alone | A–A | 0.719 | 0.372 | 0.030 |
-| b,c;c,b | B–C | 0.742 | 0.408 | 0.036 |
-| a,b;b,a | A–B | 0.809 | 0.530 | 0.046 |
-| a,d;b,c | A–D | 0.854 | 0.623 | 0.080 |
-| B alone | B–B | 0.899 | 0.727 | 0.054 |
-| a,b;c,d | B–D | 0.944 | 0.841 | 0.308 |
-| D alone | D–D | 0.989 | 0.967 | 0.149 |
+| case | worst pair | ρ | ρ³ | MSE S21 | mean \|ΔS21\| |
+|---|---|---|---|---|---|
+| C alone | C–C | 0.584 | 0.200 | 0.00038 | 0.017 |
+| a,c;c,a | A–C | 0.652 | 0.277 | 0.00067 | 0.019 |
+| A alone | A–A | 0.719 | 0.372 | 0.00107 | 0.030 |
+| b,c;c,b | B–C | 0.742 | 0.408 | 0.00171 | 0.036 |
+| a,b;b,a | A–B | 0.809 | 0.530 | 0.00367 | 0.046 |
+| a,d;b,c | A–D | 0.854 | 0.623 | 0.0118 | 0.080 |
+| B alone | B–B | 0.899 | 0.727 | 0.00393 | 0.054 |
+| a,b;c,d | B–D | 0.944 | 0.841 | **0.1654** | 0.308 |
+| D alone | D–D | 0.989 | 0.967 | 0.0351 | 0.149 |
 
 At ρ = 0.989 each extra multipole order buys 1 %, so lmax of order 100 would be
 needed — and long before that the lattice sum's amplification of the noisy
