@@ -1,0 +1,23 @@
+[2026-08-08T22:38:01] design: {"pair": "ADBC", "atoms": {"A": {"name": "A", "scale": 4.0, "r": 2.87712, "w_ring": 0.644552, "gap": 2.8, "w": 0.8, "t": 0.2, "run": 6}, "D": {"name": "D", "scale": 5.5, "r": 3.95603, "w_ring": 0.886259, "gap": 3.85, "w": 1.1, "t": 0.2, "run": 3}, "B": {"name": "B", "scale": 5.0, "r": 3.59639, "w_ring": 0.80569, "gap": 3.5, "w": 1.0, "t": 0.2, "run": 2}, "C": {"name": "C", "scale": 3.25, "r": 2.33766, "w_ring": 0.523698, "gap": 2.275, "w": 0.65, "t": 0.2, "run": 10}}, "base_pitch": 8.0, "supercell": 16.0, "z_half": 25.0, "f_min_THz": 10.0, "f_max_THz": 34.0, "n_floquet_modes": 20, "au_sigma": 45610000.0, "layout": [[-4.0, 4.0, "A"], [4.0, 4.0, "D"], [-4.0, -4.0, "B"], [4.0, -4.0, "C"]]}
+[2026-08-08T22:38:01] Rayleigh onsets: lambda = 16.00 um (orders +-1,0 / 0,+-1; BRIGHT: four distinct atoms break the symmetry that darkened them) and 11.31 um = 26.50 THz (orders +-1,+-1)
+[2026-08-08T22:38:01] ===== building supercell =====
+[2026-08-08T22:38:01] opening CST DesignEnvironment for supercell.cst ...
+[2026-08-08T22:38:24] history applied and verified:
+[2026-08-08T22:38:24]     [ 1] sc: 1 units
+[2026-08-08T22:38:24]     [ 2] sc: 2 frequency range
+[2026-08-08T22:38:24]     [ 3] sc: 3 background
+[2026-08-08T22:38:24]     [ 4] sc: 4 boundaries (unit cell 16 um)
+[2026-08-08T22:38:24]     [ 5] sc: 5 mesh type
+[2026-08-08T22:38:24]     [ 6] sc: 6 gold
+[2026-08-08T22:38:24]     [ 7] sc: 7 component
+[2026-08-08T22:38:24]     [ 8] sc: 8.0 atom A at (-4.0, +4.0)
+[2026-08-08T22:38:24]     [ 9] sc: 8.1 atom D at (+4.0, +4.0)
+[2026-08-08T22:38:24]     [10] sc: 8.2 atom B at (-4.0, -4.0)
+[2026-08-08T22:38:24]     [11] sc: 8.3 atom C at (+4.0, -4.0)
+[2026-08-08T22:38:24]     [12] sc: 9 vacuum cell brick
+[2026-08-08T22:38:24]     [13] sc: 10 mesh adaptation
+[2026-08-08T22:38:24]     [14] sc: 11 Floquet ports
+[2026-08-08T22:38:24]     [15] sc: 12 FD solver
+[2026-08-08T22:38:25] starting FD solver ...
+[2026-08-09T03:29:35] FDSolver finished after 17469 s
+[2026-08-09T03:29:42] done

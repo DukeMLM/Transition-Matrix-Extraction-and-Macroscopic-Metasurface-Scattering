@@ -19,11 +19,14 @@ below.
 Validated end-to-end on the `dary` branch against direct CST periodic
 simulations and the independent [treams](https://github.com/tfp-photonics/treams)
 code: `test/single` (pitch 2 µm, 8–20 µm) to **|ΔS| ≤ 0.003** and **~3×10⁻⁴**
-respectively, three single-atom `test/2x2` lattices (pitch 8 µm, 10–34 THz, a
-resonant band) to **mean |ΔS| 0.017–0.054**, and three *mixed* supercells built
-from pairs of those measured atoms to **mean |ΔS| 0.019–0.046** against their own
-direct CST simulations — in every case limited by the input T-matrix, not by the
-aggregation, which reproduces an independent implementation to **10⁻¹²**.
+respectively, four single-atom `test/2x2` lattices (pitch 8 µm, 10–34 THz, a
+resonant band) and five *mixed* supercells built from those measured atoms —
+nine direct CST benchmarks in all. Seven of the nine agree to **mean |ΔS|
+0.017–0.080**, limited by the input T-matrix rather than by the aggregation,
+which reproduces an independent implementation to **10⁻¹²**. The two that do not
+are documented failures with a diagnosed cause: they contain a pair of atoms
+whose circumscribing spheres nearly touch, where the spherical addition theorem
+converges too slowly to truncate. See [`experiment.md`](experiment.md).
 
 <p align="center">
 <img src="aggregation/results/fig7_cst_direct_comparison.png" width="85%">
@@ -36,31 +39,34 @@ aggregation, which reproduces an independent implementation to **10⁻¹²**.
 
 ### → [`experiment.md`](experiment.md): composing metasurfaces from measured meta-atoms
 
-Three spoke-and-wheel resonators of different size, whose isolated T-matrices
-were extracted separately, are placed two at a time on a checkerboard in one
-repeated 16 µm cell — `a,b;b,a`, `a,c;c,a`, `b,c;c,b`. The pipeline predicts each
-mixed metasurface's S-parameters; a direct CST simulation of that metasurface
-then checks the prediction. Read [`experiment.md`](experiment.md) for the whole
-story — it is the shortest route into what this repository does and how far it
-can be trusted.
+Four spoke-and-wheel resonators of different size, whose isolated T-matrices were
+extracted separately, are combined in one repeated 16 µm cell — three two-species
+checkerboards (`a,b;b,a`, `a,c;c,a`, `b,c;c,b`) and two arrangements of all four
+at once (`a,b;c,d`, `a,d;b,c`). The pipeline predicts each mixed metasurface's
+S-parameters; a direct CST simulation of that metasurface then checks the
+prediction. Read [`experiment.md`](experiment.md) for the whole story — it is the
+shortest route into what this repository does and how far it can be trusted.
 
 <p align="center">
-<img src="aggregation/results_2x2_super_l3/fig3_experiment.png" width="100%">
-<br><em>Left: the three pure lattices. Middle: the three mixed cells. Markers are
-the T-matrix prediction, pale lines the direct CST run for the same structure.
-Right: every mixed cell diffracts nothing between its two Rayleigh onsets —
-those orders are dark by symmetry, and the full-wave simulations agree to
-1.5×10⁻⁵.</em>
+<img src="aggregation/results_2x2_super_l3/fig4_comparison.png" width="100%">
+<br><em>All nine benchmarks. Markers are the T-matrix prediction, pale lines the
+direct CST run of the same structure. Bottom right: accuracy against the
+translation convergence ratio rho — above rho ~ 0.85 the method degrades, above
+0.94 it breaks.</em>
 </p>
 
-Highlights: a mixed cell is **not** an interpolation of its two constituents —
-each species red-shifts onto the sparser 11.31 µm sublattice, and `a,c;c,a`
-grows a hybrid resonance neither pure lattice has. All three cells support a
+Highlights: a mixed cell is **not** an interpolation of its constituents — each
+species red-shifts onto the sparser 11.31 µm sublattice, and `a,c;c,a` grows a
+hybrid resonance neither pure lattice has. Every two-species cell supports a
 **dark lattice resonance** at the supercell's own Rayleigh condition that no
-single-atom model can show, confirmed full-wave. And mixing costs **nothing** in
-accuracy: every mixed cell lands inside the range of its two constituents. The
-write-up also takes the residual 2–5 % apart into the three mechanisms that
-produce it, reproducibly (`aggregation/error_budget.py`).
+single-atom model can show, confirmed full-wave. Four *distinct* species break
+that symmetry: the dark diffraction orders switch on 7.8 THz lower, the cell
+becomes birefringent, and **rearranging the same four atoms changes |S21| by up
+to 0.43** — `Σ_s T_s` is identical for the two arrangements and cannot tell them
+apart. The write-up also takes the residual error apart into the mechanisms that
+produce it, reproducibly (`aggregation/error_budget.py`), and documents the two
+cases where the method breaks and why
+([`OPEN_QUESTIONS.md`](OPEN_QUESTIONS.md) carries what is still unresolved).
 
 ---
 

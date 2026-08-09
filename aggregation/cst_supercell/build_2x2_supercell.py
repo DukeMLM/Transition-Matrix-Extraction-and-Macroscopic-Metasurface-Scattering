@@ -73,6 +73,8 @@ ATOMS = {
               w=1.00, t=0.2, run=2),
     "C": dict(name="C", scale=3.25, r=2.33766, w_ring=0.523698, gap=2.275,
               w=0.65, t=0.2, run=10),
+    "D": dict(name="D", scale=5.50, r=3.95603, w_ring=0.886259, gap=3.850,
+              w=1.10, t=0.2, run=3),
 }
 BASE_PITCH = 8.0                     # atom-to-atom spacing
 SUPER = 2 * BASE_PITCH               # supercell period, um
@@ -82,11 +84,28 @@ N_FLOQUET_MODES = 20                 # >= 18 propagating at 34 THz (9 orders x 2
 AU_SIGMA = 45610000.0                # S/m, packed project step 5
 AU_RHO = 19320.0
 
-def layout(pair):
-    """x,y;y,x checkerboard for a two-letter pair such as 'AB' or 'AC'."""
-    first, second = ATOMS[pair[0]], ATOMS[pair[1]]
+def layout(spec):
+    """Site assignment for a 2- or 4-letter spec.
+
+    Two letters 'xy' -> the x,y;y,x checkerboard: x on one diagonal, y on the
+    other.  (Kept exactly as it was, so the AB / AC / BC runs stay reproducible.)
+
+    Four letters 'wxyz' -> read as the matrix the name suggests, top row first:
+
+            w  x        w at (-4, +4)   x at (+4, +4)
+            y  z        y at (-4, -4)   z at (+4, -4)
+
+    so 'ABCD' is a,b;c,d and 'ADBC' is a,d;b,c.  With four *different* atoms the
+    cell loses the C4v symmetry that made the odd diffraction orders dark, so
+    those channels carry power and cross-polarization is no longer forbidden.
+    """
     h = BASE_PITCH / 2
-    return [(-h, -h, first), (+h, +h, first), (+h, -h, second), (-h, +h, second)]
+    if len(spec) == 2:
+        first, second = ATOMS[spec[0]], ATOMS[spec[1]]
+        return [(-h, -h, first), (+h, +h, first),
+                (+h, -h, second), (-h, +h, second)]
+    w, x, y, z = (ATOMS[c] for c in spec)
+    return [(-h, +h, w), (+h, +h, x), (-h, -h, y), (+h, -h, z)]
 
 
 VBA_UNITS = """\
@@ -406,16 +425,17 @@ def main(argv=None):
         description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--pair", default="AB",
-                    help="two atom letters, e.g. AB, AC, BC: the first goes on "
-                         "one diagonal of the cell and the second on the other")
+                    help="two atom letters (AB, AC, BC) for an x,y;y,x "
+                         "checkerboard, or four (ABCD, ADBC) read as a matrix "
+                         "top row first: w,x;y,z")
     ap.add_argument("--out", type=Path, default=None,
                     help="default: runs_<pair>")
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--only", choices=("supercell", "empty"), default=None)
     args = ap.parse_args(argv)
     args.pair = args.pair.upper()
-    if len(args.pair) != 2 or any(c not in ATOMS for c in args.pair):
-        ap.error(f"--pair must be two letters from {sorted(ATOMS)}")
+    if len(args.pair) not in (2, 4) or any(c not in ATOMS for c in args.pair):
+        ap.error(f"--pair must be two or four letters from {sorted(ATOMS)}")
     if args.out is None:
         args.out = HERE / f"runs_{args.pair}"
 
@@ -439,7 +459,7 @@ def main(argv=None):
     log(f"design: {json.dumps(meta)}")
     lam_ray = SUPER / np.sqrt(2)
     log(f"Rayleigh onsets: lambda = {SUPER:.2f} um (orders +-1,0 / 0,+-1; "
-        f"extinguished by the x,y;y,x symmetry) and "
+        f"{'extinguished by the x,y;y,x symmetry' if len(args.pair) == 2 else 'BRIGHT: four distinct atoms break the symmetry that darkened them'}) and "
         f"{lam_ray:.2f} um = {299.792458/lam_ray:.2f} THz (orders +-1,+-1)")
 
     todo = [args.only] if args.only else ["empty", "supercell"]

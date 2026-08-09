@@ -6,14 +6,19 @@ simulating that metasurface?
 
 The pipeline up to this point could only repeat one atom. This experiment adds
 the missing case and checks it against full-wave simulation at every step, on
-three atoms and the three mixed cells they make.
+**four** measured atoms and **five** mixed cells built from them — three
+two-species checkerboards and two arrangements of all four at once. Nine direct
+CST benchmarks in all.
 
 <p align="center">
-<img src="aggregation/results_2x2_super_l3/fig3_experiment.png" width="100%">
-<br><em>Left: the three pure lattices. Middle: the three mixed cells. Markers are
-the T-matrix prediction, pale lines the direct CST run for the same structure.
-Right: the diffracted power of the mixed cells — exactly zero between the two
-Rayleigh onsets, because the checkerboard symmetry makes those channels dark.</em>
+<img src="aggregation/results_2x2_super_l3/fig4_comparison.png" width="100%">
+<br><em>The whole study. Top: the four single atoms, the three two-species
+checkerboards, the two four-atom cells — markers are the T-matrix prediction,
+pale lines the direct CST run of the same structure. Bottom: power into higher
+diffraction orders (the checkerboards are dark between the two Rayleigh onsets,
+the four-atom cells are not), the birefringence that four distinct species
+introduces, and the accuracy of all nine benchmarks against the translation
+convergence ratio.</em>
 </p>
 
 ---
@@ -25,14 +30,14 @@ family in `test/2x2/SAW_gold_noSub_packed.cst`. Their T-matrices were extracted
 in isolation (PML boundaries, plane-wave illumination set) over 10–34 THz,
 25 frequencies, lmax 5, vacuum embedding.
 
-| | atom **A** | atom **B** | atom **C** |
-|---|---|---|---|
-| file | `saw_gold_wl13p10um…h5` | `saw_gold_wl17p30um…h5` | `saw_gold_wl10p90um…h5` |
-| `scale` (3D Run ID) | 4.00 (run 6) | 5.00 (run 2) | 3.25 (run 10) |
-| ring outer radius | 2.877 µm | 3.596 µm | 2.338 µm |
-| stored `residual` | 0.0024–0.0240 | 0.0039–0.0164 | 0.0045–0.0395 |
-| stored `reciprocity` | 0.012–0.110 | 0.018–0.076 | 0.024–0.182 |
-| passivity, max SV(I+2T) | 1.028 | 1.021 | 1.037 |
+| | **A** | **B** | **C** | **D** |
+|---|---|---|---|---|
+| file | `…wl13p10um` | `…wl17p30um` | `…wl10p90um` | `…wl23p50um` |
+| `scale` (3D Run ID) | 4.00 (run 6) | 5.00 (run 2) | 3.25 (run 10) | 5.50 (run 3) |
+| ring outer radius | 2.877 µm | 3.596 µm | 2.338 µm | 3.956 µm |
+| stored `residual` | 0.0024–0.0240 | 0.0039–0.0164 | 0.0045–0.0395 | 0.0045–0.0217 |
+| stored `reciprocity` | 0.012–0.110 | 0.018–0.076 | 0.024–0.182 | 0.024–0.094 |
+| passivity, max SV(I+2T) | 1.028 | 1.021 | 1.037 | 1.049 |
 
 Because all three are members of the same packed parametric sweep, a direct CST
 periodic reference already exists for each of them — no new simulation was
@@ -72,14 +77,18 @@ Two things follow, and both turn out to be measurable:
 
 Each atom alone on an 8 µm square lattice, against its own direct CST run.
 
-| | atom A | atom B | atom C |
-|---|---|---|---|
-| transmission minimum, this pipeline | 13.039 µm | 16.638 µm | 10.897 µm |
-| transmission minimum, direct CST | 13.126 µm | 17.341 µm | 10.933 µm |
-| resonance offset | −0.66 % | **−4.05 %** | **−0.33 %** |
-| complex S21, max / mean \|Δ\| | 0.062 / 0.030 | 0.121 / 0.054 | 0.035 / 0.017 |
-| complex S11, max / mean \|Δ\| | 0.065 / 0.041 | 0.135 / 0.073 | 0.040 / 0.020 |
-| vs the independent treams code | ≤ 1×10⁻¹² | ≤ 1×10⁻¹² | ≤ 1×10⁻¹² |
+| | A | B | C | D |
+|---|---|---|---|---|
+| transmission minimum, this pipeline | 13.039 µm | 16.638 µm | 10.897 µm | 19.106 µm |
+| transmission minimum, direct CST | 13.126 µm | 17.341 µm | 10.933 µm | 23.509 µm |
+| resonance offset | −0.66 % | −4.05 % | **−0.33 %** | **−19 %** |
+| complex S21, max / mean \|Δ\| | 0.062 / 0.030 | 0.121 / 0.054 | 0.035 / 0.017 | 0.466 / 0.149 |
+| complex S11, max / mean \|Δ\| | 0.065 / 0.041 | 0.135 / 0.073 | 0.040 / 0.020 | 0.467 / 0.171 |
+| vs the independent treams code | ≤ 1×10⁻¹² | ≤ 1×10⁻¹² | ≤ 1×10⁻¹² | ≤ 1×10⁻¹² |
+
+Atom D fails, and it is the most informative result in the study — see
+[§ "Where the method stops working"](#where-the-method-stops-working) below and
+[`aggregation/results_D_ewald_l3/REPORT.md`](aggregation/results_D_ewald_l3/REPORT.md).
 
 The reconstruction reproduces the lineshape, the depth and the full phase
 excursion in every case; what varies is where the resonance sits.
@@ -160,7 +169,9 @@ and the three cells behave quite differently:
 |---|---|---|---|
 | a,b;b,a | 16.88 (0.111), 13.95 (0.134) | [+0.040, +0.403] | 0.310 |
 | a,c;c,a | 14.42 (0.283), 11.84 (0.128) | [+0.011, +0.356] | 0.216 |
-| b,c;c,b | 16.71 (0.102), 12.44 (0.125) | [+0.028, +0.208] | **0.433** |
+| b,c;c,b | 16.71 (0.102), 12.44 (0.125) | [+0.028, +0.208] | 0.433 |
+| a,b;c,d | 17.87 (0.081), 13.00 (0.331) | [+0.045, +0.208] | 0.409 |
+| a,d;b,c | 17.64 (0.152), 13.09 (0.247) | [+0.048, **+0.487**] | **0.429** |
 
 `b,c;c,b` diffracts hardest because C's resonance sits closest to the (±1,±1)
 onset; `a,c;c,a` develops an extra **A–C hybrid resonance at 21.25 THz** with
@@ -183,6 +194,43 @@ The 8 µm primitive lattice has no Rayleigh onset until 8 µm and shows nothing 
 all there. This feature exists only because the cell is a supercell, and its
 strength depends on the contents while its position does not.
 
+### Four distinct atoms: the symmetry breaks, and arrangement becomes a knob
+
+The three cells above are all `x,y;y,x` checkerboards, C4v about one atom site.
+Filling the four sites with four *different* atoms removes that symmetry, and
+the 24 assignments collapse under the D4 symmetry of the site square to exactly
+**three** distinct cells. Two of them were built.
+
+**The dark orders switch on.** The coherent basis sum for the (±1,0)/(0,±1)
+family is `i(F₁ − F₂ + F₃ − F₄)`; a checkerboard has F₁ = F₄ and F₂ = F₃ so it
+cancels identically, and four different atoms do not:
+
+| cell | power in the odd orders | first diffraction |
+|---|---|---|
+| all three two-species cells | ≤ 5×10⁻³¹ | 26.50 THz |
+| a,b;c,d, a,d;b,c | **5×10⁻²** | **18.74 THz** |
+
+The four-atom cells start diffracting 7.8 THz lower than any two-species cell
+made from the same atoms — the dark window is gone, and CST confirms it (0.388
+measured against 0.409 predicted for `a,b;c,d`).
+
+**The cell becomes birefringent, by an amount the arrangement sets.**
+
+| cell | max ‖t_xx\| − \|t_yy‖ | mean | max \|t_xy\| |
+|---|---|---|---|
+| a,b;c,d | **0.603** at 18.74 µm (0.286 vs 0.890) | 0.176 | 1.8×10⁻¹² |
+| a,d;b,c | 0.168 | 0.037 | 1.5×10⁻¹² |
+
+`a,b;c,d` is a strong linear polarizer near 18.7 µm; `a,d;b,c`, from the *same
+four atoms*, is nearly isotropic. Cross-polarization stays zero in both — an
+empirical cancellation tied to the square site arrangement, not to the code
+(displacing one atom gives \|t_xy\| = 10⁻²). No symmetry argument for it is
+offered; see [`OPEN_QUESTIONS.md`](OPEN_QUESTIONS.md) §2.
+
+**Rearranging alone changes \|S21\| by up to 0.429** (mean 0.159). `Σ_s T_s` is
+identical for the two cells and cannot tell them apart — the sharpest statement
+in the study of why aggregation is a multiple-scattering solve.
+
 ## Step 4 — build the metasurfaces in CST and compare
 
 For each cell, a 16 × 16 µm unit cell with the four resonators, every solver,
@@ -194,11 +242,13 @@ about an hour on ~0.7–1.0 M tetrahedral DOF over ~48 adaptive frequency points
 
 ### CST confirms the selection rule, in every cell
 
-| cell | (0,0) carrier | dark (±1,0)/(0,±1) family | (±1,±1) family, CST vs predicted |
+| cell | (0,0) carrier | (±1,0)/(0,±1) family | (±1,±1) family, CST vs predicted |
 |---|---|---|---|
-| a,b;b,a | 0.987 | **1.5×10⁻⁵** | 0.382 vs 0.310 |
-| a,c;c,a | 1.002 | **1.5×10⁻⁵** | 0.208 vs 0.216 |
-| b,c;c,b | 0.989 | **6.1×10⁻⁶** | 0.427 vs 0.433 |
+| a,b;b,a | 0.987 | **1.5×10⁻⁵** dark | 0.382 vs 0.310 |
+| a,c;c,a | 1.002 | **1.5×10⁻⁵** dark | 0.208 vs 0.216 |
+| b,c;c,b | 0.989 | **6.1×10⁻⁶** dark | 0.427 vs 0.433 |
+| a,b;c,d | 0.971 | **0.388 bright** | 0.057 |
+| a,d;b,c | 0.994 | **0.297 bright** | 0.335 |
 
 The full-wave simulation puts nothing into the odd channels over the entire
 18.7–34 THz window in which they are open — at the empty run's own noise floor.
@@ -212,6 +262,8 @@ all.
 | a,b;b,a | 0.205 / 0.046 | 0.205 / 0.048 | +0.6 %, −1.8 % |
 | a,c;c,a | 0.079 / **0.019** | 0.081 / 0.020 | −0.59 %, +0.45 % |
 | b,c;c,b | 0.090 / 0.036 | 0.089 / 0.036 | **+0.44 %, +0.27 %** |
+| a,d;b,c | 0.347 / 0.080 | 0.342 / 0.079 | +0.85 %, +0.38 % |
+| **a,b;c,d** | **0.840 / 0.308** | 0.833 / 0.308 | **−10.2 %**, +3.4 % |
 
 For `a,b;b,a` the 0.205 maximum comes entirely from the two samples that straddle
 the 16 µm dark resonance; excluding them it is 0.068 / 0.063. For `a,c;c,a` the
@@ -228,18 +280,24 @@ dark channels: 6.1×10⁻⁶ against a 0.989 carrier.
 
 | case | mean \|ΔS21\| vs its own direct CST run | mean \|ΔS11\| |
 |---|---|---|
-| atom A alone | 0.030 | 0.041 |
-| atom B alone | 0.054 | 0.073 |
 | atom C alone | 0.017 | 0.020 |
-| a,b;b,a | 0.046 | 0.048 |
 | a,c;c,a | 0.019 | 0.020 |
+| atom A alone | 0.030 | 0.041 |
 | b,c;c,b | 0.036 | 0.036 |
+| a,b;b,a | 0.046 | 0.048 |
+| atom B alone | 0.054 | 0.073 |
+| a,d;b,c | 0.080 | 0.079 |
+| atom D alone | 0.149 | 0.171 |
+| a,b;c,d | 0.308 | 0.308 |
 
-Every mixed cell lands within the range of its two constituents. `a,c;c,a` — the
-pair of atoms that reconstruct best individually — gives the best mixed cell;
-`a,b;b,a`, which contains the worst constituent, gives the worst. Aggregating two
-different atoms into one repeated cell costs nothing beyond what the input
-T-matrices already cost.
+Every *two-species* mixed cell lands within the range of its two constituents.
+`a,c;c,a` — the pair that reconstructs best individually — gives the best mixed
+cell; `a,b;b,a`, which contains the worst constituent, gives the worst.
+Aggregating two different atoms into one repeated cell costs nothing beyond what
+the input T-matrices already cost.
+
+That statement stops holding once atom D is involved, and the next section is
+about why.
 
 **Dilution helps the worst atom.** Atom B's resonance is placed 4.05 % wrong on
 its own dense 8 µm lattice; in a mixed cell, where it sits on the sparser
@@ -249,6 +307,73 @@ collective shift of a dense lattice being computed from a slightly wrong T. Halv
 the areal density and the lattice amplification that produced it halves too.
 
 ---
+
+## Where the method stops working
+
+Atom D is the largest of the four, and its own 8 µm lattice is where the method
+fails: array resonance at 19.1 µm against 23.5 µm measured, a **19 % error**, and
+absorption going negative. Diagnosing it corrected the framing used elsewhere in
+this document.
+
+**The T-matrix is innocent.** Asking each extracted T where its own *isolated*
+atom resonates gives a perfectly linear size scaling — peak/scale = 3.766, 3.770,
+3.786, 3.782 for C, A, B, D. D's T-matrix is fully consistent with its siblings,
+and it is also the most dipolar of the four (96.5 % l = 1), so multipole
+truncation is not the issue either. Raising lmax made things *worse*, not better.
+
+**The array is where the anomaly lives.** A, B and C all blue-shift from their
+isolated resonance to their 8 µm array resonance by a consistent 1.3–2.0 µm.
+D red-shifts by +2.74 µm — opposite in sign. Across the whole packed parametric
+sweep, array-dip/scale is flat at ≈ 3.3 while the neighbours are far apart and
+then climbs as the gap closes:
+
+| scale | gap between neighbours | CST array dip | dip / scale |
+|---|---|---|---|
+| 4.00 | 2.246 µm | 13.13 µm | 3.283 |
+| 4.50 | 1.526 µm | 14.90 µm | 3.311 |
+| 5.00 | 0.807 µm | 17.34 µm | 3.468 |
+| **5.50** | **0.088 µm** | **23.51 µm** | **4.275** |
+
+At scale 5.5 the rings are **88 nm** apart. That is the classic near-touching
+capacitive red-shift — real physics in the full-wave model, and the same effect
+that already makes atom B 4 % off while atom A is 0.7 %.
+
+**Why the multipole method cannot follow it.** Manual Eq. (57) requires
+‖rᵢ − rⱼ‖ > aᵢ + aⱼ, and that condition is *satisfied* in every case here — even
+D–D at 8 µm (7.912 vs 8.000). Nothing is formally invalid. What varies is the
+addition theorem's **convergence rate**: the truncation error falls like ρ^lmax
+with ρ = (aᵢ + aⱼ)/d.
+
+| case | worst pair | ρ | ρ³ | mean \|ΔS21\| |
+|---|---|---|---|---|
+| C alone | C–C | 0.584 | 0.200 | 0.017 |
+| a,c;c,a | A–C | 0.652 | 0.277 | 0.019 |
+| A alone | A–A | 0.719 | 0.372 | 0.030 |
+| b,c;c,b | B–C | 0.742 | 0.408 | 0.036 |
+| a,b;b,a | A–B | 0.809 | 0.530 | 0.046 |
+| a,d;b,c | A–D | 0.854 | 0.623 | 0.080 |
+| B alone | B–B | 0.899 | 0.727 | 0.054 |
+| a,b;c,d | B–D | 0.944 | 0.841 | 0.308 |
+| D alone | D–D | 0.989 | 0.967 | 0.149 |
+
+At ρ = 0.989 each extra multipole order buys 1 %, so lmax of order 100 would be
+needed — and long before that the lattice sum's amplification of the noisy
+l = 4, 5 rows of T takes over. Two error sources moving in opposite directions
+with lmax, which is exactly what D's lmax table shows. Marginally satisfied is
+in practice worse than violated, because nothing warns you.
+
+**And two independent codes agree on the wrong answer.** treams reproduces D's
+reconstruction to 1.2×10⁻¹⁵, because it uses the same addition theorem and
+inherits the same convergence limit. Agreement with treams validates the
+*implementation*; only CST validates the *physics*.
+
+The trend in ρ is strong but not strictly monotone — B alone beats `a,d;b,c`,
+and D alone beats `a,b;c,d` — so ρ is the right diagnostic for *which regime you
+are in* (above ~0.85 things degrade, above ~0.94 they break) rather than a
+quantitative error law. ρ is also confounded with arrangement symmetry across
+the two four-atom cells; [`OPEN_QUESTIONS.md`](OPEN_QUESTIONS.md) §1 specifies
+the third arrangement that would separate them, and §3 notes that the pipeline
+currently produces these answers with no warning at all.
 
 ## What the experiment does and does not establish
 
@@ -438,3 +563,6 @@ with it mid-solve and the error reads exactly like a solver crash.
 | the CST projects | `aggregation/cst_supercell/runs*/` (`*.cst` + model history + solver log; working directories not in git) |
 | the error budget | `aggregation/error_budget.py` |
 | the algorithm | manual §6.5.2–6.5.5 and §7.5, implemented in `aggregation/supercell.py` |
+| all nine cases in one table | `python aggregation/compare_cases.py --all` |
+| the comparison figure | `aggregation/plot_comparison.py` |
+| what is still unresolved | [`OPEN_QUESTIONS.md`](OPEN_QUESTIONS.md) |
