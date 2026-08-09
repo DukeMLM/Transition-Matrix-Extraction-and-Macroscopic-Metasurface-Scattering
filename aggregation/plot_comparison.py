@@ -2,16 +2,17 @@
 
     python plot_comparison.py [--out results_2x2_super_l3/fig4_comparison.png]
 
-Top row     one cell family per panel -- single atoms, two-species checkerboards,
-            four-distinct-atom cells.  Markers are the T-matrix prediction, pale
-            lines the direct CST run for the same structure.
-Bottom left what the 16 um period adds: power into higher diffraction orders,
-            against the two Rayleigh onsets.  The two-species cells are dark
-            between them by symmetry; the four-atom cells are not.
-Bottom mid  the four-atom cells are birefringent -- |t_xx| against |t_yy| -- and
-            how much depends on the arrangement, not the composition.
-Bottom right the accuracy summary: mean |dS21| against the manual's Eq. (57)
-            margin, min over the 8 um neighbour pairs of (8 um - a_i - a_j).
+Top row     single atoms, the two-species checkerboards, then ONE PANEL PER
+            four-distinct-atom cell -- those two carry the most structure, and
+            overlaying them hides which pale CST curve belongs to which.
+            Markers are the T-matrix prediction, pale lines the direct CST run
+            of the same structure.
+Bottom row  power into higher diffraction orders against the two Rayleigh
+            onsets (the two-species cells are dark between them by symmetry,
+            the four-atom cells are not); the birefringence of each four-atom
+            cell, again one panel each; and the accuracy summary -- mean |dS21|
+            against the addition theorem's convergence ratio
+            rho = (a_i + a_j)/d, maximised over the 8 um neighbour pairs.
 
 Cases whose directory or CST reference is missing are skipped, so this runs
 while benchmarks are still solving.
@@ -41,14 +42,19 @@ QUADS = [("results_2x2_ABCD_l3", "a,b;c,d", "C3", "ABCD"),
          ("results_2x2_ADBC_l3", "a,d;b,c", "C4", "ADBC")]
 
 
-def margin(spec):
-    """Manual Eq. (57) headroom: min over the 8 um neighbour pairs."""
+def rho(spec):
+    """Convergence ratio of the addition theorem, worst 8 um neighbour pair.
+
+    The truncation error of the outgoing->regular translation falls like
+    rho^lmax with rho = (a_i + a_j) / d.  Manual Eq. (57) only asks for rho < 1;
+    what decides the accuracy is how far below 1 it sits.
+    """
     if len(spec) == 1:                       # one atom per cell
-        return PITCH - 2 * R[spec]
+        return 2 * R[spec] / PITCH
     if len(spec) == 2:                       # x,y;y,x -- every neighbour unlike
-        return PITCH - R[spec[0]] - R[spec[1]]
+        return (R[spec[0]] + R[spec[1]]) / PITCH
     w, x, y, z = spec                        # w,x;y,z -- rows and columns
-    return PITCH - max(R[w] + R[x], R[y] + R[z], R[w] + R[y], R[x] + R[z])
+    return max(R[w] + R[x], R[y] + R[z], R[w] + R[y], R[x] + R[z]) / PITCH
 
 
 def load(d):
@@ -59,23 +65,25 @@ def load(d):
     return np.load(f, allow_pickle=True), load_cst(p)
 
 
-def spanel(ax, cases, title):
+def spanel(ax, cases, title, legend_loc="lower right"):
     for d, label, c, _ in cases:
         got = load(d)
         if got is None:
             continue
         r, cst = got
-        ax.plot(r["lam"], np.abs(r["S21"]), "o-", ms=3.2, lw=1.5, color=c,
-                label=label)
+        ax.plot(r["lam"], np.abs(r["S21"]), "o-", ms=3.4, lw=1.6, color=c,
+                label=f"{label} — T-matrix" if len(cases) == 1 else label)
         if cst is not None:
-            ax.plot(cst["lam"], np.abs(cst["S21"]), "-", lw=1.4, color=c,
-                    alpha=0.35)
+            ax.plot(cst["lam"], np.abs(cst["S21"]), "-", lw=1.8,
+                    color=c if len(cases) > 1 else "0.45",
+                    alpha=0.35 if len(cases) > 1 else 0.9,
+                    label="direct CST" if len(cases) == 1 else None)
     ax.set_xlabel("Wavelength (um)")
     ax.set_ylabel("|S21|  (0th order)")
     ax.set_xlim(8.8, 30)
     ax.set_ylim(0, 1.02)
     ax.grid(alpha=0.3)
-    ax.legend(frameon=False, fontsize=8, loc="lower right")
+    ax.legend(frameon=False, fontsize=8, loc=legend_loc)
     ax.set_title(title, fontsize=9)
     thz_axis(ax)
 
@@ -87,12 +95,19 @@ def main():
     ap.add_argument("--out", default="results_2x2_super_l3/fig4_comparison.png")
     args = ap.parse_args()
 
-    fig, ax = plt.subplots(2, 3, figsize=(16.5, 9.2), constrained_layout=True)
-    spanel(ax[0, 0], SINGLE, "one atom per 8 um cell")
+    fig, ax = plt.subplots(2, 4, figsize=(21.5, 9.2), constrained_layout=True)
+    spanel(ax[0, 0], SINGLE,
+           "one atom per 8 um cell — markers: T-matrix, pale: CST")
     spanel(ax[0, 1], PAIRS, "two species per 16 um cell (x,y;y,x)")
-    spanel(ax[0, 2], QUADS, "four species per 16 um cell")
-    ax[0, 0].set_title("one atom per 8 um cell — markers: T-matrix, pale: CST",
-                       fontsize=9)
+    for col, case in zip((2, 3), QUADS):
+        got = load(case[0])
+        err = ""
+        if got is not None and got[1] is not None:
+            r, cst = got
+            e = np.abs(r["S21"] - interp_c(r["lam"], cst["lam"],
+                                           cst["S21"])).mean()
+            err = f" — mean |ΔS21| {e:.3f}, rho {rho(case[3]):.3f}"
+        spanel(ax[0, col], [case], f"four species: {case[1]}{err}")
 
     # ---- diffracted power -------------------------------------------------
     a = ax[1, 0]
@@ -117,33 +132,36 @@ def main():
     a.set_ylim(0, 0.65)
     a.grid(alpha=0.3)
     a.legend(frameon=False, fontsize=8, loc="upper right")
-    a.set_title("two-species cells are dark between the onsets; four-species "
-                "are not", fontsize=9)
+    a.set_title("two-species cells are dark between the onsets; "
+                "four-species are not", fontsize=9)
     thz_axis(a)
 
-    # ---- birefringence ----------------------------------------------------
-    a = ax[1, 1]
+    # ---- birefringence, one panel per four-atom cell ----------------------
     jp = os.path.join(HERE, "results_2x2_ABCD_l3", "jones_xy.npz")
-    if os.path.exists(jp):
-        j = np.load(jp)
-        for key, label, c in (("abcd", "a,b;c,d", "C3"),
-                              ("adbc", "a,d;b,c", "C4")):
-            a.plot(j["lam"], j[key][:, 0], "o-", ms=3.2, lw=1.5, color=c,
-                   label=f"{label}  |t_xx|")
-            a.plot(j["lam"], j[key][:, 1], "s--", ms=3.2, lw=1.3, color=c,
-                   alpha=0.65, label=f"{label}  |t_yy|")
+    j = np.load(jp) if os.path.exists(jp) else None
+    for col, (key, label, c) in zip((1, 2), (("abcd", "a,b;c,d", "C3"),
+                                             ("adbc", "a,d;b,c", "C4"))):
+        a = ax[1, col]
+        if j is not None:
+            sep = np.abs(j[key][:, 0] - j[key][:, 1])
+            a.fill_between(j["lam"], j[key][:, 0], j[key][:, 1], color=c,
+                           alpha=0.18, lw=0)
+            a.plot(j["lam"], j[key][:, 0], "o-", ms=3.2, lw=1.6, color=c,
+                   label="|t_xx|")
+            a.plot(j["lam"], j[key][:, 1], "s--", ms=3.2, lw=1.4, color="0.35",
+                   label="|t_yy|")
+            a.set_title(f"{label}: birefringence, max ||t_xx|−|t_yy|| = "
+                        f"{sep.max():.3f}", fontsize=9)
+        a.set_xlabel("Wavelength (um)")
         a.set_ylabel("|t| of the 0th transmitted order")
-    a.set_xlabel("Wavelength (um)")
-    a.set_xlim(8.8, 30)
-    a.set_ylim(0, 1.02)
-    a.grid(alpha=0.3)
-    a.legend(frameon=False, fontsize=8, loc="lower right")
-    a.set_title("four species -> birefringent; how much is set by the "
-                "arrangement", fontsize=9)
-    thz_axis(a)
+        a.set_xlim(8.8, 30)
+        a.set_ylim(0, 1.02)
+        a.grid(alpha=0.3)
+        a.legend(frameon=False, fontsize=8, loc="lower right")
+        thz_axis(a)
 
-    # ---- accuracy vs the translation-validity margin ----------------------
-    a = ax[1, 2]
+    # ---- accuracy vs the translation convergence ratio --------------------
+    a = ax[1, 3]
     for cases, mk in ((SINGLE, "o"), (PAIRS, "s"), (QUADS, "D")):
         for d, label, c, spec in cases:
             got = load(d)
@@ -152,22 +170,26 @@ def main():
             r, cst = got
             err = np.abs(r["S21"] - interp_c(r["lam"], cst["lam"],
                                              cst["S21"])).mean()
-            a.plot(margin(spec), err, mk, ms=9, color=c, mec="k", mew=0.5)
-            a.annotate(label.split()[0], (margin(spec), err), fontsize=8,
-                       xytext=(6, -3), textcoords="offset points")
-    a.axvspan(-0.2, 1.0, color="0.85", zorder=0)
-    a.text(0.4, 0.32, "spheres\nnearly touch", fontsize=8, ha="center")
+            x = rho(spec)
+            a.plot(x, err, mk, ms=9, color=c, mec="k", mew=0.5)
+            right = x > 0.92           # keep labels clear of the right edge
+            a.annotate(label.split()[0], (x, err), fontsize=8,
+                       ha="right" if right else "left",
+                       xytext=(-9, 3) if right else (6, -3),
+                       textcoords="offset points")
+    a.axvspan(0.93, 1.005, color="0.85", zorder=0)
+    a.text(0.967, 0.021, "series barely\ncontracts", fontsize=8, ha="center")
     a.set_yscale("log")
-    a.set_xlabel("Eq. (57) margin  min(8 um − a_i − a_j)  over the 8 um pairs")
+    a.set_xlabel(r"$\rho = (a_i + a_j)\,/\,d$  over the 8 um neighbour pairs")
     a.set_ylabel("mean |ΔS21| vs direct CST")
-    a.set_xlim(-0.2, 3.6)
+    a.set_xlim(0.55, 1.005)
     a.grid(alpha=0.3, which="both")
-    a.set_title("accuracy tracks the translation-validity headroom\n"
+    a.set_title("accuracy tracks the addition theorem's convergence rate\n"
                 "(circles: 1 atom, squares: 2 species, diamonds: 4)",
                 fontsize=9)
 
     out = args.out if os.path.isabs(args.out) else os.path.join(HERE, args.out)
-    fig.savefig(out, dpi=165)
+    fig.savefig(out, dpi=160)
     print(f"saved {out}")
 
 
