@@ -1,10 +1,11 @@
-"""The whole study in one figure: 4 atoms, 5 mixed cells, 9 CST benchmarks.
+"""The whole study in one figure: 4 atoms, 6 mixed cells, 10 CST benchmarks.
 
     python plot_comparison.py [--out results_2x2_super_l3/fig4_comparison.png]
 
 Top row     single atoms, the two-species checkerboards, then ONE PANEL PER
-            four-distinct-atom cell -- those two carry the most structure, and
-            overlaying them hides which pale CST curve belongs to which.
+            four-distinct-atom cell -- all three distinct arrangements of the
+            same four atoms, which carry the most structure, and overlaying
+            them hides which pale CST curve belongs to which.
             Markers are the T-matrix prediction, pale lines the direct CST run
             of the same structure.
 Bottom row  power into higher diffraction orders against the two Rayleigh
@@ -42,7 +43,8 @@ PAIRS = [("results_2x2_super_l3", "a,b;b,a", "C0", "AB"),
          ("results_2x2_AC_l3", "a,c;c,a", "C1", "AC"),
          ("results_2x2_BC_l3", "b,c;c,b", "C2", "BC")]
 QUADS = [("results_2x2_ABCD_l3", "a,b;c,d", "C3", "ABCD"),
-         ("results_2x2_ADBC_l3", "a,d;b,c", "C4", "ADBC")]
+         ("results_2x2_ADBC_l3", "a,d;b,c", "C4", "ADBC"),
+         ("results_2x2_ACDB_l3", "a,c;d,b", "C5", "ACDB")]
 
 
 def rho(spec):
@@ -98,11 +100,11 @@ def main():
     ap.add_argument("--out", default="results_2x2_super_l3/fig4_comparison.png")
     args = ap.parse_args()
 
-    fig, ax = plt.subplots(2, 4, figsize=(21.5, 9.2), constrained_layout=True)
+    fig, ax = plt.subplots(2, 5, figsize=(26.5, 9.2), constrained_layout=True)
     spanel(ax[0, 0], SINGLE,
            "one atom per 8 um cell — markers: T-matrix, pale: CST")
     spanel(ax[0, 1], PAIRS, "two species per 16 um cell (x,y;y,x)")
-    for col, case in zip((2, 3), QUADS):
+    for col, case in zip((2, 3, 4), QUADS):
         got = load(case[0])
         err = ""
         if got is not None and got[1] is not None:
@@ -142,10 +144,11 @@ def main():
     # ---- birefringence, one panel per four-atom cell ----------------------
     jp = os.path.join(HERE, "results_2x2_ABCD_l3", "jones_xy.npz")
     j = np.load(jp) if os.path.exists(jp) else None
-    for col, (key, label, c) in zip((1, 2), (("abcd", "a,b;c,d", "C3"),
-                                             ("adbc", "a,d;b,c", "C4"))):
+    for col, (key, label, c) in zip((1, 2, 3), (("abcd", "a,b;c,d", "C3"),
+                                                ("adbc", "a,d;b,c", "C4"),
+                                                ("acdb", "a,c;d,b", "C5"))):
         a = ax[1, col]
-        if j is not None:
+        if j is not None and key in j.files:         # jones_xy.py may predate a cell
             sep = np.abs(j[key][:, 0] - j[key][:, 1])
             a.fill_between(j["lam"], j[key][:, 0], j[key][:, 1], color=c,
                            alpha=0.18, lw=0)
@@ -164,7 +167,8 @@ def main():
         thz_axis(a)
 
     # ---- accuracy vs the translation convergence ratio --------------------
-    a = ax[1, 3]
+    a = ax[1, 4]
+    seen = {}                          # rho -> how many points already at it
     for cases, mk in ((SINGLE, "o"), (PAIRS, "s"), (QUADS, "D")):
         for d, label, c, spec in cases:
             got = load(d)
@@ -175,10 +179,15 @@ def main():
             err = float(np.mean(np.abs(dz) ** 2))
             x = rho(spec)
             a.plot(x, err, mk, ms=9, color=c, mec="k", mew=0.5)
+            # a,b;c,d and a,c;d,b sit at exactly the same rho -- that is the
+            # point of the third cell, so their labels must not collide.
+            n = seen.get(round(x, 6), 0)
+            seen[round(x, 6)] = n + 1
             right = x > 0.92           # keep labels clear of the right edge
+            dy = 3 if n % 2 == 0 else -11
             a.annotate(label.split()[0], (x, err), fontsize=8,
                        ha="right" if right else "left",
-                       xytext=(-9, 3) if right else (6, -3),
+                       xytext=(-9, dy) if right else (6, -3),
                        textcoords="offset points")
     a.axvspan(0.93, 1.005, color="0.85", zorder=0)
     a.text(0.967, 0.021, "series barely\ncontracts", fontsize=8, ha="center")

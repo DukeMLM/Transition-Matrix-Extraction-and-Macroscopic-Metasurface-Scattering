@@ -1,26 +1,35 @@
-"""Presentation figure: single atoms, the two four-species cells, and their layouts.
+"""Presentation figure: single atoms, all three four-species cells, and their layouts.
 
     python plot_figure_slide.py [--out results_2x2_super_l3/fig5_slide.png]
 
-Six panels, top row spectra and bottom row the geometry that explains them:
+Eight panels, top row spectra and bottom row the geometry that explains them:
 
   a  the four meta-atoms, each alone on its own 8 um lattice
   b  a,b;c,d  — T-matrix prediction against its own direct CST run
   c  a,d;b,c  — the same four atoms rearranged
+  d  a,c;d,b  — the third and last distinct arrangement
 
-Panels b and c are scored by the MSE of the complex 0th-order S21,
+Panels b-d are scored by the MSE of the complex 0th-order S21,
 mean(|S21_predicted - S21_CST|^2) over the 25 stored frequencies -- on the
 complex amplitude rather than its magnitude, so a phase error counts.
-  d  the four atoms drawn to scale, so the size series in (a) is visible
-  e  the a,b;c,d cell, to scale, with the tightest neighbour gap marked
-  f  the a,d;b,c cell, likewise
+  e  the four atoms drawn to scale, so the size series in (a) is visible
+  f  the a,b;c,d cell, to scale, with the tightest neighbour gap marked
+  g  the a,d;b,c cell, likewise
+  h  the a,c;d,b cell, likewise
+
+The 24 assignments of four distinct atoms to the four sites collapse under the
+D4 symmetry of the site square to exactly the three cells in b-d, so this is the
+complete set.  Panels f and h are the reason the third one was run: a,c;d,b
+reproduces a,b;c,d's tightest gap and rho exactly while placing a different pair
+on the diagonal, which separates the geometry explanation of the b-versus-c
+difference from the symmetry one (`OPEN_QUESTIONS.md` section 1).
 
 The layouts are drawn from the same ring/spoke parameters the CST models are
 built from (`cst_supercell/build_2x2_supercell.py: ATOMS`), not traced from
 screenshots, so they are to scale and stay correct if the design changes.  The
-gap annotation in (e) and (f) is the quantity that explains the difference
-between (b) and (c): the addition theorem's truncation error falls like
-rho^lmax with rho = (a_i + a_j)/d, so the tightest pair sets the accuracy.
+gap annotation in (f)-(h) is the quantity under test: the addition theorem's
+truncation error falls like rho^lmax with rho = (a_i + a_j)/d, so the tightest
+pair sets the accuracy -- if that is the whole story.
 """
 import argparse
 import os
@@ -51,7 +60,8 @@ SINGLE = [("results_C_ewald_l3", "C", 3.25), ("results_A_ewald_l3", "A", 4.00),
           ("results_B_ewald_l3", "B", 5.00), ("results_D_ewald_l3", "D", 5.50)]
 # site order: top-left, top-right, bottom-left, bottom-right
 QUADS = [("results_2x2_ABCD_l3", "a,b;c,d", "ABCD", "#d62728"),
-         ("results_2x2_ADBC_l3", "a,d;b,c", "ADBC", "#9467bd")]
+         ("results_2x2_ADBC_l3", "a,d;b,c", "ADBC", "#9467bd"),
+         ("results_2x2_ACDB_l3", "a,c;d,b", "ACDB", "#8c564b")]
 
 
 def draw_atom(ax, cx, cy, key, alpha=1.0, edge=True):
@@ -184,7 +194,7 @@ def atom_row(ax):
     ax.set_xticks([]); ax.set_yticks([])
     for sp in ax.spines.values():
         sp.set_visible(False)
-    label(ax, "d", "the four meta-atoms, to scale")
+    label(ax, "e", "the four meta-atoms, to scale")
 
 
 def main():
@@ -194,13 +204,13 @@ def main():
     ap.add_argument("--out", default="results_2x2_super_l3/fig5_slide.png")
     args = ap.parse_args()
 
-    fig, ax = plt.subplots(2, 3, figsize=(16.5, 9.6),
+    fig, ax = plt.subplots(2, 4, figsize=(21.5, 9.6),
                            gridspec_kw=dict(height_ratios=[1.15, 1.0]),
                            constrained_layout=True)
 
     spectra_single(ax[0, 0])
-    spectra_quad(ax[0, 1], QUADS[0], "b")
-    spectra_quad(ax[0, 2], QUADS[1], "c")
+    for col, (case, tag) in enumerate(zip(QUADS, "bcd"), start=1):
+        spectra_quad(ax[0, col], case, tag)
     for a in ax[0]:
         a.set_xlabel("Wavelength (µm)")
         a.set_ylabel("|S21|  (0th order)")
@@ -210,8 +220,8 @@ def main():
         thz_axis(a)
 
     atom_row(ax[1, 0])
-    layout(ax[1, 1], QUADS[0][2], "e", QUADS[0][1])
-    layout(ax[1, 2], QUADS[1][2], "f", QUADS[1][1])
+    for col, (case, tag) in enumerate(zip(QUADS, "fgh"), start=1):
+        layout(ax[1, col], case[2], tag, case[1])
 
     out = args.out if os.path.isabs(args.out) else os.path.join(HERE, args.out)
     fig.savefig(out, dpi=200, facecolor="w")

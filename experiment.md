@@ -6,18 +6,18 @@ simulating that metasurface?
 
 The pipeline up to this point could only repeat one atom. This experiment adds
 the missing case and checks it against full-wave simulation at every step, on
-**four** measured atoms and **five** mixed cells built from them — three
-two-species checkerboards and two arrangements of all four at once. Nine direct
-CST benchmarks in all.
+**four** measured atoms and **six** mixed cells built from them — three
+two-species checkerboards and all three distinct arrangements of the four at
+once. Ten direct CST benchmarks in all.
 
 <p align="center">
 <img src="aggregation/results_2x2_super_l3/fig4_comparison.png" width="100%">
 <br><em>The whole study. Top: the four single atoms, the three two-species
-checkerboards, the two four-atom cells — markers are the T-matrix prediction,
+checkerboards, the three four-atom cells — markers are the T-matrix prediction,
 pale lines the direct CST run of the same structure. Bottom: power into higher
 diffraction orders (the checkerboards are dark between the two Rayleigh onsets,
 the four-atom cells are not), the birefringence that four distinct species
-introduces, and the accuracy of all nine benchmarks against the translation
+introduces, and the accuracy of all ten benchmarks against the translation
 convergence ratio.</em>
 </p>
 
@@ -172,6 +172,7 @@ and the three cells behave quite differently:
 | b,c;c,b | 16.71 (0.102), 12.44 (0.125) | [+0.028, +0.208] | 0.433 |
 | a,b;c,d | 17.87 (0.081), 13.00 (0.331) | [+0.045, +0.208] | 0.409 |
 | a,d;b,c | 17.64 (0.152), 13.09 (0.247) | [+0.048, **+0.487**] | **0.429** |
+| a,c;d,b | 22.93 (0.190), 15.35 (0.201) | [+0.046, +0.230] | 0.407 |
 
 `b,c;c,b` diffracts hardest because C's resonance sits closest to the (±1,±1)
 onset; `a,c;c,a` develops an extra **A–C hybrid resonance at 21.25 THz** with
@@ -199,7 +200,7 @@ strength depends on the contents while its position does not.
 The three cells above are all `x,y;y,x` checkerboards, C4v about one atom site.
 Filling the four sites with four *different* atoms removes that symmetry, and
 the 24 assignments collapse under the D4 symmetry of the site square to exactly
-**three** distinct cells. Two of them were built.
+**three** distinct cells. All three were built and benchmarked.
 
 **The dark orders switch on.** The coherent basis sum for the (±1,0)/(0,±1)
 family is `i(F₁ − F₂ + F₃ − F₄)`; a checkerboard has F₁ = F₄ and F₂ = F₃ so it
@@ -208,37 +209,46 @@ cancels identically, and four different atoms do not:
 | cell | power in the odd orders | first diffraction |
 |---|---|---|
 | all three two-species cells | ≤ 5×10⁻³¹ | 26.50 THz |
-| a,b;c,d, a,d;b,c | **5×10⁻²** | **18.74 THz** |
+| a,b;c,d, a,d;b,c, a,c;d,b | **5×10⁻²** | **18.74 THz** |
 
 The four-atom cells start diffracting 7.8 THz lower than any two-species cell
 made from the same atoms — the dark window is gone, and CST confirms it (0.388
-measured against 0.409 predicted for `a,b;c,d`).
+measured against 0.409 predicted for `a,b;c,d`, 0.403 against 0.407 for
+`a,c;d,b`).
 
-**The cell becomes birefringent, by an amount the arrangement sets.**
+**The cell becomes birefringent, and B–D adjacency is what sets it.**
 
-| cell | max ‖t_xx\| − \|t_yy‖ | mean | max \|t_xy\| |
-|---|---|---|---|
-| a,b;c,d | **0.603** at 18.74 µm (0.286 vs 0.890) | 0.176 | 1.8×10⁻¹² |
-| a,d;b,c | 0.168 | 0.037 | 1.5×10⁻¹² |
+| cell | B and D | max ‖t_xx\| − \|t_yy‖ | mean | max \|t_xy\| |
+|---|---|---|---|---|
+| a,b;c,d | adjacent | **0.603** at 18.74 µm (0.286 vs 0.890) | 0.176 | 1.8×10⁻¹² |
+| a,c;d,b | adjacent | 0.556 | 0.149 | 3.1×10⁻¹² |
+| a,d;b,c | diagonal | 0.168 | 0.037 | 1.5×10⁻¹² |
 
 `a,b;c,d` is a strong linear polarizer near 18.7 µm; `a,d;b,c`, from the *same
-four atoms*, is nearly isotropic. Cross-polarization stays zero in both — an
-empirical cancellation tied to the square site arrangement, not to the code
-(displacing one atom gives \|t_xy\| = 10⁻²). No symmetry argument for it is
-offered; see [`OPEN_QUESTIONS.md`](OPEN_QUESTIONS.md) §2.
+four atoms*, is nearly isotropic. With the third arrangement in hand the pattern
+is legible: the two cells that put the two largest atoms (B, D) side by side are
+strongly birefringent, the one that puts them on a diagonal is not.
+Cross-polarization stays zero in all three — an empirical cancellation tied to
+the square site arrangement, not to the code (displacing one atom gives
+\|t_xy\| = 10⁻²). No symmetry argument for it is offered; see
+[`OPEN_QUESTIONS.md`](OPEN_QUESTIONS.md) §2, now three for three.
 
 **Rearranging alone changes \|S21\| by up to 0.429** (mean 0.159). `Σ_s T_s` is
-identical for the two cells and cannot tell them apart — the sharpest statement
-in the study of why aggregation is a multiple-scattering solve.
+identical for all three cells and cannot tell them apart — the sharpest statement
+in the study of why aggregation is a multiple-scattering solve. Which
+arrangement you choose also decides whether the prediction is usable at all: see
+the ρ table below.
 
 ## Step 4 — build the metasurfaces in CST and compare
 
 For each cell, a 16 × 16 µm unit cell with the four resonators, every solver,
 mesh, material and boundary setting copied from the packed project's own periodic
 run, 20 Floquet modes per port. One **empty-cell companion run** — identical
-geometry, no metal — serves all three: it measures the port-plane separation
-(56.813 µm) and doubles as the manual's §8 background test. Each supercell took
-about an hour on ~0.7–1.0 M tetrahedral DOF over ~48 adaptive frequency points.
+geometry, no metal — serves every cell: it measures the port-plane separation
+(56.813 µm) and doubles as the manual's §8 background test. Most supercells took
+about an hour on ~0.7–1.0 M tetrahedral DOF over ~48 adaptive frequency points;
+the four-atom cells are heavier (1.7 h for `a,b;c,d` and `a,c;d,b`, 4.9 h for
+`a,d;b,c`, whose D-derived resonance sits on the 18.74 THz Rayleigh edge).
 
 ### CST confirms the selection rule, in every cell
 
@@ -248,7 +258,8 @@ about an hour on ~0.7–1.0 M tetrahedral DOF over ~48 adaptive frequency points
 | a,c;c,a | 1.002 | **1.5×10⁻⁵** dark | 0.208 vs 0.216 |
 | b,c;c,b | 0.989 | **6.1×10⁻⁶** dark | 0.427 vs 0.433 |
 | a,b;c,d | 0.971 | **0.388 bright** | 0.057 |
-| a,d;b,c | 0.994 | **0.297 bright** | 0.335 |
+| a,d;b,c | 0.994 | **0.296 bright** | 0.335 |
+| a,c;d,b | 1.003 | **0.403 bright** | 0.065 |
 
 The full-wave simulation puts nothing into the odd channels over the entire
 18.7–34 THz window in which they are open — at the empty run's own noise floor.
@@ -263,6 +274,7 @@ all.
 | a,c;c,a | 0.079 / **0.019** | 0.081 / 0.020 | −0.59 %, +0.45 % |
 | b,c;c,b | 0.090 / 0.036 | 0.089 / 0.036 | **+0.44 %, +0.27 %** |
 | a,d;b,c | 0.347 / 0.080 | 0.342 / 0.079 | +0.85 %, +0.38 % |
+| a,c;d,b | 0.817 / 0.244 | 0.807 / 0.242 | deepest dip **+4.92 µm** |
 | **a,b;c,d** | **0.840 / 0.308** | 0.833 / 0.308 | **−10.2 %**, +3.4 % |
 
 For `a,b;b,a` the 0.205 maximum comes entirely from the two samples that straddle
@@ -292,6 +304,7 @@ amplitude so a phase error counts — with the mean absolute error alongside:
 | atom B alone | 0.00393 | 0.00647 | 0.054 | 0.073 |
 | a,d;b,c | 0.0118 | 0.0115 | 0.080 | 0.079 |
 | atom D alone | 0.0351 | 0.0446 | 0.149 | 0.171 |
+| a,c;d,b | 0.1207 | 0.1192 | 0.244 | 0.242 |
 | a,b;c,d | **0.1654** | 0.1660 | 0.308 | 0.308 |
 
 Every *two-species* mixed cell lands within the range of its two constituents.
@@ -357,6 +370,7 @@ with ρ = (aᵢ + aⱼ)/d.
 | a,b;b,a | A–B | 0.809 | 0.530 | 0.00367 | 0.046 |
 | a,d;b,c | A–D | 0.854 | 0.623 | 0.0118 | 0.080 |
 | B alone | B–B | 0.899 | 0.727 | 0.00393 | 0.054 |
+| a,c;d,b | B–D | 0.944 | 0.841 | 0.1207 | 0.244 |
 | a,b;c,d | B–D | 0.944 | 0.841 | **0.1654** | 0.308 |
 | D alone | D–D | 0.989 | 0.967 | 0.0351 | 0.149 |
 
@@ -374,10 +388,26 @@ inherits the same convergence limit. Agreement with treams validates the
 The trend in ρ is strong but not strictly monotone — B alone beats `a,d;b,c`,
 and D alone beats `a,b;c,d` — so ρ is the right diagnostic for *which regime you
 are in* (above ~0.85 things degrade, above ~0.94 they break) rather than a
-quantitative error law. ρ is also confounded with arrangement symmetry across
-the two four-atom cells; [`OPEN_QUESTIONS.md`](OPEN_QUESTIONS.md) §1 specifies
-the third arrangement that would separate them, and §3 notes that the pipeline
-currently produces these answers with no warning at all.
+quantitative error law.
+
+**ρ, and not arrangement symmetry, is what drives this.** Across the two
+four-atom cells originally available, ρ was confounded with how nearly
+mirror-symmetric the arrangement was, because putting the two largest atoms on a
+diagonal does both at once. The third and last distinct arrangement separates
+them: `a,c;d,b` reproduces `a,b;c,d`'s worst pair, ρ and 0.448 µm gap exactly
+while placing a different pair on the diagonal, and it lands with `a,b;c,d`
+(0.1207 against 0.1654) rather than with `a,d;b,c` (0.0118) — the two cells
+sharing ρ = 0.944 are within 1.4× of each other, the cell at ρ = 0.854 is 10–14×
+better than either. [`OPEN_QUESTIONS.md`](OPEN_QUESTIONS.md) §1 records the
+verdict and its one qualification; §3 notes that the pipeline still produces
+these answers with no warning at all, which is now the live defect.
+
+Both failing cells misplace their deepest transmission dip by about 5 µm, in
+*opposite* directions (−5.51 µm for `a,b;c,d`, +4.92 µm for `a,c;d,b`, against
++0.11 µm for `a,d;b,c`), so this is truncation error rather than a bias that
+could be calibrated out. What survives intact in both is the diffracted power:
+0.407 predicted against 0.403 measured for `a,c;d,b`, 1.0 % relative, the best
+of the three arrangements in the cell with the second-worst specular error.
 
 ## What the experiment does and does not establish
 
@@ -567,6 +597,7 @@ with it mid-solve and the error reads exactly like a solver crash.
 | the CST projects | `aggregation/cst_supercell/runs*/` (`*.cst` + model history + solver log; working directories not in git) |
 | the error budget | `aggregation/error_budget.py` |
 | the algorithm | manual §6.5.2–6.5.5 and §7.5, implemented in `aggregation/supercell.py` |
-| all nine cases in one table | `python aggregation/compare_cases.py --all` |
+| all ten cases in one table | `python aggregation/compare_cases.py --all` |
+| geometry vs symmetry per arrangement | `python aggregation/arrangement_predictors.py` |
 | the comparison figure | `aggregation/plot_comparison.py` |
 | what is still unresolved | [`OPEN_QUESTIONS.md`](OPEN_QUESTIONS.md) |

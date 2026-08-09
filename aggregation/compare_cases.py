@@ -26,12 +26,13 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 C0 = 299.792458
 ALL = ["results_A_ewald_l3", "results_B_ewald_l3", "results_C_ewald_l3",
        "results_D_ewald_l3", "results_2x2_super_l3", "results_2x2_AC_l3",
-       "results_2x2_BC_l3", "results_2x2_ABCD_l3", "results_2x2_ADBC_l3"]
+       "results_2x2_BC_l3", "results_2x2_ABCD_l3", "results_2x2_ADBC_l3",
+       "results_2x2_ACDB_l3"]
 LABEL = {"results_A_ewald_l3": "A alone", "results_B_ewald_l3": "B alone",
          "results_C_ewald_l3": "C alone", "results_D_ewald_l3": "D alone",
          "results_2x2_super_l3": "a,b;b,a", "results_2x2_AC_l3": "a,c;c,a",
          "results_2x2_BC_l3": "b,c;c,b", "results_2x2_ABCD_l3": "a,b;c,d",
-         "results_2x2_ADBC_l3": "a,d;b,c"}
+         "results_2x2_ADBC_l3": "a,d;b,c", "results_2x2_ACDB_l3": "a,c;d,b"}
 
 
 def dips(lam, s21, n=3, sep=1.5):

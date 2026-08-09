@@ -7,7 +7,38 @@ experiment that would close it, so it can be picked up cold.
 
 ## 1. Does arrangement *symmetry* affect accuracy, or only pair geometry?
 
-**Status: open. A single CST run closes it.**
+**Status: SETTLED — pair geometry. The third arrangement was run; see
+[`aggregation/results_2x2_ACDB_l3/REPORT.md`](aggregation/results_2x2_ACDB_l3/REPORT.md).**
+
+`a,c;d,b` reproduces `a,b;c,d`'s pair geometry exactly (same worst pair B–D,
+same ρ = 0.944, same 0.448 µm gap) in a different symmetry class, and it
+reconstructs like `a,b;c,d`, not like `a,d;b,c`:
+
+| cell | ρ | MSE, complex S21 | mean \|ΔS21\| | deepest dip misplaced by |
+|---|---|---|---|---|
+| `a,b;c,d` | 0.944 | 0.1654 | 0.308 | −5.51 µm |
+| **`a,c;d,b`** | **0.944** | **0.1207** | **0.244** | **+4.92 µm** |
+| `a,d;b,c` | 0.854 | 0.0118 | 0.080 | +0.11 µm |
+
+The two cells sharing ρ = 0.944 are within 1.4× of each other; the one with
+ρ = 0.854 is 10–14× better than either. So ρ is the driver, and the symmetry of
+the arrangement is not what made `a,d;b,c` accurate. Both failing cells misplace
+their deepest transmission dip by ~5 µm in *opposite* directions, so this is a
+truncation error, not a correctable bias.
+
+Two qualifications, both in the report: the residual 0.1207-vs-0.1654 gap
+between the two ρ = 0.944 cells is unexplained (27 %, but second-order against
+the 10× step), and the falsification is of the *diagonal-mirror* symmetry metric
+quoted below — under an all-mirrors metric `a,b;c,d` and `a,c;d,b` tie at
+18.8 %, so that variant predicts what was observed and is untested. The usable
+conclusion is unaffected: **ρ predicts accuracy, and ρ = 0.944 cannot be trusted
+however symmetric the cell looks.** That makes §3 below the live follow-up.
+
+The original framing is kept below for the record.
+
+---
+
+### Original statement of the question
 
 The two four-atom cells built from the same A, B, C, D disagree with full-wave by
 very different amounts:
