@@ -199,8 +199,12 @@ def main(argv=None):
               f"max power {pw.max():.4e}; while closed "
               f"{pw[closed].max() if closed.any() else 0.0:.2e}")
 
-    out = args.out or (HERE / "runs")
-    out = out if out.is_absolute() else (HERE / out)
+    # A relative --out is resolved against the CURRENT directory, not this
+    # file's.  Every documented invocation is run from aggregation/ and passes
+    # e.g. --out results_2x2_ABCD_l3 meaning the results directory there;
+    # resolving against HERE instead put the CSVs in cst_supercell/ silently,
+    # where load_cst never looks and the case reads as "no CST reference yet".
+    out = args.out.resolve() if args.out else (HERE / "runs")
     out.mkdir(parents=True, exist_ok=True)
 
     with (out / "cst_direct_supercell.csv").open("w") as fh:
