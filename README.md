@@ -152,10 +152,15 @@ subwavelength lattice collapse into the 0th diffraction order, giving
 ref/                          theory manual (LaTeX + PDF)
 test/single/                  demo unit cell: spoke-and-wheel gold resonator
   saw_gold_wl15p0025um.tmat.h5   49 freqs (8-20 um), lmax 3, tmat.h5 format
-test/2x2/                     second case: same shape scaled x4, 8 um pitch
-  saw_gold_wl13p10um_10to34THz.tmat.h5   25 freqs (10-34 THz), lmax 5
+test/2x2/                     second case: same shape, four sizes, 8 um pitch
+  saw_gold_wl10p90um_10to34THz.tmat.h5   atom C, scale 3.25 (packed run 10)
+  saw_gold_wl13p10um_10to34THz.tmat.h5   atom A, scale 4.00 (run 6)
+  saw_gold_wl17p30um_10to34THz.tmat.h5   atom B, scale 5.00 (run 2)
+  saw_gold_wl23p50um_10to34THz.tmat.h5   atom D, scale 5.50 (run 3)
+                              each 25 freqs (10-34 THz), lmax 5
   SAW_gold_noSub_packed.cst   packed CST project: 10-run parametric sweep
-                              over `scale`, incl. the matching periodic run
+                              over `scale`, holding the periodic run that is
+                              the direct reference for each atom
 aggregation/                  Stage 3 implementation (this branch)
   vswf.py                     VSWF engine: fields, plane waves, far field, projections
   translate.py                translation operators + lattice sums (Richardson-extrapolated)
@@ -189,9 +194,18 @@ aggregation/                  Stage 3 implementation (this branch)
   run_supercell.py            driver: any list of tmat.h5 + positions + lattice
   treams_supercell.py         independent end-to-end treams reference
   test_supercell.py           the manual's 6.5.5 validation ladder
-  plot_supercell.py           figures + metrics
-  cst_supercell/              direct CST benchmark of the supercell
-  results_2x2_super_l3/       the a,b;b,a experiment (REPORT.md, CSV/NPZ, figs)
+  error_budget.py             where the residual disagreement with CST comes
+                              from, frequency by frequency
+  compare_cases.py            all nine benchmarked cases in one table
+  plot_supercell.py           per-case figures + agreement metrics
+  plot_comparison.py          the whole study in one figure
+  plot_experiment_summary.py  atoms vs mixed cells vs diffracted power
+  cst_supercell/              direct CST benchmarks; --pair takes 2 or 4 atoms
+  results_{A,B,C,D}_ewald_l3/ the four single-atom lattices
+  results_2x2_super_l3/       a,b;b,a  (also the method REPORT for all cells)
+  results_2x2_{AC,BC}_l3/     a,c;c,a and b,c;c,b
+  results_2x2_{ABCD,ADBC}_l3/ a,b;c,d and a,d;b,c, four distinct species
+  *_fine/                     the same sweeps on a 4x refined frequency grid
 
 retrieval/                    experimental Floquet-S-to-isolated-T inverse route
   FAST_FULL_TMATRIX_WHEEL_PROPOSAL.md   feasibility hypothesis and gates
@@ -322,28 +336,54 @@ T-matrix violates passivity by 2.8 % and reciprocity by up to 11 % (vs 0.007 %
 and 0.6–1.2 % for `test/single`), and the largest error sits exactly at the
 seam between its two merged extraction bands.
 
-### Heterogeneous supercells — three atoms, three mixed cells
+### Heterogeneous supercells — four atoms, five mixed cells, nine CST benchmarks
 
 Method and full validation ladder in
 [`aggregation/results_2x2_super_l3/REPORT.md`](aggregation/results_2x2_super_l3/REPORT.md);
-per-cell results in the sibling `results_2x2_{super,AC,BC}_l3/REPORT.md`.
-Atoms A (`scale` 4.00), B (`scale` 5.00) and C (`scale` 3.25) taken two at a
-time on a checkerboard, 8 µm atom pitch, 16 µm repeated cell, 10–34 THz.
+per-cell results in the sibling `results_2x2_*_l3/REPORT.md`. Atoms A
+(`scale` 4.00), B (5.00), C (3.25) and D (5.50) combined in a 16 µm repeated
+cell at 8 µm atom pitch, 10–34 THz. `python aggregation/compare_cases.py --all`
+prints every case in one table.
+
+**The aggregation itself is exact.** Every algebraic identity the manual's
+§6.5.5 ladder asks for holds to round-off, and an independent treams
+implementation of the whole chain — its own cluster T-matrix, Ewald lattice
+interaction and plane-wave projection — agrees on complex S and on the power
+sums over all open orders:
 
 | check | result |
 |---|---|
 | M = 1 reduces to the one-atom code (coupling, `f`, S11/S21) | bit-identical |
 | 2×2 cell of four identical atoms ≡ the primitive lattice | ≤ 8×10⁻¹⁶ |
 | basis-atom relabelling / whole-cell lattice shift | ≤ 7×10⁻¹⁶ / 0 |
-| checkerboard selection rule: power in the odd (n1+n2) orders, all three cells | ≤ 6×10⁻³³ |
+| checkerboard selection rule: power in the odd (n1+n2) orders | ≤ 6×10⁻³³ |
 | all T = 0 → S = S_bg exactly (manual §8 row 7) | 0 |
 | finite-cluster T^O vs the multi-center far field, L_C = 14 | 1.9×10⁻⁹ |
-| **independent treams implementation, complex S and all open orders, every cell** | **≤ 1×10⁻¹²** |
-| direct CST supercell runs: power in the dark (±1,0)/(0,±1) channels | 1.5×10⁻⁵ against a ~1.0 carrier |
-| direct CST, complex S21 mean \|Δ\| | 0.046 (a,b), 0.019 (a,c) |
-| direct CST, transmission-dip positions | within 0.5–1.8 % |
+| **independent treams implementation, every cell** | **≤ 1×10⁻¹²** |
 
-Two things that had to change for the heterogeneous case:
+**Against direct CST**, mean \|ΔS21\| for each of the nine benchmarks, ordered by
+the addition theorem's convergence ratio ρ = (aᵢ + aⱼ)/d over the 8 µm
+neighbour pairs:
+
+| case | ρ | mean \|ΔS21\| | | case | ρ | mean \|ΔS21\| |
+|---|---|---|---|---|---|---|
+| C alone | 0.584 | 0.017 | | a,b;b,a | 0.809 | 0.046 |
+| a,c;c,a | 0.652 | 0.019 | | B alone | 0.899 | 0.054 |
+| A alone | 0.719 | 0.030 | | a,d;b,c | 0.854 | 0.080 |
+| b,c;c,b | 0.742 | 0.036 | | D alone | 0.989 | **0.149** |
+| | | | | a,b;c,d | 0.944 | **0.308** |
+
+Seven of the nine land at 0.017–0.080, limited by the input T-matrices rather
+than by the aggregation. The two that fail are documented, with the cause
+diagnosed in [`experiment.md`](experiment.md): they contain a pair of atoms
+whose circumscribing spheres nearly touch. Eq. (57) is *satisfied* there — the
+addition theorem simply converges too slowly to truncate, since its error falls
+like ρ^lmax and ρ = 0.99 buys 1 % per multipole order. Raising lmax makes it
+worse, and treams reproduces the wrong answer to 10⁻¹⁵, which is the sharpest
+demonstration in the study that cross-code agreement validates the
+implementation and only full-wave validates the physics.
+
+Three things the heterogeneous case forced:
 
 * **The tapered lattice sum does not survive a sub-lattice shift.** The
   displacement-tapered blocks still satisfy `Σ_t W_st = C_p` to 10⁻¹⁵ — the
@@ -355,8 +395,12 @@ Two things that had to change for the heterogeneous case:
   also 30× faster and reproduces the published one-atom `test/2x2` numbers
   exactly.
 * **Diffraction is no longer optional.** A 16 µm cell has Rayleigh onsets at
-  16 µm and 11.31 µm inside a band that reaches 8.82 µm, so `run_supercell.py`
+  16 µm and 11.31 µm inside a band reaching 8.82 µm, so `run_supercell.py`
   reports every propagating Floquet order, not a scalar S11/S21.
+* **The one-atom `--lmax auto` rule must not be reused.** `cond(I − W T₀)` for a
+  supercell also contains the folded k∥ ≠ 0 bands, which are legitimately
+  near-singular next to a Rayleigh anomaly, so capping it discards physics. The
+  supercells run at fixed lmax 3.
 
 ## Key physical findings for the demo cell
 
@@ -386,14 +430,25 @@ Two things that had to change for the heterogeneous case:
   `(k·pitch)^(-(2lmax+2))`, so beyond some lmax the extra modes add noise
   rather than physics. `run_case.py --lmax auto` picks the budget per
   frequency; `run_demo.py` keeps the file's lmax = 3, which is safe there.
+  Do **not** transplant `--lmax auto` to a supercell — see the section above.
+* **Closely spaced atoms are the hard limit.** The outgoing→regular translation
+  is a two-centre multipole expansion whose truncation error falls like ρ^lmax
+  with ρ = (aᵢ + aⱼ)/d. Above ρ ≈ 0.85 accuracy degrades; above ρ ≈ 0.94 it
+  breaks, and no truncation repairs it because the physics living in the gap
+  cannot be written as multipoles about two separated centres. Manual §6.6
+  names the fixes (plane-wave-mediated coupling, or a composite T-matrix
+  enclosing the pair); neither is implemented. **The pipeline does not currently
+  warn about this** — see [`OPEN_QUESTIONS.md`](OPEN_QUESTIONS.md) §3.
 * Ground plane is an idealized PEC mirror with vacuum spacer; a layered
   substrate needs the Sommerfeld reflection operator (manual, Stage 2).
 
 ## Where to go next
 
 * **Start here — one experiment, end to end**: [`experiment.md`](experiment.md)
-  — composing a metasurface out of two separately measured meta-atoms, with the
-  full-wave check at every step
+  — composing metasurfaces out of separately measured meta-atoms, with the
+  full-wave check at every step, and where the method stops working
+* **What this did not settle**: [`OPEN_QUESTIONS.md`](OPEN_QUESTIONS.md) — four
+  questions, each with the experiment that would close it
 * **Results and figures**: [`aggregation/REPORT.md`](aggregation/REPORT.md)
 * **The heterogeneous-supercell extension in detail**:
   [`aggregation/results_2x2_super_l3/REPORT.md`](aggregation/results_2x2_super_l3/REPORT.md)
