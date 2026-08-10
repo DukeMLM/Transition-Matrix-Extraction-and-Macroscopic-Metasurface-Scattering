@@ -1,0 +1,91 @@
+{
+  "_workflow": [
+    "T-matrix extraction configuration.  Keys beginning with an",
+    "underscore are comments and are ignored.",
+    "1. Build the unit-cell geometry interactively in CST: geometry and",
+    "   materials only, centered at the origin, no ports, no periodic",
+    "   boundaries, no substrate reaching the domain edge.  Save as a",
+    "   .cst file.  (Template requirements: docs/manual.tex.)",
+    "2. Copy this file and fill in the values.",
+    "3. On the CST machine:",
+    "     python -m cst_tmatrix.runner my_extraction.json --dry-run",
+    "   validates the configuration without starting CST; then run",
+    "   without --dry-run.  Sub-ranges run sequentially, are merged, and",
+    "   the result is one .tmat.h5 file in the library.",
+    "The automatic checks are active: the monitor placement is computed",
+    "and verified, mesh size and memory are checked before any solve,",
+    "unusable field data stops a run within one solve, and a stopped",
+    "sub-range is rerun once with a larger monitor."
+  ],
+
+  "name": "my_resonator",
+  "template": "C:/work/my_resonator.cst",
+
+  "_r_circ": [
+    "Radius (um) of the smallest origin-centered sphere enclosing the",
+    "whole structure; measure it in CST.  An underestimate is caught by",
+    "the template verification."
+  ],
+  "r_circ_um": 3.6,
+
+  "_frequencies": [
+    "A wide frequency range should be split into sub-ranges: each",
+    "sub-range gets its own (smaller) monitor sphere and mesh, which",
+    "keeps the memory bounded.  About a factor of two in frequency per",
+    "sub-range works well.  Omit range_edges_thz for a single range."
+  ],
+  "frequencies": {
+    "min_thz": 10.0,
+    "max_thz": 34.0,
+    "step_thz": 1.0,
+    "range_edges_thz": [10.0, 20.0, 34.0]
+  },
+
+  "_extraction": [
+    "lmax: multipole truncation.  Use ONE value for a family of related",
+    "designs (same matrix dimension for all) and choose the largest",
+    "value the family needs; see the manual, 'Multipole truncation'.",
+    "Wiscombe's criterion is an upper bound; the measured content plus",
+    "one order is the requirement.  The first solve of each sub-range",
+    "prints a warning if the truncation appears too low.",
+    "symmetry_n_fold: point-group symmetry of the cell about z.",
+    "0 = none (safe default).  A fourfold cell = 4 with the four mirror",
+    "planes below; reduces the number of solver runs about sevenfold.",
+    "Verify the symmetry before claiming it (see the manual); a wrongly",
+    "assumed symmetry corrupts the result."
+  ],
+  "extraction": {
+    "lmax": 5,
+    "symmetry_n_fold": 0,
+    "symmetry_mirror_planes_deg": [0.0, 45.0, 90.0, 135.0]
+  },
+
+  "_mesh": [
+    "Fixed tetrahedral density in steps per wavelength (near zone, far",
+    "zone).  [20, 8] has been verified for metallic resonators of the",
+    "kind in this repository; raise it if the diagnostics at the upper",
+    "end of the frequency range look degraded (see the manual, 'Sources",
+    "of error').  Leave adaptive false; see the manual, 'Mesh strategy'."
+  ],
+  "mesh": {
+    "steps_per_wave": [20, 8],
+    "adaptive": false
+  },
+
+  "_solver": [
+    "Machine settings.  These belong in settings.json at the repository",
+    "root, once per machine; give them here only to override for this",
+    "one extraction."
+  ],
+  "solver": {},
+
+  "_paths": [
+    "Leave empty to use settings.json / environment variables / package",
+    "defaults.  run_root must be a local disk, never a cloud-synchronized",
+    "folder: CST locks and corrupts synchronized folders during solves."
+  ],
+  "paths": {
+    "run_root": "",
+    "library": ""
+  }
+}
