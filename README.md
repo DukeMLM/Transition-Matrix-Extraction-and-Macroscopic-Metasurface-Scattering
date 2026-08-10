@@ -73,7 +73,7 @@ also decides whether the prediction is usable: a purpose-built third cell holds
 the pair geometry fixed while changing the symmetry class and shows that the
 accuracy follows the geometry. The write-up also takes the residual error apart
 into the mechanisms that produce it, reproducibly
-(`aggregation/error_budget.py`), and documents the three cases where the method
+(`tmatrix.aggregation.error_budget`), and documents the three cases where the method
 breaks and why ([`OPEN_QUESTIONS.md`](OPEN_QUESTIONS.md) carries what is still
 unresolved).
 
@@ -117,20 +117,37 @@ physics-prior advantage is claimed yet.
 Start with:
 
 * [`retrieval/FAST_FULL_TMATRIX_WHEEL_PROPOSAL.md`](retrieval/FAST_FULL_TMATRIX_WHEEL_PROPOSAL.md) — method, milestones, and stop/go gates
-* [`retrieval/fastfull/README.md`](retrieval/fastfull/README.md) — implementation and test entry points
+* [`src/tmatrix/retrieval/fastfull/README.md`](src/tmatrix/retrieval/fastfull/README.md) — implementation and test entry points
 * [`retrieval/results/fastfull/M1_DESIGN_STUDY.md`](retrieval/results/fastfull/M1_DESIGN_STUDY.md) — rank/SNR/cost screen
 * [`retrieval/results/fastfull/GATE_A_STUDY.md`](retrieval/results/fastfull/GATE_A_STUDY.md) — blind synthetic stress study
 * [`review.md`](review.md) — adversarial review history and unresolved evidence boundaries
 
-Validation entry points, run from `retrieval/` in the `cst_inference`
-environment:
+Validation entry points, in the `cst_inference` environment:
 
 ```bash
-python test_fastfull_core.py
-python test_fastfull_design.py
-python test_fastfull_ewald.py
-python test_fastfull_synthetic.py  # search-heavy; about 8 minutes on the reviewed machine
+pytest -k fastfull
 ```
+
+or one at a time (each is also a standalone script with its own PASS/FAIL
+table):
+
+```bash
+python tests/retrieval/test_fastfull_core.py
+```
+
+```bash
+python tests/retrieval/test_fastfull_design.py
+```
+
+```bash
+python tests/retrieval/test_fastfull_ewald.py
+```
+
+```bash
+python tests/retrieval/test_fastfull_synthetic.py
+```
+
+The last one is search-heavy: about 8 minutes on the reviewed machine.
 
 This Git branch contains the retrieval source, tests, compact FastFull reports,
 and small campaign metadata. Unpacked CST databases and the bulk generated
@@ -142,10 +159,10 @@ result tree remain local and are excluded by `.gitignore`.
 
 | Stage | What it does | Code | Status |
 |---|---|---|---|
-| **1. Near-field extraction** | Illuminates the *isolated* unit cell with a set of plane waves in CST (frequency-domain solver, open boundaries) and exports complex E/H on a spherical monitor | `extract_cst_near_fields_2.py` | main |
-| **2. T-matrix projection** | Projects the recorded fields onto vector spherical wave functions (VSWFs) and solves F = T·A in least squares → `*.tmat.h5` | `compute_t_matrix_projection_2.py` | main |
-| **3. Array aggregation → S-parameters** | Couples the per-cell T-matrices through the Foldy–Lax multiple-scattering equations (finite arrays or infinite lattices) and projects the collective response onto plane waves → S11/S21 | `aggregation/` | **this branch** |
-| **3b. Heterogeneous supercell** | A repeated cell holding *several different* meta-atoms: pair-resolved Bloch coupling `W_st`, a block Foldy–Lax solve, and the full Floquet S-matrix over every open diffraction order | `aggregation/supercell.py` + `run_supercell.py` | **this branch** |
+| **1. Near-field extraction** | Illuminates the *isolated* unit cell with a set of plane waves in CST (frequency-domain solver, open boundaries) and exports complex E/H on a spherical monitor | `tmatrix.extraction.extract_cst_near_fields` | main |
+| **2. T-matrix projection** | Projects the recorded fields onto vector spherical wave functions (VSWFs) and solves F = T·A in least squares → `*.tmat.h5` | `tmatrix.extraction.compute_t_matrix_projection` | main |
+| **3. Array aggregation → S-parameters** | Couples the per-cell T-matrices through the Foldy–Lax multiple-scattering equations (finite arrays or infinite lattices) and projects the collective response onto plane waves → S11/S21 | `tmatrix.aggregation` | **this branch** |
+| **3b. Heterogeneous supercell** | A repeated cell holding *several different* meta-atoms: pair-resolved Bloch coupling `W_st`, a block Foldy–Lax solve, and the full Floquet S-matrix over every open diffraction order | `tmatrix.aggregation.supercell` + `run_supercell` | **this branch** |
 
 Theory reference: `ref/main.tex` (operational manual). The physics in one
 breath: the scattering of one cell is the linear map `f = T a` between
@@ -156,6 +173,74 @@ subwavelength lattice collapse into the 0th diffraction order, giving
 `S21 = 1 + (2πi/kA)·ê*·F(+ẑ)` and `S11 = (2πi/kA)·ê*·F(−ẑ)`.
 
 ## Repository layout
+
+Code lives under `src/tmatrix/` and is installed as one package; data stays at
+the top level, where the CST campaign manifest records its absolute paths.
+`tmatrix.paths` is the only module that knows those locations — nothing
+resolves a data directory from its own `__file__`.
+
+### Code
+
+```
+pyproject.toml                installable package; `pip install -e .`
+src/tmatrix/
+  units.py                    c in both conventions, lambda <-> f
+  numerics.py                 maxabs, rel_err/rel_frob, richardson, nearest_idx
+  plotting.py                 Agg setup, THz twin axis, parabolic minima, dips
+  results_io.py               readers for periodic/treams/CST run outputs
+  paths.py                    where the data directories are
+  cst_env.py                  where the CST python libraries are ($CST_PYTHON_LIB)
+  treams_compat.py            the Windows/numpy-2 gufunc cast patch, once
+
+  extraction/                 stages 1-2: CST near fields -> VSWF -> tmat.h5
+
+  aggregation/                stage 3 (this branch)
+    vswf.py                   VSWF engine: fields, plane waves, far field, projections
+    translate.py              translation operators + lattice sums (Richardson-extrapolated)
+    aggregate.py              Foldy-Lax finite-array + periodic solves
+    sparams.py                S11/S21, energy balance, cross sections
+    mirror.py                 PEC ground plane via exact image theory
+    tmat_io.py                tmat.h5 reader
+    run_demo.py               full 49-frequency demo (periodic + finite arrays)
+    run_mirror_demo.py        ground-plane variant
+    treams_reference.py       independent cross-check via treams
+    cst_direct/               direct CST periodic reference simulation
+
+    --- generic drivers: any tmat.h5 + pitch, no code edits ---
+    run_case.py               periodic sweep + convergence/finite-array checks,
+                              with adaptive multipole truncation (--lmax auto)
+    treams_case.py            treams cross-check for the same case
+    cst_packed_reference.py   direct reference straight out of a packed *.cst
+                              (no CST install needed; --list picks the run)
+    plot_case.py              figures + agreement metrics for a results dir
+
+    --- stage 3b: several different atoms in one repeated cell ---
+    supercell.py              pair-resolved Bloch sums W_st, block solve,
+                              full Floquet channels, finite-cluster T^O
+    ewald_supercell.py        the same W_st by Ewald summation (the method the
+                              heterogeneous case needs -- see below)
+    run_supercell.py          driver: any list of tmat.h5 + positions + lattice
+    treams_supercell.py       independent end-to-end treams reference
+    error_budget.py           where the residual disagreement with CST comes
+                              from, frequency by frequency
+    compare_cases.py          all ten benchmarked cases in one table
+    arrangement_predictors.py rho and mirror mismatch per arrangement
+    jones_xy.py               both polarizations -> the cells' Jones diagonal
+    plot_supercell.py         per-case figures + agreement metrics
+    plot_comparison.py        the whole study in one figure
+    plot_figure_slide.py      presentation figure with drawn cell layouts
+    plot_experiment_summary.py  atoms vs mixed cells vs diffracted power
+    cst_supercell/            direct CST benchmarks; --pair takes 2 or 4 atoms
+
+  retrieval/                  experimental Floquet-S-to-isolated-T inverse route
+    fastfull/                 D4h basis, coded-cell design, Ewald and recovery
+
+tests/aggregation/            VSWF and translation layers, the manual's 6.5.5
+tests/retrieval/              ladder, parametrize, de-embedding, fastfull gates
+tests/test_suites.py          the pytest front end that runs them all
+```
+
+### Data
 
 ```
 ref/                          theory manual (LaTeX + PDF)
@@ -170,63 +255,27 @@ test/2x2/                     second case: same shape, four sizes, 8 um pitch
   SAW_gold_noSub_packed.cst   packed CST project: 10-run parametric sweep
                               over `scale`, holding the periodic run that is
                               the direct reference for each atom
-aggregation/                  Stage 3 implementation (this branch)
-  vswf.py                     VSWF engine: fields, plane waves, far field, projections
-  translate.py                translation operators + lattice sums (Richardson-extrapolated)
-  aggregate.py                Foldy-Lax finite-array + periodic solves
-  sparams.py                  S11/S21, energy balance, cross sections
-  mirror.py                   PEC ground plane via exact image theory
-  tmat_io.py                  tmat.h5 reader
-  test_*.py                   validation suite (see table below)
-  run_demo.py                 full 49-frequency demo (periodic + finite arrays)
-  run_mirror_demo.py          ground-plane variant
-  treams_reference.py         independent cross-check via treams
-  cst_direct/                 direct CST periodic reference simulation
-  results/                    figures, CSV/NPZ spectra
-  REPORT.md                   results and findings
-  IMPLEMENTATION_GUIDE.md     full tutorial: how this was built from scratch
 
-  --- generic drivers: any tmat.h5 + pitch, no code edits ---
-  run_case.py                 periodic sweep + convergence/finite-array checks,
-                              with adaptive multipole truncation (--lmax auto)
-  treams_case.py              treams cross-check for the same case
-  cst_packed_reference.py     direct reference straight out of a packed *.cst
-                              (no CST install needed; --list picks the run)
-  plot_case.py                figures + agreement metrics for a results dir
+aggregation/                  stage 3 outputs
+  results/                    the test/single demo: figures, CSV/NPZ spectra
   results_2x2/                the test/2x2 case (REPORT.md, CSV/NPZ, figures)
-
-  --- Stage 3b: several different atoms in one repeated cell ---
-  supercell.py                pair-resolved Bloch sums W_st, block solve,
-                              full Floquet channels, finite-cluster T^O
-  ewald_supercell.py          the same W_st by Ewald summation (the method the
-                              heterogeneous case needs -- see below)
-  run_supercell.py            driver: any list of tmat.h5 + positions + lattice
-  treams_supercell.py         independent end-to-end treams reference
-  test_supercell.py           the manual's 6.5.5 validation ladder
-  error_budget.py             where the residual disagreement with CST comes
-                              from, frequency by frequency
-  compare_cases.py            all ten benchmarked cases in one table
-  arrangement_predictors.py   rho and mirror mismatch per arrangement
-  jones_xy.py                 both polarizations -> the cells' Jones diagonal
-  plot_supercell.py           per-case figures + agreement metrics
-  plot_comparison.py          the whole study in one figure
-  plot_figure_slide.py        presentation figure with drawn cell layouts
-  plot_experiment_summary.py  atoms vs mixed cells vs diffracted power
-  cst_supercell/              direct CST benchmarks; --pair takes 2 or 4 atoms
   results_{A,B,C,D}_ewald_l3/ the four single-atom lattices
   results_2x2_super_l3/       a,b;b,a  (also the method REPORT for all cells)
   results_2x2_{AC,BC}_l3/     a,c;c,a and b,c;c,b
   results_2x2_{ABCD,ADBC,ACDB}_l3/
                               the three distinct four-species arrangements
   *_fine/                     the same sweeps on a 4x refined frequency grid
+  cst_direct/, cst_supercell/ the CST projects and their solver logs
+  REPORT.md                   results and findings
+  IMPLEMENTATION_GUIDE.md     full tutorial: how this was built from scratch
 
-retrieval/                    experimental Floquet-S-to-isolated-T inverse route
+retrieval/                    inverse-route outputs and reports
   FAST_FULL_TMATRIX_WHEEL_PROPOSAL.md   feasibility hypothesis and gates
-  fastfull/                   D4h basis, coded-cell design, Ewald and recovery code
-  test_fastfull_*.py          direct validation entry points
+  HANDOFF.md                  the normative conventions; read before editing
   results/fastfull/           compact M1/M2 screening artifacts
   cst_runs/*.json             curated campaign metadata (raw CST trees stay local)
 ```
+
 
 ## Conventions (read this before touching anything)
 
@@ -243,28 +292,42 @@ exactly as declared by the data file:
 
 ## Quickstart
 
-Requirements: Python with `numpy`, `scipy ≥ 1.15` (`sph_harm_y`), `h5py`,
-`matplotlib`; optionally `treams` for the cross-check. CST is **not** needed
-to run Stage 3.
+Requirements: Python ≥ 3.10 with `numpy`, `scipy ≥ 1.15` (`sph_harm_y`),
+`h5py`, `matplotlib`; optionally `treams` for the cross-check. CST is **not**
+needed to run Stage 3.
+
+Install the package once, in editable mode — the data directories are located
+relative to the checkout, so a non-editable copy install will not find them:
 
 ```bash
-cd aggregation
-python test_vswf.py && python test_translate.py && python test_mirror.py   # validation suite
-python run_demo.py        # ~8 min: 49 freqs, infinite lattice + finite arrays
-python test_feature_fidelity.py
-python plot_results.py    # figures + CSV into results/
+pip install -e .
 ```
+
+Then, from anywhere:
+
+```bash
+pytest -m "not slow"      # validation suite, ~2 min
+python -m tmatrix.aggregation.run_demo      # ~8 min: 49 freqs, lattice + finite arrays
+python -m tmatrix.aggregation.plot_results  # figures + CSV into aggregation/results/
+```
+
+`pytest` alone runs everything including the search-heavy gates (~25 min); a
+suite whose input data is not in the checkout is skipped rather than failed.
+Set `TMATRIX_ROOT` if you need to point the code at a different checkout's
+data, and `CST_PYTHON_LIB` / `AUTO_CST_DIR` if CST lives somewhere other than
+this machine's default.
 
 Minimal API example — periodic array at normal incidence:
 
 ```python
-from tmat_io import TMatrixData
-from vswf import plane_wave_coeffs
-from translate import lattice_sum_C, make_quad
-from aggregate import solve_periodic
-from sparams import sparams_normal, energy_balance
+from tmatrix.aggregation.tmat_io import TMatrixData
+from tmatrix.aggregation.vswf import plane_wave_coeffs
+from tmatrix.aggregation.translate import lattice_sum_C, make_quad
+from tmatrix.aggregation.aggregate import solve_periodic
+from tmatrix.aggregation.sparams import sparams_normal, energy_balance
+from tmatrix.paths import DEMO_TMAT
 
-data = TMatrixData("../test/single/saw_gold_wl15p0025um.tmat.h5")
+data = TMatrixData(DEMO_TMAT)
 i = 21                                   # frequency index (~15 um)
 k = data.k_at(i)                         # rad/um
 C = lattice_sum_C(k, 2.0, data.modes, 0.8, make_quad())   # pitch 2 um
@@ -280,19 +343,29 @@ Finite arrays with arbitrary in-plane positions and per-site T-matrices:
 
 ### Running a new case
 
-`run_case.py` does the whole sweep for any `tmat.h5` plus a pitch, no code
-edits. The `test/2x2` case, end to end (~2 min for the sweep):
+`run_case` does the whole sweep for any `tmat.h5` plus a pitch, no code edits.
+Relative `--out` paths resolve against `aggregation/`, so the results land
+beside the others regardless of your working directory. The `test/2x2` case,
+end to end (~2 min for the sweep):
 
 ```bash
-cd aggregation
-python run_case.py ../test/2x2/saw_gold_wl13p10um_10to34THz.tmat.h5 \
-    --pitch 8.0 --r0 3.0 --lmax auto --finite 2 3 5 9 --out results_2x2
-python treams_case.py ../test/2x2/saw_gold_wl13p10um_10to34THz.tmat.h5 \
-    --pitch 8.0 --out results_2x2/treams_reference.npz --lmax auto
-python cst_packed_reference.py ../test/2x2/SAW_gold_noSub_packed.cst --list
-python cst_packed_reference.py ../test/2x2/SAW_gold_noSub_packed.cst \
-    --run 6 --out results_2x2/cst_direct_reference.csv
-python plot_case.py results_2x2
+python -m tmatrix.aggregation.run_case test/2x2/saw_gold_wl13p10um_10to34THz.tmat.h5 --pitch 8.0 --r0 3.0 --lmax auto --finite 2 3 5 9 --out results_2x2
+```
+
+```bash
+python -m tmatrix.aggregation.treams_case test/2x2/saw_gold_wl13p10um_10to34THz.tmat.h5 --pitch 8.0 --out results_2x2/treams_reference.npz --lmax auto
+```
+
+```bash
+python -m tmatrix.aggregation.cst_packed_reference test/2x2/SAW_gold_noSub_packed.cst --list
+```
+
+```bash
+python -m tmatrix.aggregation.cst_packed_reference test/2x2/SAW_gold_noSub_packed.cst --run 6 --out results_2x2/cst_direct_reference.csv
+```
+
+```bash
+python -m tmatrix.aggregation.plot_case results_2x2
 ```
 
 Two things that bite on a new case:
@@ -355,7 +428,7 @@ Method and full validation ladder in
 [`aggregation/results_2x2_super_l3/REPORT.md`](aggregation/results_2x2_super_l3/REPORT.md);
 per-cell results in the sibling `results_2x2_*_l3/REPORT.md`. Atoms A
 (`scale` 4.00), B (5.00), C (3.25) and D (5.50) combined in a 16 µm repeated
-cell at 8 µm atom pitch, 10–34 THz. `python aggregation/compare_cases.py --all`
+cell at 8 µm atom pitch, 10–34 THz. `python -m tmatrix.aggregation.compare_cases --all`
 prints every case in one table.
 
 **The aggregation itself is exact.** Every algebraic identity the manual's

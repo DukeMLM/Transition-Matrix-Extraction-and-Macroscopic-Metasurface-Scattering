@@ -416,7 +416,7 @@ of the whole chain — its own cluster T-matrix, its own Ewald lattice interacti
 its own plane-wave projection — agrees to **≤ 3×10⁻¹⁴ on complex S21** and
 ≤ 1×10⁻¹² on S11, for every cell, including the power sums over all nine open
 orders. Every algebraic identity the manual's §6.5.5 ladder asks for holds to
-round-off (40 checks in `aggregation/test_supercell.py`).
+round-off (40 checks in `tests/aggregation/test_supercell.py`).
 
 **Does not.** The absolute accuracy against full-wave is 2–5 % in complex S, and
 that floor belongs to the input T-matrices, which violate passivity by 2.1–3.7 %
@@ -426,7 +426,7 @@ number but three mechanisms in three parts of the band.
 
 ## Where the remaining 2–5 % comes from
 
-`aggregation/error_budget.py` takes any result directory and separates the two
+`tmatrix.aggregation.error_budget` takes any result directory and separates the two
 things that decide how much of the input T-matrix's error survives into S: how
 badly T is known (the h5's own stored `residual`, and the isolated scattering
 cross section that sets its signal-to-noise) and how hard the lattice amplifies
@@ -540,44 +540,50 @@ incidence the two codes agree to 10⁻¹².
 
 CST is needed only for step 4; steps 1–3 run in seconds from the h5 files.
 
+Run from the repository root, with the package installed (`pip install -e .`).
+Relative `--out` paths resolve against `aggregation/`.
+
 ```bash
-cd aggregation
-H5=../test/2x2
+H5=test/2x2
 A=$H5/saw_gold_wl13p10um_10to34THz.tmat.h5
 B=$H5/saw_gold_wl17p30um_10to34THz.tmat.h5
 C=$H5/saw_gold_wl10p90um_10to34THz.tmat.h5
+AGG="python -m tmatrix.aggregation"
 
 # validation ladder (40 checks; --taper adds the tapered-sum comparison)
-python test_supercell.py
+python tests/aggregation/test_supercell.py
 
 # step 1: each atom alone, against its own direct CST run (runs 6, 2, 10)
-python run_supercell.py --cell 8 --site $A 0 0 --lmax 3 --out results_A_ewald_l3
-python cst_packed_reference.py $H5/SAW_gold_noSub_packed.cst --run 6 \
+$AGG.run_supercell --cell 8 --site $A 0 0 --lmax 3 --out results_A_ewald_l3
+$AGG.cst_packed_reference $H5/SAW_gold_noSub_packed.cst --run 6 \
     --out results_A_ewald_l3/cst_direct_reference.csv
 #   ... likewise B with run 2 and C with run 10
 
 # steps 2-3: the mixed cells, plus the finite-cluster T^O
-python run_supercell.py --cell 16 --site $A -4 -4 --site $A 4 4 \
-                                  --site $B  4 -4 --site $B -4 4 \
+$AGG.run_supercell --cell 16 --site $A -4 -4 --site $A 4 4 \
+                              --site $B  4 -4 --site $B -4 4 \
     --lmax 3 --cluster-lmax 12 --out results_2x2_super_l3
 #   ... likewise --pair AC and BC into results_2x2_AC_l3 / results_2x2_BC_l3
 
 # independent cross-check, and the refined grid that resolves the dark resonance
-python treams_supercell.py --cell 16 --site ... --lmax 3 --out <dir>/treams_reference.npz
-python run_supercell.py --cell 16 --site ... --lmax 3 --refine 4 --out <dir>_fine
+$AGG.treams_supercell --cell 16 --site ... --lmax 3 --out <dir>/treams_reference.npz
+$AGG.run_supercell --cell 16 --site ... --lmax 3 --refine 4 --out <dir>_fine
 
 # step 4: CST (needs an installation; ~1 h per supercell, ~5 min for the empty cell)
-python cst_supercell/build_2x2_supercell.py --pair AB --only empty   # once, shared
-python cst_supercell/build_2x2_supercell.py --pair AB --only supercell
-python cst_supercell/read_supercell_results.py \
-    --run cst_supercell/runs_AB/supercell/supercell.cst \
-    --empty cst_supercell/runs/empty/empty.cst --out results_2x2_super_l3
+$AGG.cst_supercell.build_2x2_supercell --pair AB --only empty   # once, shared
+$AGG.cst_supercell.build_2x2_supercell --pair AB --only supercell
+#   NB: read_supercell_results resolves a relative --out against the CWD, not
+#   against aggregation/ the way the run_*/plot_* drivers do
+$AGG.cst_supercell.read_supercell_results \
+    --run aggregation/cst_supercell/runs_AB/supercell/supercell.cst \
+    --empty aggregation/cst_supercell/runs/empty/empty.cst \
+    --out aggregation/results_2x2_super_l3
 
 # figures, metrics and the error budget
-python plot_supercell.py results_2x2_super_l3 --fine results_2x2_super_fine
-python plot_experiment_summary.py
-python compare_cases.py --all
-python error_budget.py results_2x2_super_l3
+$AGG.plot_supercell results_2x2_super_l3 --fine results_2x2_super_fine
+$AGG.plot_experiment_summary
+$AGG.compare_cases --all
+$AGG.error_budget results_2x2_super_l3
 ```
 
 Long CST solves must be launched **detached** (PowerShell `Start-Process`), not
@@ -595,9 +601,9 @@ with it mid-solve and the error reads exactly like a solver crash.
 | direct CST, de-embedded | `<dir>/cst_direct_supercell*.csv` |
 | finite-cluster `T^O` | `<dir>/cluster_T.npz` (not in git; regenerate with `--cluster-lmax`) |
 | the CST projects | `aggregation/cst_supercell/runs*/` (`*.cst` + model history + solver log; working directories not in git) |
-| the error budget | `aggregation/error_budget.py` |
-| the algorithm | manual §6.5.2–6.5.5 and §7.5, implemented in `aggregation/supercell.py` |
-| all ten cases in one table | `python aggregation/compare_cases.py --all` |
-| geometry vs symmetry per arrangement | `python aggregation/arrangement_predictors.py` |
-| the comparison figure | `aggregation/plot_comparison.py` |
+| the error budget | `tmatrix.aggregation.error_budget` |
+| the algorithm | manual §6.5.2–6.5.5 and §7.5, implemented in `tmatrix.aggregation.supercell` |
+| all ten cases in one table | `python -m tmatrix.aggregation.compare_cases --all` |
+| geometry vs symmetry per arrangement | `python -m tmatrix.aggregation.arrangement_predictors` |
+| the comparison figure | `tmatrix.aggregation.plot_comparison` |
 | what is still unresolved | [`OPEN_QUESTIONS.md`](OPEN_QUESTIONS.md) |

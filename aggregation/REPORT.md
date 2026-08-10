@@ -148,11 +148,11 @@ here is a fresh periodic solve.
 ```
 conda activate cst_inference
 cd "D:/Claude/T matrix/aggregation"
-python test_vswf.py && python test_translate.py && python test_mirror.py
-python run_demo.py          # ~8 min: 49 freqs, periodic + finite arrays
-python test_feature_fidelity.py
-python run_mirror_demo.py   # ~15 min: ground-plane variant
-python plot_results.py
+pytest -m "not slow"                              # validation suite
+python -m tmatrix.aggregation.run_demo            # ~8 min: 49 freqs, periodic + finite arrays
+python tests/aggregation/test_feature_fidelity.py
+python -m tmatrix.aggregation.run_mirror_demo     # ~15 min: ground-plane variant
+python -m tmatrix.aggregation.plot_results
 ```
 
 For a new multi-atom problem: load per-atom T-matrices, call

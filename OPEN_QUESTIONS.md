@@ -82,13 +82,14 @@ a different symmetry class. So:
 Run it with:
 
 ```bash
-python cst_supercell/build_2x2_supercell.py --pair ACDB --only supercell
-python cst_supercell/read_supercell_results.py \
-    --run cst_supercell/runs_ACDB/supercell/supercell.cst \
-    --empty cst_supercell/runs/empty/empty.cst --out results_2x2_ACDB_l3
+python -m tmatrix.aggregation.cst_supercell.build_2x2_supercell --pair ACDB --only supercell
 ```
 
-plus the matching `run_supercell.py --site A -4 4 --site C 4 4 --site D -4 -4
+```bash
+python -m tmatrix.aggregation.cst_supercell.read_supercell_results --run aggregation/cst_supercell/runs_ACDB/supercell/supercell.cst --empty aggregation/cst_supercell/runs/empty/empty.cst --out aggregation/results_2x2_ACDB_l3
+```
+
+plus the matching `run_supercell --site A -4 4 --site C 4 4 --site D -4 -4
 --site B 4 -4`. About 1–2 h of CST; it reuses the existing empty-cell run and
 completes the set of three arrangements either way.
 

@@ -1,5 +1,12 @@
 __pycache__/
 *.pyc
+
+# packaging and test-runner artifacts
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+
 # CST run directories (project folders are 30-100 MB each); curated
 # artifacts from them are force-added explicitly
 aggregation/cst_direct/run_*/

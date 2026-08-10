@@ -1,5 +1,13 @@
 # Session handoff — multi-angle Floquet → T-matrix retrieval implementation
 
+> **Path note (later than this handoff).** The code was reorganized into an
+> installable package: every `retrieval/*.py` referenced below now lives at
+> `src/tmatrix/retrieval/*.py`, `aggregation/*.py` at
+> `src/tmatrix/aggregation/*.py`, and the test suites under `tests/`. The
+> directories named here still exist and still hold this study's *data*
+> (`retrieval/cst_runs/`, `retrieval/results/`). Conventions below are
+> unchanged and remain normative.
+
 **Written 2026-08-06 ~21:55 by the previous (Fable) session at its usage limit.
 You are the successor session. Read this file and
 `../INVERSE_TMATRIX_FROM_FLOQUET.md` (the normative design doc) before doing
