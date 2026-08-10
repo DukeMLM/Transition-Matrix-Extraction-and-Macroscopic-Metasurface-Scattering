@@ -1,6 +1,7 @@
 """Tests (e)-(f) for sparams_oblique.py (retrieval deliverable 2).
 
-Run:  python test_sparams_oblique.py       (conda env cst_inference)
+Run:  python tests/retrieval/test_sparams_oblique.py  (conda env cst_inference)
+      pytest -k sparams_oblique                       (the same, through pytest)
 
 (e) theta -> 0 consistency against sparams.sparams_normal at k_hat = +z_hat
     (theta=0, phi=0) at 3 frequencies (band edges + middle), asserting the
@@ -14,8 +15,8 @@ Run:  python test_sparams_oblique.py       (conda env cst_inference)
     energy conservation R + T < 1 with A = 1 - R - T in (0, 1) per incident
     polarization (lossy gold).
 
-Lattice sums are cached in test_cache_C.npz next to this file so re-runs are
-fast; delete that file to force recomputation.
+Lattice sums are cached in retrieval/test_cache_C.npz so re-runs are fast;
+delete that file to force recomputation.
 """
 import os
 import sys

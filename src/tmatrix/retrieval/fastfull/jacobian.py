@@ -76,11 +76,11 @@ def sigma_uniform(n_obs, sigma):
     """Flat complex-S error model: E|dS_i|^2 = sigma^2 for every observable.
 
     The campaign MEASURED sigma = 2.6333e-3 on the 2x2 specular blocks
-    (retrieval/HANDOFF.md, results/fit_sigma_from_closure.npz).  There is no
-    measurement yet for a multimode diffractive cell, so a flat model at that
-    level is the honest default: it must be replaced by a per-channel
-    covariance from the M3 empty-cell repeatability study before any Gate A
-    verdict is final.
+    (retrieval/HANDOFF.md, retrieval/results/fit_sigma_from_closure.npz).
+    There is no measurement yet for a multimode diffractive cell, so a flat
+    model at that level is the honest default: it must be replaced by a
+    per-channel covariance from the M3 empty-cell repeatability study before
+    any Gate A verdict is final.
     """
     return np.full(int(n_obs), float(sigma))
 
@@ -137,7 +137,7 @@ def jacobian_fd(W, A, B, T0, C=None, h=1e-6):
     Perturbs each complex coefficient along the real axis; because S is
     holomorphic in c that single direction determines the whole complex
     derivative, and the imaginary direction is checked separately by the
-    caller (test_fastfull_design.py does both).
+    caller (tests/retrieval/test_fastfull_design.py does both).
     """
     B = np.asarray(B)
     Cz = np.zeros_like(T0) if C is None else C
@@ -304,8 +304,8 @@ def recovery_errors(B, modes, Cov, n_obs, T_ref, blocks=None,
     """Predicted T-recovery error, invariant, under TWO error models.
 
     WHY TWO MODELS.  The whitening level sigma is the campaign's measured
-    normal-incidence CLOSURE residual, and `results/REAL_RETRIEVAL.md` par.
-    4.3 establishes that this residual is dominated by MODEL error, not by
+    normal-incidence CLOSURE residual, and `retrieval/results/REAL_RETRIEVAL.md`
+    par. 4.3 establishes that this residual is dominated by MODEL error, not by
     CST numerical noise: "because the dominant error is systematic rather
     than i.i.d. Gaussian, every chi2 significance quoted ... is indicative".
     A systematic discrepancy does NOT average down over the n_obs modal

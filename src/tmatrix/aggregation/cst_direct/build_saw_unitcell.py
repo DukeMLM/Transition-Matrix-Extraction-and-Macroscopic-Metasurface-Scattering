@@ -1,6 +1,6 @@
 """Direct CST reference: free-standing spoke-and-wheel unit cell, periodic
 (Floquet) boundaries, normal incidence — the configuration predicted by the
-T-matrix aggregation pipeline (aggregation/run_demo.py).
+T-matrix aggregation pipeline (tmatrix.aggregation.run_demo).
 
 Geometry/material from the tmat.h5 attributes (matching the extraction
 project): pitch 2 um, r_out = 0.7193, w_ring = 0.1611, gap = 0.5627,

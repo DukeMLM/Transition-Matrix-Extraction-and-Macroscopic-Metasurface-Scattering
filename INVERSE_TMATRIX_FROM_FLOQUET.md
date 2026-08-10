@@ -1,11 +1,11 @@
 # Retrieving the isolated-cell T-matrix from multi-angle Floquet S-parameters
 
 **Status: IMPLEMENTED and independently verified (2026-08-07).** The whole
-§10 checklist exists in `retrieval/`; every module has been read line-by-line
-against this document and its gates re-run by a verifier. (The companion
-`.cst` is a 48 KB history-only archive with **no result data** — it provides
-geometry provenance only; all reference CST data comes from fresh periodic
-solves, cf. `cst_direct/run_v3/s_params_complex.csv`.)
+§10 checklist exists in `src/tmatrix/retrieval/`; every module has been read
+line-by-line against this document and its gates re-run by a verifier. (The
+companion `.cst` is a 48 KB history-only archive with **no result data** — it
+provides geometry provenance only; all reference CST data comes from fresh
+periodic solves, cf. `aggregation/cst_direct/run_v3/s_params_complex.csv`.)
 
 **Read these three before trusting any claim below:**
 - `retrieval/HANDOFF.md` — state, locked conventions, next steps.
@@ -32,7 +32,8 @@ marked inline, with the original text preserved for provenance):
 
 Every numerical claim originally in this document was either measured directly
 on the repo's data or adversarially re-verified (2026-08-06); items marked
-**NEW** were built in `retrieval/` and are listed in the §10 checklist.
+**NEW** were built in `src/tmatrix/retrieval/` and are listed in the §10
+checklist.
 
 ---
 
@@ -71,10 +72,10 @@ plane wave with direction `k̂` (in-plane Bloch vector
 `k∥ = k(sinθ cosφ, sinθ sinφ)`) and polarization `ê_b`:
 
 ```
-a_inc,b = plane_wave_coeffs(k̂, ê_b, modes)                 # vswf.py:184
-C       = lattice_sum_C_bloch(k, p, modes, k∥, r0, quad)    # NEW (extends translate.py)
+a_inc,b = plane_wave_coeffs(k̂, ê_b, modes)                 # src/tmatrix/aggregation/vswf.py:184
+C       = lattice_sum_C_bloch(k, p, modes, k∥, r0, quad)    # NEW (extends tmatrix.aggregation.translate)
 f_b     = (I − T0·C)⁻¹ · T0 · a_inc,b                       # = aggregate.solve_periodic
-F_b(r̂)  = far_field_amplitude(k, f_b, modes, r̂)            # vswf.py:203
+F_b(r̂)  = far_field_amplitude(k, f_b, modes, r̂)            # src/tmatrix/aggregation/vswf.py:203
 
 S21_ab = δ_ab + (2πi/(k A cosθ)) · ê_a^(t)* · F_b(k̂_t)     # transmitted specular order
 S11_ab =        (2πi/(k A cosθ)) · ê_a^(r)* · F_b(k̂_r)     # reflected specular order
@@ -102,9 +103,9 @@ the `e^{+ik·r}` spatial convention, site `R` sees `a_inc·e^{+i k∥·R}`, givi
 shell-sum convergence — the controlling parameter becomes `k(1 − sinθ)Rc`
 (distance to the grazing Rayleigh anomaly), ≈ 7.5× worse at θ = 60° than at
 normal incidence. Scale taper lengths as `kRc ≳ 10/(1 − sinθ)` at oblique
-angles, re-run `test_translate.py`-style Richardson-stability checks at the
-largest k∥ (θ=60°, λ=20 µm), and fall back to Ewald (treams) near grazing if
-tapered sums degrade.
+angles, re-run `tests/aggregation/test_translate.py`-style
+Richardson-stability checks at the largest k∥ (θ=60°, λ=20 µm), and fall back
+to Ewald (treams) near grazing if tapered sums degrade.
 
 Conventions throughout: tmat.h5 / Stage 3 (`e^{−iωt}`, `h_l^{(1)}` outgoing,
 Condon–Shortley, `f = T a`, mode order from `/modes`). CST S-parameters arrive
@@ -114,15 +115,15 @@ in `e^{+jωt}` → conjugate before use (§7 specifies the verification).
 
 | Piece | Status | Where |
 |---|---|---|
-| `plane_wave_coeffs` at arbitrary `k̂` | exists | `vswf.py:184` |
-| `solve_periodic`, `effective_array_T` | exist | `aggregate.py:87,94` |
-| Lattice sum at `k∥ = 0` | exists, validated | `translate.py:150` (tapered shells + Richardson) |
-| **Bloch-phased lattice sum** | **NEW** | extend `translate.py`; per-site phases in `assemble_shell_sum` (sites enumerated by `square_lattice_shells`) |
-| **Oblique specular Jones blocks** (`1/cosθ`) | **NEW** (small) | generalize `sparams.py:26` per the formulas above |
+| `plane_wave_coeffs` at arbitrary `k̂` | exists | `src/tmatrix/aggregation/vswf.py:184` |
+| `solve_periodic`, `effective_array_T` | exist | `src/tmatrix/aggregation/aggregate.py:87,94` |
+| Lattice sum at `k∥ = 0` | exists, validated | `src/tmatrix/aggregation/translate.py:150` (tapered shells + Richardson) |
+| **Bloch-phased lattice sum** | **NEW** | extend `tmatrix.aggregation.translate`; per-site phases in `assemble_shell_sum` (sites enumerated by `square_lattice_shells`) |
+| **Oblique specular Jones blocks** (`1/cosθ`) | **NEW** (small) | generalize `src/tmatrix/aggregation/sparams.py:26` per the formulas above |
 | **Complex-S de-embedding vs CST** | **NEW** — nothing complex-valued exists (see §7) | new module |
 | **Fit driver + constraints + observability** | **NEW** | this project |
-| Oblique treams cross-check | **NEW work** — `treams_reference.py` is k∥=0-only (see §6) | extend it |
-| Oblique CST campaign | **NEW runs** | `cst_direct/` + `cma_infinite/cst` templates, with required edits (§7) |
+| Oblique treams cross-check | **NEW work** — `tmatrix.aggregation.treams_reference` is k∥=0-only (see §6) | extend it |
+| Oblique CST campaign | **NEW runs** | `src/tmatrix/aggregation/cst_direct/` + `cma_infinite/cst` templates, with required edits (§7) |
 
 ## 3. Empirical structure of the target (measured on the reference file)
 
@@ -135,7 +136,8 @@ independently re-verified:
   `(m − m') mod 4 = 0` are ≤ 1.5e-3 relative (noise level). The rule allows
   228 of 900 entries; 23 of the 25 bright entries obey it.
 - **Reciprocity** `T_{lm,l'm'} = (−1)^{m+m'} T_{l'(−m'),l(−m)}` (the repo's
-  validated convention, cf. `run_demo.py:45` and IMPLEMENTATION_GUIDE §7.4):
+  validated convention, cf. `src/tmatrix/aggregation/run_demo.py:45` and
+  IMPLEMENTATION_GUIDE §7.4):
   mid-band 3.7e-5 absolute vs |T|max 1.1e-2; band-worst 1.5e-4 vs 7.8e-2
   (both at λ = 8 µm) — **0.2–0.4 % relative at every frequency**, consistent
   with the file's stored diagnostic.
@@ -177,13 +179,13 @@ with `w_i = 1/σ_i²`, σ_i from the calibrated per-angle floor (§7).
 
 - **C4 rotations about z** act by conjugation with the *diagonal*
   `D_φ = diag(e^{i m_ν φ})`, φ ∈ {0, π/2, π, 3π/2} — the same phases
-  `rotate_inplane` (`translate.py:94`) applies. No Wigner-D machinery needed
-  for z-rotations.
+  `rotate_inplane` (`src/tmatrix/aggregation/translate.py:94`) applies. No
+  Wigner-D machinery needed for z-rotations.
 - **The four C4v mirrors are VERTICAL planes (σ_v: xz, yz; σ_d: diagonals) —
-  `mirror.py`'s `mirror_parity_signs` is NOT one of them.** That function
-  encodes the *horizontal* z-mirror `diag(1,1,−1)` (PEC image theory, an
-  element of C4h/D4h, diagonal in (l,m)); a vertical mirror maps `m → −m`
-  (a signed permutation, block-antidiagonal — it would trip
+  `tmatrix.aggregation.mirror`'s `mirror_parity_signs` is NOT one of them.**
+  That function encodes the *horizontal* z-mirror `diag(1,1,−1)` (PEC image
+  theory, an element of C4h/D4h, diagonal in (l,m)); a vertical mirror maps
+  `m → −m` (a signed permutation, block-antidiagonal — it would trip
   `mirror_parity_signs`' own diagonality assertion). Using σ_h builds the
   **wrong group** (C4h), and — trap — the reference T is *also* invariant
   under that wrong projector because the flat wheel is D4h-symmetric, so
@@ -214,8 +216,9 @@ gate on `‖T0·C‖ < 1`** — it fails at every frequency; use ρ.
 
 **Precompute the lattice sums.** `C(k, k∥)` is independent of `T0`:
 compute all 49 freqs × n_angles Bloch sums **once**
-(`retrieval/precompute_C.py` → `results/C_bloch.npz`; ~1–2 h at run_demo.py
-rates), and have `forward.py`/`fit.py`/`observability.py` load the cache.
+(`tmatrix.retrieval.precompute_C` → `results/C_bloch.npz`; ~1–2 h at
+`tmatrix.aggregation.run_demo` rates), and have
+`tmatrix.retrieval.forward`/`fit`/`observability` load the cache.
 Forward evaluations are then microseconds and finite-difference Jacobians are
 cheap; without the cache the fit is computationally infeasible.
 
@@ -255,9 +258,10 @@ non-issue here: worst-case onset `λ = p(1 + sinθ) = 3.73 µm` at θ=60°
 1. **Oblique forward map vs treams.** Implement `lattice_sum_C_bloch` +
    `sparams_oblique`; compare complex specular S at θ ∈ {0°, 20°, 40°},
    φ ∈ {0°, 45°}, both polarizations, 49 freqs. Gate: ≤ 1e-3 complex; θ=0 must
-   reproduce `run_demo.py` exactly.
-   **Scope warning:** `treams_reference.py` wraps treams at k∥ = 0 *only*, and
-   two steps are normal-incidence-specific. Generalizing is part of this
+   reproduce `tmatrix.aggregation.run_demo` exactly.
+   **Scope warning:** `tmatrix.aggregation.treams_reference` wraps treams at
+   k∥ = 0 *only*, and two steps are normal-incidence-specific. Generalizing
+   is part of this
    step's work (~a day of convention-wrangling): pass
    `kpar = k(sinθcosφ, sinθsinφ)` to `latticeinteraction.solve` and
    `PlaneWaveBasisByComp.diffr_orders`; build TE/TM incident coefficients by
@@ -278,7 +282,8 @@ non-issue here: worst-case onset `λ = p(1 + sinθ) = 3.73 µm` at θ=60°
 ## 7. CST campaign specification
 
 **Geometry:** free-standing gold wheel array, no spacer, no ground plane —
-matching what `T_iso` describes. Base: `aggregation/cst_direct/build_saw_unitcell.py`
+matching what `T_iso` describes. Base:
+`src/tmatrix/aggregation/cst_direct/build_saw_unitcell.py`
 (pitch trap documented in REPORT §4b: set `UnitCellFitToBoundingBox "False"` +
 explicit `UnitCellDs1/Ds2`).
 
@@ -297,7 +302,8 @@ explicit `UnitCellDs1/Ds2`).
   of the excitation port driven (switch to `"All","All"` or list both; note
   this doubles excitation count). Keep the script's frequency sampling
   (`AddSampleInterval`) otherwise.
-- **Dependency chain (for a fresh machine/session):** `build_saw_unitcell.py`
+- **Dependency chain (for a fresh machine/session):**
+  `tmatrix.aggregation.cst_direct.build_saw_unitcell`
   imports `nir.cst_helpers` from `D:/Claude/auto_cst` (hard-coded sys.path);
   also needs `E:/cst/AMD64/python_cst_libraries` and the
   [cma_infinite](https://github.com/DaryLu0v0/cma_infinite) clone for the
@@ -416,7 +422,7 @@ explicit `UnitCellDs1/Ds2`).
   `deembed.label_hypotheses` per the HANDOFF caveat. Do **not** fall back to
   raw-T separation numbers — they are a property of the reference file.
 
-  Implemented in `retrieval/validate_against_reference.py`
+  Implemented in `tmatrix.retrieval.validate_against_reference`
   (`channel_dictionary_acceptance(..., statistic="chi2")`); the doc-literal
   `statistic="max"` path is retained for comparison.
 
@@ -453,7 +459,8 @@ explicit `UnitCellDs1/Ds2`).
   why the acceptance must run off the mirror plane.
 
 **Complex de-embedding (NEW — nothing complex-valued exists in the repo;
-`plot_cst_comparison.py` and REPORT §4b validated magnitudes only):**
+`tmatrix.aggregation.plot_cst_comparison` and REPORT §4b validated magnitudes
+only):**
 
 - With the z-symmetric pinned domain: `S21_deemb = S21_raw / S21_empty`,
   `S11_deemb = S11_raw / S21_empty` (symmetric domain ⇒ reflected path length
@@ -485,7 +492,7 @@ before any CST time is spent) decide additions.
 
 **Frequency grid:** the file's 49 frequencies; interpolate CST's dense sweep
 onto it via separate Re/Im `np.interp` (pattern already in
-`build_saw_unitcell.py` ~line 317).
+`src/tmatrix/aggregation/cst_direct/build_saw_unitcell.py` ~line 317).
 
 ## 8. Acceptance criteria (real-data test)
 
@@ -513,39 +520,44 @@ onto it via separate Re/Im `np.interp` (pattern already in
 | Angle set under-determines even-m blocks | synthetic observability map computed before the campaign; even-m content needs oblique + φ=22.5° runs (§4) |
 | lmax=3 truncation (Wiscombe suggests 5) | same truncation as reference & Stage 3 ⇒ consistent comparison; flag as shared systematic |
 
-## 10. Implementation checklist (new session; suggested `retrieval/` package)
+## 10. Implementation checklist (new session; suggested `src/tmatrix/retrieval/` package)
 
-Numerical parameters (normative, from the validated `run_demo.py` setup):
+Numerical parameters (normative, from the validated
+`tmatrix.aggregation.run_demo` setup):
 `modes = TMatrixData('test/single/saw_gold_wl15p0025um.tmat.h5').modes`
 (30-mode `ModeBasis`, order from `/modes`); pitch 2.0 µm; A_cell 4.0 µm²;
 `r0 = 0.8`; `quad = make_quad(16, 32)`; `kRc = (10, 14, 20)` at θ=0, scaled
 per §2 at oblique; frequency grid = the file's 49 points.
 
-1. `retrieval/bloch_lattice.py` — `lattice_sum_C_bloch(...)` reusing
-   `translation_shells`/`assemble_shell_sum`; tests: k∥=0 ≡ `lattice_sum_C`
-   (1e-12); Richardson stability at θ=60°, λ=20 µm.
-2. `retrieval/sparams_oblique.py` — Jones blocks per §2 incl. the normative
-   TE/TM basis and its θ→0 continuity limit; test: θ=0 ≡ `sparams_normal`.
-3. `retrieval/forward.py` + `retrieval/precompute_C.py` — `predict_S` reading
-   the `C_bloch.npz` cache; treams validation script (§6 step 1, incl. the
-   oblique treams generalization).
-4. `retrieval/parametrize.py` — C4v×reciprocity basis per §4 (numerical σ_v
-   derivation, group-closure tests, explicit σ_v selection-rule validation).
-5. `retrieval/fit.py` + `retrieval/observability.py` — LM driver (Born seed,
-   `w_i = 1/σ_i²`), Jacobian from cache, SVD resolution + heatmap
-   `H[μ,ν] = Σ_k res_k |B_k[μ,ν]|²`.
-6. `retrieval/synthetic_test.py` — ladder steps 2–3.
-7. `retrieval/cst_campaign.py` — §7 edits to `build_saw_unitcell.py`
+1. `src/tmatrix/retrieval/bloch_lattice.py` — `lattice_sum_C_bloch(...)`
+   reusing `translation_shells`/`assemble_shell_sum`; tests: k∥=0 ≡
+   `lattice_sum_C` (1e-12); Richardson stability at θ=60°, λ=20 µm.
+2. `src/tmatrix/retrieval/sparams_oblique.py` — Jones blocks per §2 incl. the
+   normative TE/TM basis and its θ→0 continuity limit; test: θ=0 ≡
+   `sparams_normal`.
+3. `src/tmatrix/retrieval/forward.py` + `src/tmatrix/retrieval/precompute_C.py`
+   — `predict_S` reading the `C_bloch.npz` cache; treams validation script
+   (§6 step 1, incl. the oblique treams generalization).
+4. `src/tmatrix/retrieval/parametrize.py` — C4v×reciprocity basis per §4
+   (numerical σ_v derivation, group-closure tests, explicit σ_v selection-rule
+   validation).
+5. `src/tmatrix/retrieval/fit.py` + `src/tmatrix/retrieval/observability.py` —
+   LM driver (Born seed, `w_i = 1/σ_i²`), Jacobian from cache, SVD resolution
+   + heatmap `H[μ,ν] = Σ_k res_k |B_k[μ,ν]|²`.
+6. `src/tmatrix/retrieval/synthetic_test.py` — ladder steps 2–3.
+7. `src/tmatrix/retrieval/cst_campaign.py` — §7 edits to
+   `tmatrix.aggregation.cst_direct.build_saw_unitcell`
    (cellpad, both-mode excitation, θ/φ parametrization), empty references,
    channel-dictionary acceptance run. Dependencies: `D:/Claude/auto_cst`
    (`nir.cst_helpers`), `E:/cst/AMD64/python_cst_libraries`, cma_infinite
    clone.
-8. `retrieval/deembed.py` + `retrieval/validate_against_reference.py` —
+8. `src/tmatrix/retrieval/deembed.py` +
+   `src/tmatrix/retrieval/validate_against_reference.py` —
    complex de-embedding + closure gate (§7), acceptance criteria (§8),
    figures.
 
 Environment: conda env `cst_inference` (numpy/scipy/h5py, treams importable
-per `treams_reference.py`).
+per `tmatrix.aggregation.treams_reference`).
 
 ---
 
@@ -554,8 +566,9 @@ per `treams_reference.py`).
 Independent of this direction, two audit findings (Aug 2026) should reach
 whoever maintains `cst_tmatrix` / the shipped scripts:
 
-- `compute_t_matrix_projection_2.py` (the in-repo template, *not* the
-  production tool) has a numerically confirmed sign error (Green-identity
+- `src/tmatrix/extraction/compute_t_matrix_projection.py` (the in-repo
+  template, *not* the production tool) has a numerically confirmed sign error
+  (Green-identity
   integrand needs `E×curl Ψ* − Ψ*×curl E`; the shipped `+` leaks the incident
   field), a missing Wronskian normalization, and a pole clamp that zeroes
   |m|=1 coefficients for polar illumination nodes.

@@ -1,4 +1,4 @@
-"""PASS/FAIL test suite for retrieval/parametrize.py.
+"""PASS/FAIL test suite for tmatrix.retrieval.parametrize.
 
 Checklist item 4 of INVERSE_TMATRIX_FROM_FLOQUET.md: C4v (x) reciprocity
 constrained subspace -- numerical sigma_v derivation, group validation,
@@ -9,8 +9,8 @@ selection rule, passivity).
 
 Run:
     conda activate cst_inference
-    cd "D:/Claude/T matrix/retrieval"
-    python test_parametrize.py
+    cd "D:/Claude/T matrix"
+    python tests/retrieval/test_parametrize.py     (or pytest -k parametrize)
 """
 import os
 import sys
@@ -42,7 +42,7 @@ def info(name, detail):
 def main():
     t_start = time.time()
     print("=" * 76)
-    print("retrieval/parametrize.py test suite  (checklist item 4)")
+    print("tmatrix.retrieval.parametrize test suite  (checklist item 4)")
     print("=" * 76)
 
     # ---------------------------------------------------------------- [0]

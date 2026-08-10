@@ -53,7 +53,7 @@ previous frequency) **completely solves the basin problem when the target
 lies in the fitted span**: on the C-clean loop ifreq 48 goes from 11.04
 (Born) to **6e-12**, objective 3.17e-6 → 1.7e-30, every step of the chain at
 ~1e-30. That is a real, realizable win and it is why continuation is now a
-first-class protocol dimension in `gate_study.py`.
+first-class protocol dimension in `tmatrix.retrieval.gate_study`.
 
 **But on the physical target it does not transfer to the rich span.** With
 model error present, each frequency's minimum is displaced from the truth and

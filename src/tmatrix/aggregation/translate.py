@@ -9,8 +9,8 @@ Computed by numerical projection: the outgoing fields (E, Ht) are sampled on a
 sphere |rho| = r0 < |d| around the target and projected onto the regular basis
 (vswf.RegularProjector).  This is convention-locked to vswf.py by construction.
 
-Azimuthal rotation identity (verified in test_translate.py): for a rotation
-of d by phi about z,
+Azimuthal rotation identity (verified in tests/aggregation/test_translate.py):
+for a rotation of d by phi about z,
     A(Rot_phi d)[mu, nu] = e^{i (m_nu - m_mu) phi} A(d)[mu, nu]
 so in-plane lattice points can be grouped into shells of equal radius: one
 projection per distinct radius, and per-shell azimuthal phase sums

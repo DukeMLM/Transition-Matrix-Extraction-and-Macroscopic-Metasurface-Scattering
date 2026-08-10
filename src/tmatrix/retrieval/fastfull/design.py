@@ -49,9 +49,10 @@ that cost and signal enter on the same footing.
   questions and are reported side by side, never mixed.
 
   WHY sqrt(n_obs) IS IN THE DENOMINATOR.  The whitening level is the
-  campaign's measured closure residual, which `results/REAL_RETRIEVAL.md`
-  par. 4.3 shows is dominated by systematic model error rather than iid
-  noise.  An iid objective (plain sigma_40) silently rewards a design for
+  campaign's measured closure residual, which
+  `retrieval/results/REAL_RETRIEVAL.md` par. 4.3 shows is dominated by
+  systematic model error rather than iid noise.  An iid objective (plain
+  sigma_40) silently rewards a design for
   having more modal entries, because iid errors average down; a systematic
   discrepancy does not average down, so extra channels only help when they
   raise sigma_40 faster than sqrt(n_obs).  Dividing makes that trade
@@ -63,8 +64,9 @@ generic operator restricted to a 40-dimensional subspace, hence
 
       sigma_40(H)  >=  sigma_30(W) sigma_30(A)                        (D1)
 
-always.  (D1) is gated in test_fastfull_design.py and is the quantitative
-form of the proposal's statement that the generic gate is the stronger one.
+always.  (D1) is gated in tests/retrieval/test_fastfull_design.py and is the
+quantitative form of the proposal's statement that the generic gate is the
+stronger one.
 
 Penalties (par. 7.2, 7.3)
 -------------------------
@@ -91,9 +93,9 @@ recovery loop.
 
 CLI
 ---
-    python -m retrieval.fastfull.design --lam 8              # design at 8 um
-    python -m retrieval.fastfull.design --lam 8,20 --track both
-    python -m retrieval.fastfull.design --evaluate 26,33.8,90,0,0.09,-0.46
+    python -m tmatrix.retrieval.fastfull.design --lam 8       # design at 8 um
+    python -m tmatrix.retrieval.fastfull.design --lam 8,20 --track both
+    python -m tmatrix.retrieval.fastfull.design --evaluate 26,33.8,90,0,0.09,-0.46
 """
 import argparse
 import hashlib
@@ -141,11 +143,12 @@ def _sha_npz(path):
 def measured_sigma(lam_um):
     """Frequency-MATCHED complex-S discrepancy from the campaign closure.
 
-    `results/fit_sigma_from_closure.npz` holds the measured normal-incidence
-    closure residual per frequency (2.3063e-3 ... 3.6171e-3 across the band;
-    2.8417e-3 at 8 um, 3.1751e-3 at 20 um).  Using the band RMS everywhere
-    understates the noise at the ends of the band, so the design study
-    interpolates the spectrum at the wavelength actually being designed for.
+    `retrieval/results/fit_sigma_from_closure.npz` holds the measured
+    normal-incidence closure residual per frequency (2.3063e-3 ... 3.6171e-3
+    across the band; 2.8417e-3 at 8 um, 3.1751e-3 at 20 um).  Using the band
+    RMS everywhere understates the noise at the ends of the band, so the
+    design study interpolates the spectrum at the wavelength actually being
+    designed for.
 
     This is a MODEL-vs-CST discrepancy, not an iid noise floor -- see
     jacobian.recovery_errors for why that distinction changes the verdict.

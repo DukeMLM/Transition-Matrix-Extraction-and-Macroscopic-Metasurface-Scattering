@@ -33,14 +33,15 @@ azimuthal phase sums become per-site sums
 with the sites R = r_s (cos phi_R, sin phi_R, 0) enumerated by
 translate.square_lattice_shells and the site matrix given by the rotation
 identity A(R)[mu, nu] = A_s[mu, nu] e^{i (m_nu - m_mu) phi_R}
-(= translate.rotate_inplane; identity verified in test_translate.py).  The
-Richardson extrapolation over the kRc list is unchanged.
+(= translate.rotate_inplane; identity verified in
+tests/aggregation/test_translate.py).  The Richardson extrapolation over
+the kRc list is unchanged.
 
 Convergence warning (doc par. 2): Bloch phases slow the propagating-channel
 shell-sum convergence -- the controlling parameter becomes k (1 - sin th) Rc,
 the distance to the grazing Rayleigh anomaly.  Scale kRc >~ 10/(1 - sin th)
 at oblique incidence and re-run Richardson-stability checks at the largest
-k_par (see test_bloch_lattice.py tests (c) and (d)).
+k_par (see tests/retrieval/test_bloch_lattice.py tests (c) and (d)).
 """
 
 import numpy as np

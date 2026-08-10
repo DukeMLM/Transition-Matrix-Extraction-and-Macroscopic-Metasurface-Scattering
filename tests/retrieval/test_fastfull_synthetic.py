@@ -1,6 +1,7 @@
-"""Gates for retrieval/fastfull/synthetic.py (M2 Gate A blind recovery).
+"""Gates for tmatrix.retrieval.fastfull.synthetic (M2 Gate A blind recovery).
 
-Run:  python test_fastfull_synthetic.py   (from retrieval/, env cst_inference)
+Run:  python tests/retrieval/test_fastfull_synthetic.py   (from the repo root,
+      env cst_inference), or  pytest -k fastfull_synthetic
 
   (a) noise-free blind recovery is EXACT for a target that lies exactly in
       the 40-coefficient space -- both the wheel branch (seed + continuation

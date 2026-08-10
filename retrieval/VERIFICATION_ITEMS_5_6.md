@@ -1,4 +1,4 @@
-# Independent verification of retrieval items 5–6 (`fit.py`, `observability.py`, `synthetic_test.py`)
+# Independent verification of retrieval items 5–6 (`tmatrix.retrieval.fit`, `tmatrix.retrieval.observability`, `tmatrix.retrieval.synthetic_test`)
 
 Verifier pass, 2026-08-06. Every number below was produced by the verifier
 re-running the shipped code and by an **independently written** check script
@@ -14,16 +14,17 @@ smoke frequencies ifreq 32 (λ = 12.00 µm) and ifreq 48 (λ = 8.00 µm).
 |---|---|
 | Cached `C` is bit-for-bit unchanged by `predict` / `fit` / `AnalyticJacobian` (17 angles) | PASS |
 | `pack_S` applies `sqrt(w)` to **both** Re and Im; `objective == Σ wᵢ\|dSᵢ\|² == ‖weighted residual‖²` | PASS (agreement to 1e-12 relative) |
-| `fit.py` defaults: `direction = -1`, `t0 = None` (Born seed 0) | PASS |
+| `tmatrix.retrieval.fit` defaults: `direction = -1`, `t0 = None` (Born seed 0) | PASS |
 | Analytic Jacobian vs an **O(h⁴) Richardson-extrapolated** central FD (independent of the shipped G2 test) | PASS — max column relative error **1.08e-11** (ifreq 32) / **5.41e-11** (ifreq 48) |
 | Truth-seeded closed loop (`C_clean`) stays at the truth | PASS — objective **8.7e-31** / **2.6e-30**, entry error **3.1e-12** / **3.8e-12** |
-| Shipped `test_fit_smoke.py` | 15/15 PASS |
-| Shipped `synthetic_test.py --freqs 32,48` | all 6 machinery gates PASS, 574 s |
-| Shipped `observability.py --ifreq 32 --basis bright --angles campaign` | reproduces: 20/20 SVs above λ, cond 2.23e4, `s_min` 2.11e-2 |
+| Shipped `tests/retrieval/test_fit_smoke.py` | 15/15 PASS |
+| Shipped `python -m tmatrix.retrieval.synthetic_test --freqs 32,48` | all 6 machinery gates PASS, 574 s |
+| Shipped `python -m tmatrix.retrieval.observability --ifreq 32 --basis bright --angles campaign` | reproduces: 20/20 SVs above λ, cond 2.23e4, `s_min` 2.11e-2 |
 
 The analytic-Jacobian result is **five orders of magnitude tighter** than the
-gate `test_fit_smoke.py` claims, because Richardson extrapolation removes the
-FD truncation term that limited the shipped comparison.
+gate `tests/retrieval/test_fit_smoke.py` claims, because Richardson
+extrapolation removes the FD truncation term that limited the shipped
+comparison.
 
 ### A suspicion that was checked and found harmless
 
@@ -107,7 +108,7 @@ frequencies.
 
 ## 3. The regularization protocol is itself a major error source
 
-`synthetic_test.py`'s step 3 uses an isotropic Tikhonov prior
+`tmatrix.retrieval.synthetic_test`'s step 3 uses an isotropic Tikhonov prior
 `tik = 1/τ²`, `τ = ‖pack(T_bp)‖/√n_par`. Measured consequences:
 
 - **The noise ladder is inverted** at ifreq 32: dipole error *falls* as σ

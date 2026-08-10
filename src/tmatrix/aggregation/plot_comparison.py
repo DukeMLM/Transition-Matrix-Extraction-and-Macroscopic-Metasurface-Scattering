@@ -1,6 +1,7 @@
 """The whole study in one figure: 4 atoms, 6 mixed cells, 10 CST benchmarks.
 
-    python plot_comparison.py [--out results_2x2_super_l3/fig4_comparison.png]
+    python -m tmatrix.aggregation.plot_comparison \
+        [--out results_2x2_super_l3/fig4_comparison.png]
 
 Top row     single atoms, the two-species checkerboards, then ONE PANEL PER
             four-distinct-atom cell -- all three distinct arrangements of the

@@ -26,7 +26,7 @@ its worst pair is looser (ρ 0.854 against 0.944), *and* it is the more nearly
 mirror-symmetric. `a,c;d,b` breaks the tie because it reproduces `a,b;c,d`'s
 pair geometry **exactly** — same worst pair, same ρ, same 0.448 µm gap — while
 placing a different pair on the diagonal. The predictors are computed by
-[`../arrangement_predictors.py`](../arrangement_predictors.py).
+[`src/tmatrix/aggregation/arrangement_predictors.py`](../../src/tmatrix/aggregation/arrangement_predictors.py).
 
 ## Verdict: the convergence ratio is the driver
 
@@ -99,7 +99,8 @@ is in the truncated outgoing→regular translation that both share, exactly wher
 ## Against the direct CST supercell run
 
 5 972 s (1.66 h), 1 005 in-band samples after interpolation, sharing the
-`runs/empty` companion run. Built by `build_2x2_supercell.py --pair ACDB`, every
+`runs/empty` companion run. Built by
+`tmatrix.aggregation.cst_supercell.build_2x2_supercell --pair ACDB`, every
 solver, mesh, material and boundary setting identical to the other nine
 benchmarks.
 
@@ -136,7 +137,7 @@ wrong, it is not the aggregate power leaving the sheet; it is where the
 Same layout as `../results_2x2_super_l3/`; `../results_2x2_ACDB_fine/` holds the
 same sweep on a 4× refined grid, and the Jones-matrix data for all three
 four-atom arrangements is in `../results_2x2_ABCD_l3/jones_xy.npz`, regenerated
-by [`../jones_xy.py`](../jones_xy.py).
+by [`src/tmatrix/aggregation/jones_xy.py`](../../src/tmatrix/aggregation/jones_xy.py).
 
 ## Incidental: birefringence tracks B–D adjacency
 

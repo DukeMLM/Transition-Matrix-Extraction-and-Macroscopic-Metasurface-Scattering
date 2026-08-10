@@ -31,12 +31,12 @@ gets +1, M_{1,0} (z magnetic dipole, a pseudovector component) gets +1,
 M_{1,+-1} gets -1.  These are exactly the horizontal-parity assignments the
 proposal quotes in par. 3.1.
 
-MIRROR TRAP, restated.  aggregation/mirror.py's `mirror_parity_signs` looks
-like this operator but is NOT: it computes D . V(sigma rho) with
+MIRROR TRAP, restated.  tmatrix.aggregation.mirror's `mirror_parity_signs`
+looks like this operator but is NOT: it computes D . V(sigma rho) with
 D = diag(-1, -1, +1) = -M, the PEC IMAGE construction, so its signs are the
-NEGATIVE of (S1).  parametrize.py warns against using it as the C4v vertical
-mirror; it is equally wrong here up to an overall sign, and the numeric gate
-below is what settles the question.
+NEGATIVE of (S1).  tmatrix.retrieval.parametrize warns against using it as the
+C4v vertical mirror; it is equally wrong here up to an overall sign, and the
+numeric gate below is what settles the question.
 
 Counts this module verifies (none of them assumed)
 --------------------------------------------------

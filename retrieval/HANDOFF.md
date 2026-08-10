@@ -25,10 +25,10 @@ re-running gates. That protocol caught real bugs in every wave so far.
 ## Environment (all verified working)
 
 - Repo: `D:\Claude\T matrix` (space in path — always quote). Branch `dary`,
-  do NOT commit unless the user asks. Do NOT modify `aggregation/` or any
-  validated file; new work goes in `retrieval/`.
+  do NOT commit unless the user asks. Do NOT modify `src/tmatrix/aggregation/`
+  or any validated file; new work goes in `src/tmatrix/retrieval/`.
 - Python: conda env `cst_inference`. Bash:
-  `eval "$(conda shell.bash hook 2>/dev/null)" && conda activate cst_inference && cd "/d/Claude/T matrix/retrieval" && python ...`
+  `eval "$(conda shell.bash hook 2>/dev/null)" && conda activate cst_inference && cd "/d/Claude/T matrix" && python -m tmatrix.retrieval.<module> ...`
 - Bash calls cap at 10 min; long jobs → `run_in_background` or checkpointed
   scripts.
 - Reference data: `../test/single/saw_gold_wl15p0025um.tmat.h5`
@@ -49,7 +49,7 @@ re-running gates. That protocol caught real bugs in every wave so far.
 | 7 | `cst_campaign.py` | **DONE + VERIFIED** (19-run manifest in `cst_runs/`; `--build` creates projects only). 8 starter projects **BUILT** 2026-08-07. Solve driver is now `cst_solve.py` (separate module) |
 | 8 | `deembed.py` (de-embed half) | **DONE + VERIFIED** (10/10 synthetic tests) |
 | 8b | `validate_against_reference.py` | **DONE + VERIFIED** — 20 machinery gates PASS on re-run, exit 0. §8.1 held-out acceptance **PASSES**: fit 4 angles, predict 9, worst \|dS\| **6.0e-4** vs the 1e-2 gate (9.1e-3 at σ=3e-3). Carries the new χ² channel-dictionary discriminant |
-| 9 | `cst_solve.py` | **DONE + VERIFIED** — sequential, checkpointed, resumable; §7 ordering enforced *in the execution loop* (`enforce_order`, cst_solve.py:1384), not merely documented. **Exactly one solver call site: `cst_solve.py:418`** (`m3d.FDSolver.Start()`), byte-identical to `build_saw_unitcell.py:271`. Use `--timeout-min 0` (the watchdog path is untested) |
+| 9 | `cst_solve.py` | **DONE + VERIFIED** — sequential, checkpointed, resumable; §7 ordering enforced *in the execution loop* (`enforce_order`, cst_solve.py:1384), not merely documented. **Exactly one solver call site: `cst_solve.py:418`** (`m3d.FDSolver.Start()`), byte-identical to `build_saw_unitcell.py:269`. Use `--timeout-min 0` (the watchdog path is untested) |
 | 10 | `gate_study.py` | **DONE** — span/estimator/angle-set/threshold ladders; `results/GATE_STUDY.md` |
 
 Every "VERIFIED" row: I read the full source and re-ran the gates myself;

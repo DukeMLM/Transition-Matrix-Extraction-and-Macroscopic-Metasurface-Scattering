@@ -1,13 +1,13 @@
 """Where the disagreement with direct CST comes from, frequency by frequency.
 
-    python error_budget.py results_A_ewald_l3
-    python error_budget.py results_2x2_super_l3 --draws 32
+    python -m tmatrix.aggregation.error_budget results_A_ewald_l3
+    python -m tmatrix.aggregation.error_budget results_2x2_super_l3 --draws 32
 
 The aggregation itself is exact -- it reproduces an independent treams
-implementation to 1e-12 (`test_supercell.py`).  Everything that remains between
-a reconstruction and its direct full-wave reference is therefore inherited from
-the input T-matrices, and this script separates the two things that decide how
-much of it survives into S:
+implementation to 1e-12 (`tests/aggregation/test_supercell.py`).  Everything
+that remains between a reconstruction and its direct full-wave reference is
+therefore inherited from the input T-matrices, and this script separates the
+two things that decide how much of it survives into S:
 
   how badly T is known        the h5's own stored `residual`, and the isolated
                               scattering cross section that sets its SNR --

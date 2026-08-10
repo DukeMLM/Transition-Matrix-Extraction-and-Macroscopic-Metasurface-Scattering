@@ -45,8 +45,9 @@ Z0 CANCELS: A carries sqrt(Z0), W carries 1/sqrt(Z0), so every entry of
 W T A is impedance independent.  Z0 = 1 is therefore used, and the flux
 factor is stored as nu = sqrt(k / (area |k_z|)) with alpha = sqrt(2) nu.
 
-Sanity anchor (gated in test_fastfull_core.py): for a cell in which only one
-order propagates, W T_eff A + S_empty reproduces sparams_oblique's S11 / S21
+Sanity anchor (gated in tests/retrieval/test_fastfull_core.py): for a cell in
+which only one order propagates, W T_eff A + S_empty reproduces
+sparams_oblique's S11 / S21
 Jones blocks to roundoff, because there alpha_in = alpha_out and the product
 of the two normalizations collapses back to 2 pi i / (k * area * cos theta).
 
@@ -69,7 +70,7 @@ for entry, the mapping table in the sparams_oblique docstring: for
 illumination with d_in = +1 every S21 entry maps with +, while the TM
 RECEIVE row of S11 (whose outgoing wave has d = -1) maps with -1.  That is
 the sign whose omission took the campaign's chi^2_red from 658.9 to 2.49
-(retrieval/HANDOFF.md, deembed.py "S11 TM-ROW SIGN").
+(retrieval/HANDOFF.md, tmatrix.retrieval.deembed "S11 TM-ROW SIGN").
 
 Two caveats, both deliberate:
 
@@ -115,7 +116,7 @@ def farfield_basis(k, modes, rhat_pts):
                      == np.tensordot(f, farfield_basis(k, modes, rhat),
                                      axes=(0, 0))
     exactly (same arithmetic, contraction pulled out); gated in
-    test_fastfull_core.py.
+    tests/retrieval/test_fastfull_core.py.
     """
     pts = np.atleast_2d(np.asarray(rhat_pts, dtype=float))
     nrm = np.linalg.norm(pts, axis=1)
@@ -140,7 +141,7 @@ def plane_wave_coeffs_batch(khat, ehat, modes):
     Same arithmetic with the angular tables built once for all directions
     instead of once per direction (the design search evaluates thousands of
     candidate cells).  Gated against plane_wave_coeffs entry by entry in
-    test_fastfull_core.py.
+    tests/retrieval/test_fastfull_core.py.
     """
     khat = np.atleast_2d(np.asarray(khat, dtype=float))
     ehat = np.atleast_2d(np.asarray(ehat, dtype=complex))
@@ -177,7 +178,8 @@ def gauge_signs(channels, gauge=GAUGE_CST, mode_gauge=None):
     mode_gauge : optional (n_channels,) array of +/-1, the residual per-port-
         mode orientation freedom.  It multiplies BOTH s_in and s_out of a
         channel, so it acts on S as S -> D S D and can never change a
-        co-polar diagonal entry (deembed.py's label-hypothesis family).
+        co-polar diagonal entry (tmatrix.retrieval.deembed's
+        label-hypothesis family).
     """
     n = channels.n
     if gauge == GAUGE_PHYSICAL:

@@ -44,9 +44,10 @@ and the incident coefficients come from sparams_oblique itself at T = 0;
 T to <= validate_tol (1e-9) -- this pins L and the x-solve (measured
 ~1e-16); (3) the resolvent-derivative calculus is cross-checked against
 an INDEPENDENT central-finite-difference Jacobian (observability.jacobian
-at FD step 1e-8) in test_fit_smoke.py -- measured column-wise agreement
-5.2e-8 / 7.2e-9 at the smoke frequencies.  Pass jac='2-point' (or any
-scipy jac spec) through **lsq_kwargs to fall back to finite differences.
+at FD step 1e-8) in tests/retrieval/test_fit_smoke.py -- measured
+column-wise agreement 5.2e-8 / 7.2e-9 at the smoke frequencies.  Pass
+jac='2-point' (or any scipy jac spec) through **lsq_kwargs to fall back
+to finite differences.
 
 CAMPAIGN CONVENTION: direction = -1 (incidence from +z travelling down,
 the CST/treams illumination) is the DEFAULT in this module and everything
@@ -69,7 +70,7 @@ campaign 13 angles): predict 1.51 ms/angle (19.6 ms / residual
 evaluation); analytic Jacobian ~6-10 ms (full 68-basis); bright-basis fit
 0.3-6 s (15-270 residual calls), observable-restricted full fit 15-40 s
 (600-1600 calls incl. multistart; numbers re-measured and reported by
-test_fit_smoke.py / synthetic_test.py).
+tests/retrieval/test_fit_smoke.py / synthetic_test.py).
 
 MEASURED IDENTIFIABILITY STRUCTURE (campaign-13 specular data; central to
 every gate interpretation downstream -- see synthetic_test.py):
@@ -232,7 +233,7 @@ class AnalyticJacobian:
     comes from sparams_oblique itself evaluated at T = 0, and the affine
     model must reproduce fm.predict at the reference T of this frequency to
     <= validate_tol, else construction RAISES.  The derivative calculus is
-    additionally FD-cross-checked in test_fit_smoke.py.
+    additionally FD-cross-checked in tests/retrieval/test_fit_smoke.py.
 
     Row/packing layout is EXACTLY ForwardModel.pack_S: complex observable
     index c = ((angle*2 + blk)*2 + a)*2 + b, packed rows = [Re(all c),
@@ -695,4 +696,4 @@ def format_compare(cmp, modes, top=None):
 
 if __name__ == "__main__":
     print(__doc__)
-    print("Self-test: python test_fit_smoke.py")
+    print("Self-test: python tests/retrieval/test_fit_smoke.py")

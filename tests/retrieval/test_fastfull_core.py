@@ -1,6 +1,7 @@
-"""Gates for retrieval/fastfull: lattice, transforms, symmetry.
+"""Gates for tmatrix.retrieval.fastfull: lattice, transforms, symmetry.
 
-Run:  python test_fastfull_core.py          (from retrieval/, env cst_inference)
+Run:  python tests/retrieval/test_fastfull_core.py   (from the repo root,
+      env cst_inference), or  pytest -k fastfull_core
 
 Every gate here is a re-derivation against something already validated, not a
 self-consistency check:

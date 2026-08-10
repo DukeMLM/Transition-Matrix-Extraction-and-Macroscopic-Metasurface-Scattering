@@ -1,10 +1,11 @@
 """Ewald lattice coupling C for a general 2-D Bravais lattice (milestone M2).
 
 M1 identified this as the blocker: the repository's tapered real-space Bloch
-sum (`bloch_lattice.py`, generalized in `coupling.py`) needs many lattice
-sites inside a Gaussian taper of length Rc, and a diffractive coding cell has
-a pitch LARGER than the taper.  `coupling.converged_C` correctly refuses
-there.  This module supplies the Ewald-summed alternative through `treams`,
+sum (`tmatrix.retrieval.bloch_lattice`, generalized in `coupling.py`) needs
+many lattice sites inside a Gaussian taper of length Rc, and a diffractive
+coding cell has a pitch LARGER than the taper.  `coupling.converged_C`
+correctly refuses there.  This module supplies the Ewald-summed alternative
+through `treams`,
 which is also the independent second implementation the proposal's Gate D
 asks for ("preferably the repository implementation and an Ewald/treams
 calculation").
@@ -72,7 +73,8 @@ def lattice_sum_C(lattice, k, modes, k_par, eta=0, pol_flip=False):
 
     Parameters
     ----------
-    lattice : fastfull.lattice.Lattice2D  (or anything with a (2, 2) `.A`)
+    lattice : tmatrix.retrieval.fastfull.lattice.Lattice2D  (or anything with
+        a (2, 2) `.A`)
     k : float          embedding wavenumber, rad/um
     modes : vswf.ModeBasis
     k_par : (2,) in-plane Bloch vector, rad/um.  Sign convention is the

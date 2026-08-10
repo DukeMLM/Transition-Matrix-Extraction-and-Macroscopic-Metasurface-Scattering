@@ -2,7 +2,7 @@
 
 The validated pipeline computes C(k, k_par) = sum_{R != 0} A(R) e^{+i k_par.R}
 for a SQUARE lattice by Gaussian-tapered shell sums with Richardson
-extrapolation in 1/Rc^2 (retrieval/bloch_lattice.py, verified against a
+extrapolation in 1/Rc^2 (tmatrix.retrieval.bloch_lattice, verified against a
 brute-force per-site sum to 1.3e-15).  The assembly step there is already
 lattice-agnostic -- it consumes only radii, per-site azimuths and the
 in-plane rotation identity -- so extending it to a rectangular or oblique
@@ -44,7 +44,7 @@ def lattice_sum_C(lattice, k, modes, r0, quad, k_par,
                   projector=None, shells_cache=None):
     """C(k, k_par) for `lattice`, same conventions as
     bloch_lattice.lattice_sum_C_bloch (which it reproduces exactly for a
-    square lattice -- gated in test_fastfull_core.py).
+    square lattice -- gated in tests/retrieval/test_fastfull_core.py).
 
     shells_cache : optional dict keyed by (k, lattice id, r_max); the
         translation-operator build is the expensive part and depends on

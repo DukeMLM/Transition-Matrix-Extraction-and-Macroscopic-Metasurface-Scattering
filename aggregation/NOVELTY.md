@@ -60,11 +60,11 @@ periodic and finite aggregation.** The intersection (reflection-coupled /
 image-corrected per-site T-matrices from a commercial solver) × (flat metallic
 atoms on ground planes — where SMUTHI documentedly fails) × (the same extracted
 object driving periodic S-parameter stacks AND heterogeneous finite arrays) is
-claimed by no surveyed work. The PEC-image machinery in `mirror.py` (validated by
-machine-exact unitarity of a lossless array over PEC) is the seed; the full
-version needs the Sommerfeld R-matrix of the manual's Stage 2. Defensible because
-it attacks a *documented failure mode* of the incumbent, not a gap of
-convenience.
+claimed by no surveyed work. The PEC-image machinery in
+`tmatrix.aggregation.mirror` (validated by machine-exact unitarity of a lossless
+array over PEC) is the seed; the full version needs the Sommerfeld R-matrix of
+the manual's Stage 2. Defensible because it attacks a *documented failure mode*
+of the incumbent, not a gap of convenience.
 
 **Lane 3 — Design-by-library around a non-differentiable commercial solver.**
 A closed loop: CST-extracted T-matrix library + ML surrogate/interpolation over
@@ -99,7 +99,10 @@ defensible build order.
   reciprocity vs. stored metrics, treams and direct-CST closure at ≤0.3% — is the
   quality-enforcement groundwork).
 - Finite-array Foldy–Lax with per-site T-matrices and arbitrary in-plane
-  positions (`aggregate.py`), plus the periodic lattice-sum path (`translate.py`).
-- PEC-image ground-plane coupling (`mirror.py`) — Lane 2's special case, with the
-  unitarity test that any Sommerfeld generalization must also pass.
-- The web viewer (`webview/`) and diagnostics tooling for extracted-file QA.
+  positions (`tmatrix.aggregation.aggregate`), plus the periodic lattice-sum
+  path (`tmatrix.aggregation.translate`).
+- PEC-image ground-plane coupling (`tmatrix.aggregation.mirror`) — Lane 2's
+  special case, with the unitarity test that any Sommerfeld generalization must
+  also pass.
+- The web viewer (`src/tmatrix/aggregation/webview/`) and diagnostics tooling
+  for extracted-file QA.

@@ -49,8 +49,8 @@ campaign adds on top).
 PASS/FAIL summary: the LITERAL doc gates on A-bright / A-full are printed
 with their measured numbers and marked "[measured FAIL -- expected]" --
 they are findings about the data's information content, not defects (the
-C-clean loop and test_fit_smoke.py prove the machinery is exact).  The
-exit code reflects ONLY the machinery gates (C-clean basin
+C-clean loop and tests/retrieval/test_fit_smoke.py prove the machinery is
+exact).  The exit code reflects ONLY the machinery gates (C-clean basin
 certification, step-3 linear-theory consistency, and the structural
 theta=0 darkness of the even-m sub-basis).
 
@@ -106,12 +106,14 @@ observability npz (via observability.analyze; the doc-named default
 figure paths are produced by the observability.py CLI).
 
 Usage (each frequency fits in well under 10 min; run per-freq if needed):
-    python synthetic_test.py --freqs 32,48
-    python synthetic_test.py --freqs 32 --trials 10 --sigmas 1e-3,3e-3,1e-2
-    python synthetic_test.py --freqs 48 --no-noise      # step 2 only
+    python -m tmatrix.retrieval.synthetic_test --freqs 32,48
+    python -m tmatrix.retrieval.synthetic_test --freqs 32 --trials 10 \
+        --sigmas 1e-3,3e-3,1e-2
+    python -m tmatrix.retrieval.synthetic_test --freqs 48 --no-noise
+                                                       # step 2 only
 Frequencies whose campaign angles are not yet cached are skipped
 gracefully, so the eventual full-band run is
-    python synthetic_test.py --freqs all
+    python -m tmatrix.retrieval.synthetic_test --freqs all
 """
 import argparse
 import os

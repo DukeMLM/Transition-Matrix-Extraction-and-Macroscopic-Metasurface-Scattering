@@ -26,10 +26,10 @@ cutoff mask r <= r_max(theta) are applied; the mask replicates
 bloch_lattice.slice_shells' float rule (keep shells with
 rint((r/pitch)^2) * pitch^2 <= r_max(theta)^2), so each accumulated sum
 equals a fresh lattice_sum_C_bloch(kRc(theta)) call up to floating-point
-regrouping (verified <= 1e-13 rel in test_precompute.py).  The three taper
-sums per angle are Richardson-extrapolated at the end with the same
-Lagrange-in-1/Rc^2 code as translate/bloch_lattice.  One RegularProjector is
-reused throughout a process.
+regrouping (verified <= 1e-13 rel in tests/retrieval/test_precompute.py).
+The three taper sums per angle are Richardson-extrapolated at the end with
+the same Lagrange-in-1/Rc^2 code as translate/bloch_lattice.  One
+RegularProjector is reused throughout a process.
 
 Checkpointing: one npz per frequency index under results/C_bloch/
 (freq_XX.npz), storing C (17, n, n) with a per-angle `have` mask, the angle
@@ -44,13 +44,20 @@ deterministic and byte-reproducible).
 
 Usage
 -----
-  python precompute_C.py                       # all 49 freqs, all 17 angles
-  python precompute_C.py --freqs 48,32         # explicit frequency indices
-  python precompute_C.py --stride 4            # indices 0,4,...,48
-  python precompute_C.py --angles 0,13-16      # angle subset (e.g. treams set)
-  python precompute_C.py --workers 4           # multiprocessing over freqs
-  python precompute_C.py --consolidate         # write results/C_bloch.npz
-  python precompute_C.py --dry-run             # shell counts + projected cost
+  python -m tmatrix.retrieval.precompute_C
+                              # all 49 freqs, all 17 angles
+  python -m tmatrix.retrieval.precompute_C --freqs 48,32
+                              # explicit frequency indices
+  python -m tmatrix.retrieval.precompute_C --stride 4
+                              # indices 0,4,...,48
+  python -m tmatrix.retrieval.precompute_C --angles 0,13-16
+                              # angle subset (e.g. treams set)
+  python -m tmatrix.retrieval.precompute_C --workers 4
+                              # multiprocessing over freqs
+  python -m tmatrix.retrieval.precompute_C --consolidate
+                              # write results/C_bloch.npz
+  python -m tmatrix.retrieval.precompute_C --dry-run
+                              # shell counts + projected cost
 
 Progress lines (per-freq shell counts and timings) go to stdout (flushed) and
 are appended to results/C_bloch/progress.log.
@@ -341,7 +348,7 @@ def consolidate(out_dir):
         "campaign 13 [(0,0),(15,0),(15,22.5),(15,45),(30,0),(30,22.5),"
         "(30,45),(45,0),(45,22.5),(45,45),(60,0),(60,22.5),(60,45)] then "
         "treams-validation 4 [(20,0),(20,45),(40,0),(40,45)]. Built by "
-        "retrieval/precompute_C.py (streaming, checkpointed)."
+        "tmatrix.retrieval.precompute_C (streaming, checkpointed)."
     )
     np.savez(CONSOLIDATED, C=C, k=ks, kpar=kpar, lam_um=data.wavelength_um,
              freq_hz=data.freq, theta_deg=THETA_DEG, phi_deg=PHI_DEG,
@@ -356,7 +363,7 @@ def consolidate(out_dir):
 def dry_run(freq_indices, angle_idx):
     """Per-freq shell counts and projected cost (no projections run)."""
     data = TMatrixData(DATA)
-    ms_per_shell = 5.2            # measured (test_bloch_lattice.py test (d))
+    ms_per_shell = 5.2  # measured (tests/retrieval/test_bloch_lattice.py (d))
     print(f"{'ifreq':>5} {'lam_um':>7} {'k':>9} {'r_max_sup':>10} "
           f"{'nshell':>8} {'proj_est_min':>12}")
     tot = 0.0

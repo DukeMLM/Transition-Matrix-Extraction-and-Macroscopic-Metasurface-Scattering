@@ -34,7 +34,7 @@ Group representation on the VSWF basis (tmat.h5 convention, mode order from
         (l, m, electric) -> +(-1)^m (l, -m, electric)
         (l, m, magnetic) -> -(-1)^m (l, -m, magnetic)
 
-  MIRROR TRAP (doc section 4): aggregation/mirror.py's mirror_parity_signs
+  MIRROR TRAP (doc section 4): tmatrix.aggregation.mirror's mirror_parity_signs
   encodes the HORIZONTAL z-mirror diag(1, 1, -1) -- an element of C4h, NOT a
   C4v mirror.  It is diagonal in (l, m); a vertical mirror maps m -> -m (a
   signed permutation, block-antidiagonal in m).  Using sigma_h builds the

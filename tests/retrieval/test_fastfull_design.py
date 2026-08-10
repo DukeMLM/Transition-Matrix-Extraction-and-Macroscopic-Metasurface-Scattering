@@ -1,6 +1,7 @@
-"""Gates for retrieval/fastfull: jacobian, cost, design.
+"""Gates for tmatrix.retrieval.fastfull: jacobian, cost, design.
 
-Run:  python test_fastfull_design.py        (from retrieval/, env cst_inference)
+Run:  python tests/retrieval/test_fastfull_design.py   (from the repo root,
+      env cst_inference), or  pytest -k fastfull_design
 
   (a) the analytic Jacobian (J1) matches a central finite difference, at
       C = 0 and with the real cached lattice coupling, along BOTH the real

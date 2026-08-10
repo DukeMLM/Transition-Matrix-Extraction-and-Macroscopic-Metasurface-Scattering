@@ -1,6 +1,6 @@
 """One figure for the whole experiment: three atoms, three mixed cells.
 
-    python plot_experiment_summary.py
+    python -m tmatrix.aggregation.plot_experiment_summary
 
 Left   : the three pure 8 um lattices, each over its own direct CST run.
 Middle : the three x,y;y,x checkerboards built from them, same treatment.

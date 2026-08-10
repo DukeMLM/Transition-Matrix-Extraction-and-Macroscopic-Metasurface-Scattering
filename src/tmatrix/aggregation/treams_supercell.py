@@ -7,14 +7,14 @@ basis-position phases and power normalization.  Agreement therefore tests
 `supercell.py` end to end (coupling, block solve, Eq. (64) output map, Floquet
 normalization), which is manual section 8 row 9.
 
-    python treams_supercell.py --cell 16 \
-        --site ../test/2x2/saw_gold_wl13p10um_10to34THz.tmat.h5 -4 -4 \
-        --site ../test/2x2/saw_gold_wl17p30um_10to34THz.tmat.h5  4 -4 \
-        --site ../test/2x2/saw_gold_wl17p30um_10to34THz.tmat.h5 -4  4 \
-        --site ../test/2x2/saw_gold_wl13p10um_10to34THz.tmat.h5  4  4 \
+    python -m tmatrix.aggregation.treams_supercell --cell 16 \
+        --site test/2x2/saw_gold_wl13p10um_10to34THz.tmat.h5 -4 -4 \
+        --site test/2x2/saw_gold_wl17p30um_10to34THz.tmat.h5  4 -4 \
+        --site test/2x2/saw_gold_wl17p30um_10to34THz.tmat.h5 -4  4 \
+        --site test/2x2/saw_gold_wl13p10um_10to34THz.tmat.h5  4  4 \
         --lmax 3 --out results_2x2_super_l3/treams_reference.npz
 
-Conventions match aggregation/treams_reference.py, which was gated against the
+Conventions match tmatrix.aggregation.treams_reference, which was gated against the
 repository for `test/single`: normal incidence from the +z side (treams
 modetype "down"), incident E = x_hat exp(-i k z) with the phase reference at
 z = 0, S21 the total co-polarized 0th-order amplitude below the array

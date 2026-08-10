@@ -1,7 +1,7 @@
 """One table across several run_supercell.py output directories.
 
-    python compare_cases.py results_A_ewald_l3 results_B_ewald_l3 ...
-    python compare_cases.py --all
+    python -m tmatrix.aggregation.compare_cases results_A_ewald_l3 results_B_ewald_l3 ...
+    python -m tmatrix.aggregation.compare_cases --all
 
 For each case it reports the agreement with the independent treams
 implementation (which measures the aggregation) and with the direct CST run

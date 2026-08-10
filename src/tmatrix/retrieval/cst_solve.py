@@ -332,7 +332,8 @@ def load_manifest(runs_dir):
     if not p.exists():
         raise SolveError(
             f"no campaign manifest at {p} -- run "
-            f"`python cst_campaign.py` (dry-run, the default) first")
+            f"`python -m tmatrix.retrieval.cst_campaign` (dry-run, the "
+            f"default) first")
     with open(p, encoding="utf-8") as fh:
         return json.load(fh)
 
@@ -514,7 +515,7 @@ def _launch_solver(project):
     it finishes.  Returns the wall time in seconds.
 
     *** THIS FUNCTION CONTAINS THE ONLY SOLVER LAUNCH IN THE REPOSITORY. ***
-    It is the validated pattern of aggregation/cst_direct/
+    It is the validated pattern of src/tmatrix/aggregation/cst_direct/
     build_saw_unitcell.py:271 (m3d.FDSolver.Start()), unchanged.  Callers
     must guarantee that no other solve is in flight -- a single license, one
     solver at a time, strictly sequential.
@@ -755,7 +756,8 @@ def process_run(run, stage, env, manifest, man_hash, runs_dir, log, args):
     if not project_path.exists():
         msg = (f"project does not exist: {project_path}.  This driver does "
                f"NOT create projects (that would need a second "
-               f"DesignEnvironment).  Run `python cst_campaign.py --build` "
+               f"DesignEnvironment).  Run "
+               f"`python -m tmatrix.retrieval.cst_campaign --build` "
                f"first, then re-run this driver -- it will resume here.")
         log(f"  [FATAL] {rid}: {msg}")
         return finish("project_missing", msg)
@@ -1681,7 +1683,8 @@ def print_plan(runs_dir, manifest, man_hash, sstat, log, requested=None,
             elif cs["valid"] and cs["stale"]:
                 action = "skip (stale; --redo to re-solve)"
             elif proj == "MISSING":
-                action = "BLOCKED: run `cst_campaign.py --build`"
+                action = ("BLOCKED: run "
+                          "`python -m tmatrix.retrieval.cst_campaign --build`")
             else:
                 action = f"SOLVE + extract ({cs['detail']})"
             if requested is not None and rid not in requested:

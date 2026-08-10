@@ -126,9 +126,9 @@ text preserved.
   error shared by both — the lmax=3 truncation above all — is invisible here.
 ## 5. Full-band synthetic study (all 49 frequencies)
 
-`python synthetic_test.py --freqs all` completed 49/49. The doc-literal
-§6.2/§6.3 gates fail band-wide, as the two smoke frequencies predicted and
-for the reasons `RETRIEVAL_LIMIT.md` decomposes.
+`python -m tmatrix.retrieval.synthetic_test --freqs all` completed 49/49.
+The doc-literal §6.2/§6.3 gates fail band-wide, as the two smoke frequencies
+predicted and for the reasons `RETRIEVAL_LIMIT.md` decomposes.
 
 **Machinery gates: 195 of 196 pass.** The single failure is worth stating
 precisely rather than rounding away:

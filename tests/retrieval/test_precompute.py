@@ -3,17 +3,19 @@
 Run per stage (each stage fits well under a 10-minute budget; stages (ii),
 (iii8), (iii12) recompute lattice sums from scratch and are the slow ones):
 
-  python test_precompute.py --stage i       # theta=0 vs stored run_demo C
-  python test_precompute.py --stage ii      # (30,22.5) vs fresh bloch sum
-  python test_precompute.py --stage iii8    # (60,45) vs fresh sum, lam=8
-  python test_precompute.py --stage iii12   # (60,45) vs fresh sum, lam=12
-  python test_precompute.py --stage iv      # resume/byte-identity, freq 48
-  python test_precompute.py --stage v       # timing + full-run extrapolation
-  python test_precompute.py --stage quick   # i only (no recompute)
+  python tests/retrieval/test_precompute.py --stage i     # theta=0 vs stored run_demo C
+  python tests/retrieval/test_precompute.py --stage ii    # (30,22.5) vs fresh bloch sum
+  python tests/retrieval/test_precompute.py --stage iii8  # (60,45) vs fresh sum, lam=8
+  python tests/retrieval/test_precompute.py --stage iii12 # (60,45) vs fresh sum, lam=12
+  python tests/retrieval/test_precompute.py --stage iv    # resume/byte-identity, freq 48
+  python tests/retrieval/test_precompute.py --stage v     # timing + full-run extrapolation
+  python tests/retrieval/test_precompute.py --stage quick # i only (no recompute)
+  pytest -k precompute                                    # stage quick, through pytest
 
 Smoke frequencies (nearest lam = 8 and 12 um): indices 48 and 32.  Stages
-(i)-(iv) require the checkpoints results/C_bloch/freq_48.npz and freq_32.npz
-(create with `python precompute_C.py --freqs 48,32 --angles all`).
+(i)-(iv) require the checkpoints retrieval/results/C_bloch/freq_48.npz and
+freq_32.npz (create with `python -m tmatrix.retrieval.precompute_C
+--freqs 48,32 --angles all`).
 
 Gates:
   (i)   C[angle (0,0)] vs aggregation/results/periodic_results.npz key "C"
@@ -62,7 +64,8 @@ def load_ck(ifreq):
     d = pc.load_checkpoint(path)
     if d is None:
         raise SystemExit(f"missing/invalid checkpoint {path} -- run "
-                         f"`python precompute_C.py --freqs {ifreq}` first")
+                         f"`python -m tmatrix.retrieval.precompute_C "
+                         f"--freqs {ifreq}` first")
     return d
 
 

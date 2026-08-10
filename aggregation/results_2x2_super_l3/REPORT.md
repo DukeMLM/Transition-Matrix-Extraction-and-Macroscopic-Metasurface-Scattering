@@ -15,28 +15,28 @@ meta-atoms in `test/2x2/`.
 
 ```bash
 # validation ladder (manual 6.5.5)
-python test_supercell.py                     # 40 checks, all pass
-python test_supercell.py --taper             # + the tapered-sum comparison
+python tests/aggregation/test_supercell.py            # 40 checks, all pass
+python tests/aggregation/test_supercell.py --taper    # + the tapered-sum comparison
 
 # experiment 1: each atom alone on its own 8 um lattice, vs its direct CST run
-python run_supercell.py --cell 8 --site ../test/2x2/saw_gold_wl13p10um_10to34THz.tmat.h5 0 0 --lmax 3 --out results_A_ewald_l3
-python run_supercell.py --cell 8 --site ../test/2x2/saw_gold_wl17p30um_10to34THz.tmat.h5 0 0 --lmax 3 --out results_B_ewald_l3
-python cst_packed_reference.py ../test/2x2/SAW_gold_noSub_packed.cst --run 6 --out results_A_ewald_l3/cst_direct_reference.csv
-python cst_packed_reference.py ../test/2x2/SAW_gold_noSub_packed.cst --run 2 --out results_B_ewald_l3/cst_direct_reference.csv
+python -m tmatrix.aggregation.run_supercell --cell 8 --site test/2x2/saw_gold_wl13p10um_10to34THz.tmat.h5 0 0 --lmax 3 --out results_A_ewald_l3
+python -m tmatrix.aggregation.run_supercell --cell 8 --site test/2x2/saw_gold_wl17p30um_10to34THz.tmat.h5 0 0 --lmax 3 --out results_B_ewald_l3
+python -m tmatrix.aggregation.cst_packed_reference test/2x2/SAW_gold_noSub_packed.cst --run 6 --out results_A_ewald_l3/cst_direct_reference.csv
+python -m tmatrix.aggregation.cst_packed_reference test/2x2/SAW_gold_noSub_packed.cst --run 2 --out results_B_ewald_l3/cst_direct_reference.csv
 
 # experiments 2-3: the checkerboard supercell + the finite-cluster T-matrix
-python run_supercell.py --cell 16 \
-    --site ../test/2x2/saw_gold_wl13p10um_10to34THz.tmat.h5 -4 -4 \
-    --site ../test/2x2/saw_gold_wl17p30um_10to34THz.tmat.h5  4 -4 \
-    --site ../test/2x2/saw_gold_wl17p30um_10to34THz.tmat.h5 -4  4 \
-    --site ../test/2x2/saw_gold_wl13p10um_10to34THz.tmat.h5  4  4 \
+python -m tmatrix.aggregation.run_supercell --cell 16 \
+    --site test/2x2/saw_gold_wl13p10um_10to34THz.tmat.h5 -4 -4 \
+    --site test/2x2/saw_gold_wl17p30um_10to34THz.tmat.h5  4 -4 \
+    --site test/2x2/saw_gold_wl17p30um_10to34THz.tmat.h5 -4  4 \
+    --site test/2x2/saw_gold_wl13p10um_10to34THz.tmat.h5  4  4 \
     --lmax 3 --cluster-lmax 12 --out results_2x2_super_l3
-python treams_supercell.py --cell 16 --site ... --lmax 3 --out results_2x2_super_l3/treams_reference.npz
+python -m tmatrix.aggregation.treams_supercell --cell 16 --site ... --lmax 3 --out results_2x2_super_l3/treams_reference.npz
 
 # experiment 4: the direct CST supercell simulation
-python cst_supercell/build_2x2_supercell.py
-python cst_supercell/read_supercell_results.py --out results_2x2_super_l3
-python plot_supercell.py results_2x2_super_l3
+python -m tmatrix.aggregation.cst_supercell.build_2x2_supercell
+python -m tmatrix.aggregation.cst_supercell.read_supercell_results --out aggregation/results_2x2_super_l3
+python -m tmatrix.aggregation.plot_supercell results_2x2_super_l3
 ```
 
 ---
@@ -65,7 +65,7 @@ power-normalized by √(k_z,G / k_z,in). Manual Eqs. (65)/(66) — the scalar
 `S21 = 1 + …`, `S11 = …` used by the one-atom code — are the G = 0,
 normal-incidence special case, and are reproduced exactly (§2, test 1).
 
-New code:
+New code (under `src/tmatrix/aggregation/`, except the suite):
 
 | file | contents |
 |---|---|
@@ -73,13 +73,13 @@ New code:
 | `ewald_supercell.py` | the same `W_st` by Ewald summation through treams, with an η-split refusal policy |
 | `run_supercell.py` | driver: any list of `tmat.h5` + positions + lattice → full Floquet S-matrix |
 | `treams_supercell.py` | independent end-to-end treams reference |
-| `test_supercell.py` | the §6.5.5 / §6.6 / §7.5 / §8 / §6.4 ladder |
+| `tests/aggregation/test_supercell.py` | the §6.5.5 / §6.6 / §7.5 / §8 / §6.4 ladder |
 | `cst_supercell/` | the direct CST supercell benchmark (build + solve + de-embed) |
 | `plot_supercell.py` | figures and agreement metrics |
 
 ---
 
-## 2. Validation ladder (manual §6.5.5) — `test_supercell.py`
+## 2. Validation ladder (manual §6.5.5) — `tests/aggregation/test_supercell.py`
 
 All 40 checks pass. The load-bearing ones:
 
@@ -119,12 +119,13 @@ periodic answer from above, monotonically:
 matters most — the same behaviour the one-atom case shows in
 `results_2x2/finite_results.npz`.)
 
-The treams check (`treams_supercell.py`) is not a lattice-sum comparison: treams
-builds its own block-diagonal cluster T-matrix, does its own Ewald lattice
-interaction, and does its own plane-wave projection with its own basis-position
-phases and power normalization. Agreement at 10⁻¹² therefore validates the
-coupling, the block solve, the Eq. (64) output map *and* the Floquet
-normalization — including the R/T sums over all nine open orders at 34 THz.
+The treams check (`tmatrix.aggregation.treams_supercell`) is not a lattice-sum
+comparison: treams builds its own block-diagonal cluster T-matrix, does its own
+Ewald lattice interaction, and does its own plane-wave projection with its own
+basis-position phases and power normalization. Agreement at 10⁻¹² therefore
+validates the coupling, the block solve, the Eq. (64) output map *and* the
+Floquet normalization — including the R/T sums over all nine open orders at
+34 THz.
 
 > One trap found here and worth recording: treams and this repository must be
 > compared **at the same incidence direction**. Illuminating from −z instead of
@@ -189,15 +190,16 @@ degrades as the primitive lattice approaches its own Rayleigh anomaly
 (λ_min/pitch = 1.10 here).
 
 `ewald_supercell.converged_W` therefore supplies `W` by Ewald summation, with
-the same refuse-rather-than-guess η policy as `retrieval/fastfull/ewald.py`: the
-automatic split must agree with an η ∈ {0.5, 0.7, 1.0} bracket, which it does to
-3×10⁻¹² on every cell here. It is also much cheaper — the same 25-frequency
-one-atom sweep takes **2.0 s** by Ewald against **64 s** tapered, and the gap
-widens with M² pair blocks.
+the same refuse-rather-than-guess η policy as
+`src/tmatrix/retrieval/fastfull/ewald.py`: the automatic split must agree with
+an η ∈ {0.5, 0.7, 1.0} bracket, which it does to 3×10⁻¹² on every cell here.
+It is also much cheaper — the same 25-frequency one-atom sweep takes **2.0 s**
+by Ewald against **64 s** tapered, and the gap widens with M² pair blocks.
 
 **Regression against the published one-atom `test/2x2` numbers.** Those used the
-tapered sum with `--lmax auto`. Re-run through `run_supercell.py` with Ewald
-coupling and the same adaptive truncation, atom A reproduces them exactly:
+tapered sum with `--lmax auto`. Re-run through
+`tmatrix.aggregation.run_supercell` with Ewald coupling and the same adaptive
+truncation, atom A reproduces them exactly:
 
 | | published (tapered, `--lmax auto`) | this driver (Ewald, `--lmax auto`) |
 |---|---|---|
@@ -207,8 +209,8 @@ coupling and the same adaptive truncation, atom A reproduces them exactly:
 | vs treams (at fixed lmax 3) | max 0.070, mean 0.019 | 6×10⁻¹⁶ |
 
 (The treams row is quoted at fixed lmax 3 in both columns, since
-`treams_supercell.py` takes one truncation for the whole sweep and a
-per-frequency `auto` comparison would not be like for like.)
+`tmatrix.aggregation.treams_supercell` takes one truncation for the whole sweep
+and a per-frequency `auto` comparison would not be like for like.)
 
 So swapping the lattice sum changes nothing about the one-atom answer except
 that the treams disagreement collapses to round-off — confirming that the
@@ -398,13 +400,13 @@ S11/S21 pair. The S11/S21 of §5.2 belong to the periodic problem.
 
 ## 6. Experiment 4 — direct CST simulation of the supercell
 
-`cst_supercell/build_2x2_supercell.py` builds the 16 × 16 µm cell with the four
-resonators in the checkerboard, every solver, mesh, material and boundary
-setting copied from the packed project's own periodic run (its
-`ModelHistory.json` steps 4/5/163/169/176–179), plus 20 Floquet modes per port
-so that all nine orders open at 34 THz are represented. A companion **empty**
-cell — identical geometry, no metal — measures the port-plane separation and
-serves as the manual's §8 row-7 background test.
+`src/tmatrix/aggregation/cst_supercell/build_2x2_supercell.py` builds the
+16 × 16 µm cell with the four resonators in the checkerboard, every solver,
+mesh, material and boundary setting copied from the packed project's own
+periodic run (its `ModelHistory.json` steps 4/5/163/169/176–179), plus 20
+Floquet modes per port so that all nine orders open at 34 THz are represented.
+A companion **empty** cell — identical geometry, no metal — measures the
+port-plane separation and serves as the manual's §8 row-7 background test.
 
 ### 6.1 The benchmark's own accuracy
 
@@ -512,7 +514,7 @@ the part of T the extraction resolves worst.
 |---|---|
 | `periodic_results.csv` | λ, f, lmax, cond, solve residual, η spread, complex S11/S21 (0th order) and cross-pol, R/T/A, open-order count, higher-order power, uncoupled sheet, cross sections |
 | `periodic_results.npz` | the same plus the run metadata |
-| `cluster_T.npz` | the finite-cluster `T^O` stack, 25 × 336 × 336 complex — **not tracked in git** (45 MB, incompressible); regenerate with `run_supercell.py --cluster-lmax 12` |
+| `cluster_T.npz` | the finite-cluster `T^O` stack, 25 × 336 × 336 complex — **not tracked in git** (45 MB, incompressible); regenerate with `python -m tmatrix.aggregation.run_supercell --cluster-lmax 12` |
 | `cst_direct_supercell.csv` | the direct CST run, de-embedded to z = 0: complex 0th-order S11/S21, cross-pol, R/T/A, higher-order power |
 | `cst_direct_supercell_orders.csv` | all 20 Floquet modes, both sides: \|G\|, k_z, propagating flag, complex S, power |
 | `floquet_orders.csv` | every propagating order at every frequency: (n1,n2), k_z, complex TE/TM amplitude, power |
@@ -527,7 +529,8 @@ Two further mixed cells were built from the same three measured atoms and are
 reported next to it — see [`../results_2x2_AC_l3/REPORT.md`](../results_2x2_AC_l3/REPORT.md)
 and [`../results_2x2_BC_l3/REPORT.md`](../results_2x2_BC_l3/REPORT.md), and
 [`../../experiment.md`](../../experiment.md) for the three-cell comparison.
-`python compare_cases.py --all` prints all six cases in one table.
+`python -m tmatrix.aggregation.compare_cases --all` prints all six cases in one
+table.
 
 Sibling directories produced by the same driver:
 
@@ -540,5 +543,5 @@ Sibling directories produced by the same driver:
 | `results_2x2_super_l4`, `results_2x2_super_auto` | the truncation sensitivity of §5.4 |
 | `results_A_ewald_l4`, `results_B_ewald_l4` | the same two lattices at lmax 4, the single-atom half of the same truncation study |
 | `results_2x2_super_fine` | the same supercell on a 4× refined frequency grid (`--refine 4`, T interpolated), which resolves the 16 µm dark resonance the stored 1 THz sampling aliases |
-| `results_B` | atom B through the *old* `run_case.py` driver (tapered coupling, `--lmax auto`) — the direct analogue of the published `results_2x2`, kept for comparison |
-| `cst_supercell/runs*/` | the CST projects: `*.cst`, `Model/3D/ModelHistory.json`, `Result/Model.log`, `design.json`, `build_log.txt`. The 2.4 GB solver working directories are gitignored; `build_2x2_supercell.py` re-creates them exactly. |
+| `results_B` | atom B through the *old* `tmatrix.aggregation.run_case` driver (tapered coupling, `--lmax auto`) — the direct analogue of the published `results_2x2`, kept for comparison |
+| `cst_supercell/runs*/` | the CST projects: `*.cst`, `Model/3D/ModelHistory.json`, `Result/Model.log`, `design.json`, `build_log.txt`. The 2.4 GB solver working directories are gitignored; `tmatrix.aggregation.cst_supercell.build_2x2_supercell` re-creates them exactly. |

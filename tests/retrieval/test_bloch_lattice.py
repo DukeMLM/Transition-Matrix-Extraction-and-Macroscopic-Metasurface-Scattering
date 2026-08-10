@@ -1,6 +1,7 @@
 """Tests (a)-(d) for bloch_lattice.py (retrieval deliverable 1).
 
-Run:  python test_bloch_lattice.py       (conda env cst_inference)
+Run:  python tests/retrieval/test_bloch_lattice.py  (conda env cst_inference)
+      pytest -k bloch_lattice                       (the same, through pytest)
 
 (a) k_par = 0 reproduces translate.lattice_sum_C (gate 1e-12 rel Frobenius;
     the code path is the same arithmetic, so near machine-exact expected).

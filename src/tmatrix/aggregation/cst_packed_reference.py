@@ -23,8 +23,10 @@ run).  ``deembed_length`` recovers it and shifts both S11 and S21 back to
 z = 0 for a z-symmetric model.  CST is e^{+j omega t}; this repo is
 e^{-i omega t}, so the de-embedded values are conjugated to match.
 
-    python cst_packed_reference.py ../test/2x2/SAW_gold_noSub_packed.cst --list
-    python cst_packed_reference.py ../test/2x2/SAW_gold_noSub_packed.cst \
+    python -m tmatrix.aggregation.cst_packed_reference \
+        test/2x2/SAW_gold_noSub_packed.cst --list
+    python -m tmatrix.aggregation.cst_packed_reference \
+        test/2x2/SAW_gold_noSub_packed.cst \
         --run 6 --out results_2x2/cst_direct_reference.csv
 """
 import argparse

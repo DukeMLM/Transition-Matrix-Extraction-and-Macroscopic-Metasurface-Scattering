@@ -2,7 +2,7 @@
 
 Companion to the auto-generated numbers in
 `retrieval/results/fastfull/M1_DESIGN_STUDY.md` (regenerate with
-`python -m fastfull.m1_study --samples 700`). Milestone M1 of
+`python -m tmatrix.retrieval.fastfull.m1_study --samples 700`). Milestone M1 of
 `FAST_FULL_TMATRIX_WHEEL_PROPOSAL.md`.
 
 **Revision 2 (2026-08-07), after the external review logged in
@@ -10,18 +10,19 @@ Companion to the auto-generated numbers in
 §5 reversed. See §8 for what was withdrawn and why.
 
 All numbers are at the **frequency-matched measured** complex-S discrepancy
-from `results/fit_sigma_from_closure.npz` (2.8417e-3 at 8 µm, 3.1751e-3 at
-20 µm), with the C = 0 screening Jacobian, and the reference wheel used only
-for benchmarking — never for design.
+from `retrieval/results/fit_sigma_from_closure.npz` (2.8417e-3 at 8 µm,
+3.1751e-3 at 20 µm), with the C = 0 screening Jacobian, and the reference
+wheel used only for benchmarking — never for design.
 
 ---
 
 ## 0. The error model, and why every number is a bracket
 
 The whitening level σ is the campaign's normal-incidence **closure**
-residual. `results/REAL_RETRIEVAL.md` §4.3 establishes that this residual is
-dominated by *model* error, not CST numerical noise: "because the dominant
-error is systematic rather than i.i.d. Gaussian, every χ² significance
+residual. `retrieval/results/REAL_RETRIEVAL.md` §4.3 establishes that this
+residual is dominated by *model* error, not CST numerical noise: "because the
+dominant error is systematic rather than i.i.d. Gaussian, every χ²
+significance
 quoted … is *indicative*."
 
 That matters because a coded cell has hundreds of modal observables
@@ -89,7 +90,7 @@ under the systematic model (101 % vs 40 % global). The wheel track needs only
 24 channels; at 24 channels the generic branch is *impossible*
 (rank(A) = 24 < 30), which is the proposal's par. 3 point that the generic
 gate is the stronger one. Inequality (D1), σ₄₀(H) ≥ σ₃₀(W)·σ₃₀(A), is gated
-in `test_fastfull_design.py`.
+in `tests/retrieval/test_fastfull_design.py`.
 
 The generic track keeps its value as an object-independent correctness
 reference — branch G of par. 9.3 runs exactly, noise-free, in gate (d) — not
@@ -121,8 +122,9 @@ sampled Bloch vectors were 45/200, 6/200 and 1/200 for the 2–6, 6–20 and
 **(b) No single fixed cell serves both ends of the band.** The 8 µm winners
 have *no* propagating orders at 20 µm (they are subwavelength there), and the
 20 µm winners are the exact 2.5× rescalings of the 8 µm ones — the whitened
-operator is λ-scale invariant, gated in `test_fastfull_design.py`. Par. 11's
-overlapping-subband strategy is mandatory, not a refinement.
+operator is λ-scale invariant, gated in
+`tests/retrieval/test_fastfull_design.py`. Par. 11's overlapping-subband
+strategy is mandatory, not a refinement.
 
 ## 5. Pooling encodings does not help
 
@@ -199,18 +201,20 @@ par. 6 seed cell (5471 min) was not.
 | band-RMS σ = 2.6333e-3 everywhere | **replaced** by the frequency-matched spectrum (2.8417e-3 at 8 µm, 3.1751e-3 at 20 µm). |
 
 Two permanent gates were added so none of these can silently return:
-`test_fastfull_design.py` (k) checks that every reported recovery number is
-invariant under a random orthogonal rotation of the 40-dimensional basis
+`tests/retrieval/test_fastfull_design.py` (k) checks that every reported
+recovery number is invariant under a random orthogonal rotation of the
+40-dimensional basis
 (holds to 1.4e-15), and (k) checks that the systematic bound is the exact
 worst case and brackets the iid figure.
 
 ## 9. M2 progress — the C = 0 caveat is discharged
 
-`fastfull/ewald.py` now supplies a converged lattice coupling for exactly the
-cells `coupling.py` refuses (14 gates in `test_fastfull_ewald.py`).
+`tmatrix.retrieval.fastfull.ewald` now supplies a converged lattice coupling
+for exactly the cells `coupling.py` refuses (14 gates in
+`tests/retrieval/test_fastfull_ewald.py`).
 
 **The lattice-sum operator agrees between two implementations** — but Gate D is NOT closed; see the README header for why the separate
-`aggregation/` repo-vs-treams discrepancy has to be resolved in a common
+`tmatrix.aggregation` repo-vs-treams discrepancy has to be resolved in a common
 basis first. `treams.sw.translate_periodic` reproduces the
 repository's convention with no transpose, conjugation, polarization flip or
 Bloch-sign change, and agrees with the *campaign's own* tapered C — the one
@@ -241,10 +245,11 @@ bite: σ_min(I + T_eff C) ≥ 0.90, cond ≤ 1.17.
 
 ## 10. Gate A — blind noisy recovery, and the bracket closed empirically
 
-`fastfull/synthetic.py` + `gate_a_run.py` (10 gates in
-`test_fastfull_synthetic.py`; numbers in
-`results/fastfull/GATE_A_STUDY.md`). A known T0 is synthesized through the
-real Ewald C, perturbed, and recovered **blind** — C = 0 linear seed,
+`tmatrix.retrieval.fastfull.synthetic` + `gate_a_run.py` (10 gates in
+`tests/retrieval/test_fastfull_synthetic.py`; numbers in
+`retrieval/results/fastfull/GATE_A_STUDY.md`). A known T0 is synthesized
+through the real Ewald C, perturbed, and recovered **blind** — C = 0 linear
+seed,
 continuation in the coupling, Levenberg-Marquardt with the analytic
 Jacobian, no mask and no oracle.
 
@@ -305,10 +310,10 @@ on a signal of 1.96e-2. `generic@8`'s predicts it to 3.68 σ.
 ## 11. Nuisance-marginalized design, and why the estimator had to change too
 
 Following reviewer recommendation 6 (`review.md`, 2026-08-07 15:45).
-`fastfull/nuisance.py` builds the joint Fisher information of T and the
-declared calibration parameters and reports its Schur complement
-`F_T = J_c^T (I − P_η) J_c`; `fastfull/opt_marginalized.py` optimizes against
-it. Four results, in the order they were forced on me.
+`tmatrix.retrieval.fastfull.nuisance` builds the joint Fisher information of
+T and the declared calibration parameters and reports its Schur complement
+`F_T = J_c^T (I − P_η) J_c`; `tmatrix.retrieval.fastfull.opt_marginalized`
+optimizes against it. Four results, in the order they were forced on me.
 
 **(a) The tangent audit reproduces independently.** For `small@8`: the
 port-plane tangent has 99.979 % of its norm inside col(H) (reviewer: 99.981 %),

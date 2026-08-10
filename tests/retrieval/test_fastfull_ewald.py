@@ -1,6 +1,7 @@
-"""Gates for retrieval/fastfull/ewald.py (milestone M2, lattice coupling C).
+"""Gates for tmatrix.retrieval.fastfull.ewald (milestone M2, lattice coupling C).
 
-Run:  python test_fastfull_ewald.py     (from retrieval/, env cst_inference)
+Run:  python tests/retrieval/test_fastfull_ewald.py   (from the repo root,
+      env cst_inference), or  pytest -k fastfull_ewald
 
   (a) GATE D, the two-implementation cross-check: on a square lattice, where
       the repository's tapered real-space Bloch sum is valid and was itself

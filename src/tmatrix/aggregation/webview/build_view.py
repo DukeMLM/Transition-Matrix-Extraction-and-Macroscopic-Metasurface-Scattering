@@ -9,7 +9,7 @@ l-block structure, per-cell mode-pair tooltips), response spectrum,
 stored diagnostics charts, geometry drawing, mode table, and file tree.
 
 Usage:
-    python build_view.py [tmat_h5_path] [out_html]
+    python -m tmatrix.aggregation.webview.build_view [tmat_h5_path] [out_html]
 Defaults to the demo file and tmat_h5_view.html next to this script.
 """
 import json

@@ -1,10 +1,11 @@
 # Building a T-Matrix Array-Aggregation Pipeline from Scratch
 ### A rookie-facing implementation manual, with all the technical details
 
-This document explains, step by step, how the code in this folder was built:
-from an empty directory to a pipeline that takes one unit cell's T-matrix
-(extracted from CST) and predicts the S-parameters of a whole metasurface —
-validated to 0.3 % against a direct CST periodic simulation.
+This document explains, step by step, how the code in
+`src/tmatrix/aggregation/` was built: from an empty directory to a pipeline
+that takes one unit cell's T-matrix (extracted from CST) and predicts the
+S-parameters of a whole metasurface — validated to 0.3 % against a direct CST
+periodic simulation.
 
 It is written for someone who knows electromagnetic basics (Maxwell, plane
 waves, S-parameters) but has never touched vector spherical waves or
@@ -44,9 +45,10 @@ After that, an array of thousands of atoms is pure linear algebra:
    give S11 and S21.
 
 The two deliverables of this project are exactly those two steps:
-**aggregation** (`aggregate.py`, `translate.py`) and **S-parameter
-extraction** (`sparams.py`). Everything else exists to make those two steps
-*provably correct*.
+**aggregation** (`tmatrix.aggregation.aggregate`,
+`tmatrix.aggregation.translate`) and **S-parameter extraction**
+(`tmatrix.aggregation.sparams`). Everything else exists to make those two
+steps *provably correct*.
 
 The basis that makes this work is the **vector spherical wave functions
 (VSWFs)** — the electromagnetic analogue of spherical harmonics. Section 2
@@ -85,9 +87,9 @@ uses circular-polarization combinations of the two. The file's `p` is our
 
 The implementation strategy that follows from rule zero:
 
-1. **Write down one convention explicitly** (docstring of `vswf.py`) and
-   implement *everything* — plane waves, far fields, translations, mirrors —
-   in that single convention.
+1. **Write down one convention explicitly** (docstring of
+   `tmatrix.aggregation.vswf`) and implement *everything* — plane waves, far
+   fields, translations, mirrors — in that single convention.
 2. **Never trust a formula from a paper without a numerical test.** Every
    layer of this code has a test that would catch a wrong sign or a wrong
    factor of i (Section 7). Two of these tests failed during development and
@@ -99,7 +101,7 @@ The implementation strategy that follows from rule zero:
 
 ---
 
-## 2. Layer 0 — the VSWF engine (`vswf.py`)
+## 2. Layer 0 — the VSWF engine (`tmatrix.aggregation.vswf`)
 
 ### 2.1 Scalar spherical harmonics and the two angular helper functions
 
@@ -257,7 +259,7 @@ yourself, *make this test exist before anything else downstream*.
 
 ---
 
-## 3. Layer 1 — translation operators (`translate.py`)
+## 3. Layer 1 — translation operators (`tmatrix.aggregation.translate`)
 
 ### 3.1 What they are
 
@@ -281,8 +283,8 @@ sphere" into "regular coefficients". So compute A(d) columnwise *from its
 definition*: evaluate the E and H̃ fields of outgoing mode ν centered at d on
 a sphere of radius r₀ < |d| around the target, and project. No Gaunt
 coefficients, no new conventions — A(d) is exact by construction relative to
-the same `vswf.py` that defines everything else. Cost: one batched GEMM per
-displacement, ~30 modes × 512 points.
+the same `tmatrix.aggregation.vswf` that defines everything else. Cost: one
+batched GEMM per displacement, ~30 modes × 512 points.
 
 Two tests lock it:
 
@@ -320,7 +322,7 @@ offset untouched.
 
 ---
 
-## 4. Layer 2 — aggregation (`aggregate.py`)
+## 4. Layer 2 — aggregation (`tmatrix.aggregation.aggregate`)
 
 ### 4.1 Foldy–Lax: the self-consistent array equations
 
@@ -413,7 +415,7 @@ unitarity test of Section 6, which is even stricter.)
 
 ---
 
-## 5. Layer 3 — S-parameters (`sparams.py`)
+## 5. Layer 3 — S-parameters (`tmatrix.aggregation.sparams`)
 
 ### 5.1 From a lattice of spherical waves to two plane waves
 
@@ -449,7 +451,7 @@ negative. On the demo file: positive across the band. Sentinel passed.
 
 ---
 
-## 6. Bonus layer — ground plane by image theory (`mirror.py`)
+## 6. Bonus layer — ground plane by image theory (`tmatrix.aggregation.mirror`)
 
 The demo atom is an absorber *designed to sit over a metal ground plane*;
 isolated, it has no resonance in the band (Section 8.2). Image theory adds
@@ -570,8 +572,9 @@ extension (Section 6) then shows the absorber physics reappearing.
 
 Asked for the true S-parameters, the archived `.cst` turned out to be a
 48 KB model-only archive (no results), so a fresh periodic simulation was
-scripted (`cst_direct/build_saw_unitcell.py`: unit-cell boundaries, Floquet
-ports, FD solver, lossy gold). Two failures on the way — both instructive:
+scripted (`src/tmatrix/aggregation/cst_direct/build_saw_unitcell.py`:
+unit-cell boundaries, Floquet ports, FD solver, lossy gold). Two failures on
+the way — both instructive:
 
 1. **False mesh convergence.** The first run finished in 27 s on a
    1372-cell mesh and gave |S11| ≈ 0.97. Refining the mesh 5× *did not
@@ -675,14 +678,14 @@ minutes and localizes setup bugs that no amount of mesh refinement reveals.
 
 | file | role |
 |---|---|
-| `vswf.py` | conventions + VSWF engine + plane waves + far field + projector |
-| `translate.py` | translation operators, shells, tapered+Richardson lattice sums |
-| `aggregate.py` | Foldy–Lax finite solve, periodic solve, effective array T |
-| `sparams.py` | S11/S21, energy balance, cross sections |
-| `mirror.py` | PEC ground plane: parity signs, image lattice, mirrored S11 |
-| `tmat_io.py` | tmat.h5 reader |
-| `test_vswf.py`, `test_translate.py`, `test_mirror.py`, `test_feature_fidelity.py` | the validation pyramid |
-| `run_demo.py`, `run_mirror_demo.py`, `plot_results.py`, `plot_cst_comparison.py` | drivers and figures |
-| `treams_reference.py`, `validate_synthetic_treams.py` | independent treams cross-checks |
-| `cst_direct/build_saw_unitcell.py`, `cst_direct/control_tests.py` | direct CST reference + setup controls |
+| `src/tmatrix/aggregation/vswf.py` | conventions + VSWF engine + plane waves + far field + projector |
+| `src/tmatrix/aggregation/translate.py` | translation operators, shells, tapered+Richardson lattice sums |
+| `src/tmatrix/aggregation/aggregate.py` | Foldy–Lax finite solve, periodic solve, effective array T |
+| `src/tmatrix/aggregation/sparams.py` | S11/S21, energy balance, cross sections |
+| `src/tmatrix/aggregation/mirror.py` | PEC ground plane: parity signs, image lattice, mirrored S11 |
+| `src/tmatrix/aggregation/tmat_io.py` | tmat.h5 reader |
+| `tests/aggregation/test_vswf.py`, `tests/aggregation/test_translate.py`, `tests/aggregation/test_mirror.py`, `tests/aggregation/test_feature_fidelity.py` | the validation pyramid |
+| `src/tmatrix/aggregation/run_demo.py`, `run_mirror_demo.py`, `plot_results.py`, `plot_cst_comparison.py` | drivers and figures |
+| `src/tmatrix/aggregation/treams_reference.py`, `validate_synthetic_treams.py` | independent treams cross-checks |
+| `src/tmatrix/aggregation/cst_direct/build_saw_unitcell.py`, `cst_direct/control_tests.py` | direct CST reference + setup controls |
 | `REPORT.md` | results summary; this guide covers the *how* |

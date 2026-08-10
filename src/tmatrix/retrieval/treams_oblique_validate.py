@@ -1,9 +1,10 @@
 """Oblique treams cross-check of the retrieval forward map
 (INVERSE_TMATRIX_FROM_FLOQUET.md par. 6, validation-ladder step 1).
 
-Generalizes aggregation/treams_reference.py (k_par = 0 only) to oblique
-incidence.  Angles: (0,0), (0,45), (20,0), (20,45), (40,0), (40,45), both
-incident polarizations, all four complex Jones entries of S11 and S21.
+Generalizes tmatrix.aggregation.treams_reference (k_par = 0 only) to
+oblique incidence.  Angles: (0,0), (0,45), (20,0), (20,45), (40,0),
+(40,45), both incident polarizations, all four complex Jones entries of
+S11 and S21.
 
 Illumination convention (matches the existing k_par=0 reference): incidence
 from the +z side travelling DOWN (-z), phase reference z = 0 on both sides.
@@ -40,14 +41,18 @@ than assuming the k_par=0 order.
 
 C values come from the precompute_C.py checkpoints (results/C_bloch/);
 build the needed subset first, e.g. in batches:
-    python precompute_C.py --angles 0,13-16 --freqs 0,4,8,12
-    python precompute_C.py --angles 0,13-16 --freqs 16,20,24,28,36,40,44
+    python -m tmatrix.retrieval.precompute_C --angles 0,13-16 --freqs 0,4,8,12
+    python -m tmatrix.retrieval.precompute_C --angles 0,13-16 \
+        --freqs 16,20,24,28,36,40,44
 (freqs 32 and 48 already hold all 17 angles from the smoke tests).
 
 Usage:
-    python treams_oblique_validate.py --sign-test        # writes sign file
-    python treams_oblique_validate.py --stride 4         # 13-freq sweep
-    python treams_oblique_validate.py --stride 1         # full 49 (later)
+    python -m tmatrix.retrieval.treams_oblique_validate --sign-test
+                                                         # writes sign file
+    python -m tmatrix.retrieval.treams_oblique_validate --stride 4
+                                                         # 13-freq sweep
+    python -m tmatrix.retrieval.treams_oblique_validate --stride 1
+                                                         # full 49 (later)
 
 By default the sweep runs the six VAL_ANGLES entries above and writes
 results/treams_oblique_check.npz (the recorded, closed step-1 gate -- that
@@ -57,8 +62,9 @@ precompute_C.ANGLES_DEG table (same comma-list/range idiom as
 `precompute_C.py --angles`), from which theta/phi are DERIVED, and --out
 sends the record to a different npz, e.g.
 
-    python treams_oblique_validate.py --stride 1 --angles 5,10-12 \
-        --out results/treams_oblique_check_campaign.npz
+    python -m tmatrix.retrieval.treams_oblique_validate --stride 1 \
+        --angles 5,10-12 \
+        --out retrieval/results/treams_oblique_check_campaign.npz
 
 Gate: max complex |dS| <= 1e-3 over all entries/angles/freqs in the subset.
 When the selection contains the (0, 0) angle it is additionally compared

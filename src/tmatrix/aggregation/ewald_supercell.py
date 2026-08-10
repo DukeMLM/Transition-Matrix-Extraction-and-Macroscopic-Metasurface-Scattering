@@ -5,7 +5,8 @@ repository's own Gaussian-taper + Richardson machinery.  That method is
 validated for the *one-atom* lattice, and its sub-lattice decomposition is
 exact in the sense that
 
-    sum_t W_st  ==  C_p     (to 1e-15, checked in test_supercell.py)
+    sum_t W_st  ==  C_p     (to 1e-15, checked in
+                             tests/aggregation/test_supercell.py)
 
 but the *individual* blocks are shifted sub-lattice sums whose period is M^(1/2)
 times coarser, so a taper of length Rc contains proportionally fewer sites and
@@ -18,7 +19,7 @@ alternative").
 This module supplies that alternative.  `treams.sw.translate_periodic` accepts a
 list of shift vectors `rs` and returns the full block matrix in one call; the
 repository has already gated its convention against the tapered sum for the
-one-atom case (`retrieval/fastfull/ewald.py`): no transpose, no conjugation, no
+one-atom case (`tmatrix.retrieval.fastfull.ewald`): no transpose, no conjugation, no
 Bloch-sign change, and the parity polarization index may be flipped or not
 without changing C for in-plane displacements.
 
@@ -26,10 +27,10 @@ Block layout.  treams returns an (M n) x (M n) matrix ordered by (position,
 mode); it is reshaped to (M, M, n, n) with `W[s, t]` = target s, source t --
 the same indexing `supercell.solve_supercell` expects.  The direction is fixed
 by test, not by assumption: `selfsum_residual` below checks `sum_t W_st == C_p`
-(which a transposed block layout fails), `test_supercell.py` checks the M = 1
-reduction against `translate.lattice_sum_C` and the four-identical-atom
-equivalence, and `test_supercell.py --taper` compares block by block against the
-repository's own tapered sum.
+(which a transposed block layout fails), `tests/aggregation/test_supercell.py`
+checks the M = 1 reduction against `translate.lattice_sum_C` and the
+four-identical-atom equivalence, and `tests/aggregation/test_supercell.py
+--taper` compares block by block against the repository's own tapered sum.
 """
 import numpy as np
 
@@ -63,9 +64,9 @@ def converged_W(k, a1, a2, rho, modes, kpar=(0.0, 0.0),
                 eta_bracket=(0.5, 0.7, 1.0), rtol=1e-8, return_info=False):
     """W with an explicit eta-stability verdict; refuses rather than guessing.
 
-    Same policy as `retrieval/fastfull/ewald.converged_C`: the automatic split
-    is evaluated first and must agree with a bracket at or below eta = 1, where
-    treams' real-space part is reliable.
+    Same policy as `tmatrix.retrieval.fastfull.ewald.converged_C`: the
+    automatic split is evaluated first and must agree with a bracket at or
+    below eta = 1, where treams' real-space part is reliable.
     """
     W0 = block_lattice_sums_ewald(k, a1, a2, rho, modes, kpar, eta=0)
     scale = float(np.abs(W0).max())

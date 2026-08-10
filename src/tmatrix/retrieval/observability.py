@@ -68,8 +68,10 @@ is exact) AND with column norms of sub-basis Jacobians (span of the
 projected canonical entries, linearized at P(T_ref)).
 
 CLI:
-    python observability.py --ifreq 32 --basis full --angles campaign
-    python observability.py --ifreq 32 --basis bright --angles normal-only
+    python -m tmatrix.retrieval.observability --ifreq 32 --basis full \
+        --angles campaign
+    python -m tmatrix.retrieval.observability --ifreq 32 --basis bright \
+        --angles normal-only
 Options: --sigma 3e-3, --direction -1, --no-visibility, --tag NAME.
 """
 import argparse

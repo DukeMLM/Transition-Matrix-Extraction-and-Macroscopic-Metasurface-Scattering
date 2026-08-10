@@ -64,7 +64,7 @@ flowchart LR
 
 ## 2. Target structure
 
-The CST builder defines the object as one Au annulus united with four rectangular inward spokes. The exact implementation is in `retrieval/cst_campaign.py:120-281` and `aggregation/cst_direct/build_saw_unitcell.py:45-142`.
+The CST builder defines the object as one Au annulus united with four rectangular inward spokes. The exact implementation is in `src/tmatrix/retrieval/cst_campaign.py:121-281` and `src/tmatrix/aggregation/cst_direct/build_saw_unitcell.py:43-140`.
 
 | Symbol | Value | Meaning |
 |---|---:|---|
@@ -134,7 +134,7 @@ Both physical sides remain valuable even though horizontal mirror symmetry relat
 
 ## 4. Why the existing specular retrieval fails
 
-The present CST project retains only two modes per physical Floquet port (`retrieval/cst_campaign.py:310-324`) and the checkpoint exporter reads only eight selected S-tree entries (`retrieval/cst_solve.py:627-637`). Repeating this measurement at different specular angles produces many scalar values, but the values probe nearly the same bright combinations of the T-matrix.
+The present CST project retains only two modes per physical Floquet port (`src/tmatrix/retrieval/cst_campaign.py:310-324`) and the checkpoint exporter reads only eight selected S-tree entries (`src/tmatrix/retrieval/cst_solve.py:624-634`). Repeating this measurement at different specular angles produces many scalar values, but the values probe nearly the same bright combinations of the T-matrix.
 
 For the wheel-specific D4h + reciprocity basis, the current 13-angle measurement is formally full local rank only at extremely small numerical thresholds. Its real-parameter Jacobian has a condition number of order \(10^9\), and several symmetry-allowed directions remain below the measured discrepancy scale.
 

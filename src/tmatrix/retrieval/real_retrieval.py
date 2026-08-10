@@ -72,9 +72,9 @@ CONVENTIONS (locked, see retrieval/HANDOFF.md -- do not re-derive)
 
 USAGE
 -----
-    python real_retrieval.py                      # full band, everything
-    python real_retrieval.py --freqs 32,48         # smoke
-    python real_retrieval.py --no-figs --tag quick
+    python -m tmatrix.retrieval.real_retrieval    # full band, everything
+    python -m tmatrix.retrieval.real_retrieval --freqs 32,48   # smoke
+    python -m tmatrix.retrieval.real_retrieval --no-figs --tag quick
 """
 import argparse
 import hashlib
@@ -1063,7 +1063,7 @@ def write_report(path, ctx):
 
     A("# Real-data T-matrix retrieval and par.-8 acceptance")
     A("")
-    A("Produced by `retrieval/real_retrieval.py` on %s (tag `%s`)."
+    A("Produced by `tmatrix.retrieval.real_retrieval` on %s (tag `%s`)."
       % (datetime.now().isoformat(timespec="seconds"), ctx["tag"]))
     A("No CST solve was launched: every number comes from the 19 "
       "`cst_runs/<runid>/solve_result.npz` checkpoints already on disk.")

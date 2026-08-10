@@ -15,17 +15,17 @@ file records only what is specific to this cell.
 | circumscribing margin | (a_B + a_C) − 8 µm = **−2.07 µm** (manual Eq. 57 satisfied) |
 
 ```bash
-python run_supercell.py --cell 16 \
-    --site ../test/2x2/saw_gold_wl17p30um_10to34THz.tmat.h5 -4 -4 \
-    --site ../test/2x2/saw_gold_wl17p30um_10to34THz.tmat.h5  4  4 \
-    --site ../test/2x2/saw_gold_wl10p90um_10to34THz.tmat.h5  4 -4 \
-    --site ../test/2x2/saw_gold_wl10p90um_10to34THz.tmat.h5 -4  4 \
+python -m tmatrix.aggregation.run_supercell --cell 16 \
+    --site test/2x2/saw_gold_wl17p30um_10to34THz.tmat.h5 -4 -4 \
+    --site test/2x2/saw_gold_wl17p30um_10to34THz.tmat.h5  4  4 \
+    --site test/2x2/saw_gold_wl10p90um_10to34THz.tmat.h5  4 -4 \
+    --site test/2x2/saw_gold_wl10p90um_10to34THz.tmat.h5 -4  4 \
     --lmax 3 --cluster-lmax 12 --out results_2x2_BC_l3
-python cst_supercell/build_2x2_supercell.py --pair BC --only supercell
-python cst_supercell/read_supercell_results.py --run cst_supercell/runs_BC/supercell/supercell.cst \
-    --empty cst_supercell/runs/empty/empty.cst --out results_2x2_BC_l3
-python plot_supercell.py results_2x2_BC_l3 --fine results_2x2_BC_fine
-python error_budget.py results_2x2_BC_l3
+python -m tmatrix.aggregation.cst_supercell.build_2x2_supercell --pair BC --only supercell
+python -m tmatrix.aggregation.cst_supercell.read_supercell_results --run aggregation/cst_supercell/runs_BC/supercell/supercell.cst \
+    --empty aggregation/cst_supercell/runs/empty/empty.cst --out aggregation/results_2x2_BC_l3
+python -m tmatrix.aggregation.plot_supercell results_2x2_BC_l3 --fine results_2x2_BC_fine
+python -m tmatrix.aggregation.error_budget results_2x2_BC_l3
 ```
 
 ## Validation
@@ -57,8 +57,9 @@ python error_budget.py results_2x2_BC_l3
 ## Against the direct CST supercell run
 
 49 min, 48 adaptive frequency points, ~0.68 M tetrahedral DOF. Built by
-`build_2x2_supercell.py --pair BC` with the same settings as the other two
-cells, sharing the `runs/empty` companion run for de-embedding.
+`tmatrix.aggregation.cst_supercell.build_2x2_supercell --pair BC` with the same
+settings as the other two cells, sharing the `runs/empty` companion run for
+de-embedding.
 
 | | max | mean |
 |---|---|---|

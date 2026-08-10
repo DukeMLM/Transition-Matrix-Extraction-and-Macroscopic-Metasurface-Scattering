@@ -26,7 +26,8 @@ value; the default keeps every mode in the file.
 
 Example (the 8 um-pitch spoke-and-wheel cell of test/2x2):
 
-    python run_case.py ../test/2x2/saw_gold_wl13p10um_10to34THz.tmat.h5 \
+    python -m tmatrix.aggregation.run_case \
+        test/2x2/saw_gold_wl13p10um_10to34THz.tmat.h5 \
         --pitch 8.0 --r0 3.0 --lmax auto --out results_2x2
 """
 import argparse

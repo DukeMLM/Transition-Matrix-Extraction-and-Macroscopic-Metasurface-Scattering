@@ -13,17 +13,17 @@ this file records only what is specific to this cell.
 | circumscribing margin | (a_A + a_C) − 8 µm = **−2.79 µm** (manual Eq. 57 satisfied) |
 
 ```bash
-python run_supercell.py --cell 16 \
-    --site ../test/2x2/saw_gold_wl13p10um_10to34THz.tmat.h5 -4 -4 \
-    --site ../test/2x2/saw_gold_wl13p10um_10to34THz.tmat.h5  4  4 \
-    --site ../test/2x2/saw_gold_wl10p90um_10to34THz.tmat.h5  4 -4 \
-    --site ../test/2x2/saw_gold_wl10p90um_10to34THz.tmat.h5 -4  4 \
+python -m tmatrix.aggregation.run_supercell --cell 16 \
+    --site test/2x2/saw_gold_wl13p10um_10to34THz.tmat.h5 -4 -4 \
+    --site test/2x2/saw_gold_wl13p10um_10to34THz.tmat.h5  4  4 \
+    --site test/2x2/saw_gold_wl10p90um_10to34THz.tmat.h5  4 -4 \
+    --site test/2x2/saw_gold_wl10p90um_10to34THz.tmat.h5 -4  4 \
     --lmax 3 --cluster-lmax 12 --out results_2x2_AC_l3
-python cst_supercell/build_2x2_supercell.py --pair AC --only supercell
-python cst_supercell/read_supercell_results.py --run cst_supercell/runs_AC/supercell/supercell.cst \
-    --empty cst_supercell/runs/empty/empty.cst --out results_2x2_AC_l3
-python plot_supercell.py results_2x2_AC_l3 --fine results_2x2_AC_fine
-python error_budget.py results_2x2_AC_l3
+python -m tmatrix.aggregation.cst_supercell.build_2x2_supercell --pair AC --only supercell
+python -m tmatrix.aggregation.cst_supercell.read_supercell_results --run aggregation/cst_supercell/runs_AC/supercell/supercell.cst \
+    --empty aggregation/cst_supercell/runs/empty/empty.cst --out aggregation/results_2x2_AC_l3
+python -m tmatrix.aggregation.plot_supercell results_2x2_AC_l3 --fine results_2x2_AC_fine
+python -m tmatrix.aggregation.error_budget results_2x2_AC_l3
 ```
 
 ## Validation

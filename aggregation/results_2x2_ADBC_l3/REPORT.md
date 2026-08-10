@@ -76,8 +76,8 @@ arrangement that separates them.
 
 17 469 s (4.9 h), 95 adaptive frequency points, ~5.7 M tetrahedral DOF — the
 longest and heaviest solve in the study. Built by
-`build_2x2_supercell.py --pair ADBC`, same settings as every other cell, sharing
-the `runs/empty` companion run.
+`tmatrix.aggregation.cst_supercell.build_2x2_supercell --pair ADBC`, same
+settings as every other cell, sharing the `runs/empty` companion run.
 
 | | MSE | max \|Δ\| | mean \|Δ\| |
 |---|---|---|---|

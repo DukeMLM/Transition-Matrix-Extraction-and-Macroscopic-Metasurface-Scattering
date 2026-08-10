@@ -1,4 +1,4 @@
-"""Fast deterministic identity tests for retrieval/fit.py (the
+"""Fast deterministic identity tests for tmatrix.retrieval.fit (the
 pure-optimization gate, independent of the physics target).
 
 Gates (smoke frequencies 32 and 48 by default; frequencies whose campaign
@@ -58,8 +58,9 @@ scaled to rho = 0.25 exactly; the resulting max|T0| is printed.
 
 Run:
     conda activate cst_inference
-    cd "D:/Claude/T matrix/retrieval"
-    python test_fit_smoke.py [--freqs 32,48]
+    cd "D:/Claude/T matrix"
+    python tests/retrieval/test_fit_smoke.py [--freqs 32,48]
+    # or, at the default frequencies:  pytest -k fit_smoke
 """
 import argparse
 import sys
@@ -107,7 +108,7 @@ def main(argv=None):
 
     t_all = time.time()
     print("=" * 76)
-    print("retrieval/fit.py smoke identity (pure-optimization gate)")
+    print("tmatrix.retrieval.fit smoke identity (pure-optimization gate)")
     print("=" * 76)
     fm = ForwardModel()
     print("cache: %s; available freqs: %s"

@@ -1,7 +1,8 @@
 """Validation ladder for supercell.py (manual sections 6.5.5, 6.6, 7.5, 8, 6.4).
 
-    python test_supercell.py            # full ladder, Ewald coupling
-    python test_supercell.py --taper    # add the tapered-sum comparison (slow)
+    python tests/aggregation/test_supercell.py          # full ladder, Ewald coupling
+    python tests/aggregation/test_supercell.py --taper  # add the tapered-sum comparison (slow)
+    pytest -k supercell                                 # the full ladder, through pytest
 
 Coupling.  The manual's Eq. (48) blocks are computed two ways: the repository's
 own Gaussian-taper + Richardson sum (`supercell.block_lattice_sums`) and Ewald
@@ -18,7 +19,7 @@ Checks, in the manual's numbering:
   6.5.5-2  a 2x2 supercell of four identical atoms at base pitch p reproduces
            the one-atom primitive lattice of pitch p (coupling and complex S)
   6.5.5-3  permutation invariance of the basis atoms
-  6.5.5-4  needs CST -- see cst_supercell/
+  6.5.5-4  needs CST -- see aggregation/cst_supercell/
   6.5.5-5  power balance and reciprocity
   6.5.5-6  pair-block convergence (Ewald eta bracket; taper set, r0, quadrature
            and real-space truncation for the tapered sum)

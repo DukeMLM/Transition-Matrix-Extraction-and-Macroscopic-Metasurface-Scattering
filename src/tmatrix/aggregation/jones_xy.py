@@ -1,6 +1,6 @@
 """Normal-incidence Jones diagonal of each four-distinct-atom cell.
 
-    python jones_xy.py [--out results_2x2_ABCD_l3/jones_xy.npz]
+    python -m tmatrix.aggregation.jones_xy [--out results_2x2_ABCD_l3/jones_xy.npz]
 
 `run_supercell.py` solves one incident polarization per run, so the cell's
 0th-order Jones matrix needs two sweeps:

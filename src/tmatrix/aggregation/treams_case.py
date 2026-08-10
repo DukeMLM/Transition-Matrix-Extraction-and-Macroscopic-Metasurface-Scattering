@@ -13,7 +13,8 @@ run_case.py illuminates along +z, its S-parameters are compared against these
 after the trivial z -> -z relabelling (both are C4-symmetric planar cells, so
 S11/S21 are unchanged).
 
-    python treams_case.py ../test/2x2/saw_gold_wl13p10um_10to34THz.tmat.h5 \
+    python -m tmatrix.aggregation.treams_case \
+        test/2x2/saw_gold_wl13p10um_10to34THz.tmat.h5 \
         --pitch 8.0 --out results_2x2/treams_reference.npz --lmax auto
 """
 import argparse

@@ -30,9 +30,12 @@ Both therefore de-embed to z = 0 with the SAME factor exp(+j (k_z,0 + k_z,G) L/2
 which `read_supercell_results.py` applies before conjugating CST's e^{+j w t}
 to this repository's e^{-i w t}.
 
-    python build_2x2_supercell.py --pair AB --dry-run   # build + save, no solve
-    python build_2x2_supercell.py --pair AB            # build + solve both
-    python build_2x2_supercell.py --pair AC --only supercell
+    python -m tmatrix.aggregation.cst_supercell.build_2x2_supercell \
+        --pair AB --dry-run                            # build + save, no solve
+    python -m tmatrix.aggregation.cst_supercell.build_2x2_supercell \
+        --pair AB                                      # build + solve both
+    python -m tmatrix.aggregation.cst_supercell.build_2x2_supercell \
+        --pair AC --only supercell
 
 The empty companion run depends only on the cell, not on its contents, so one
 `--only empty` run serves every pair; point read_supercell_results.py --empty at

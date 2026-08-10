@@ -23,7 +23,8 @@ The run does three things:
      classes, and re-runs the Gate A blind recovery on it so the improvement
      is expressed in T error and not only in a singular value.
 
-Run:  python -m fastfull.opt_marginalized [--samples 300] [--lam 8]
+Run:  python -m tmatrix.retrieval.fastfull.opt_marginalized [--samples 300]
+                                                            [--lam 8]
 """
 import argparse
 import binascii

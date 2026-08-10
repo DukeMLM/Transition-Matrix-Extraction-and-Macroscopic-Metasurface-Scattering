@@ -1,6 +1,7 @@
 """External validation of the collective lattice shift seen in
-test_feature_fidelity.py: the same synthetic Lorentzian electric-dipole
-T-matrix is pushed through treams' Ewald-summed lattice coupling.
+tests/aggregation/test_feature_fidelity.py: the same synthetic Lorentzian
+electric-dipole T-matrix is pushed through treams' Ewald-summed lattice
+coupling.
 
 If treams also moves the collective resonance from the single-particle
 15 um to ~18 um at pitch 2 um, the shift is real multiple-scattering

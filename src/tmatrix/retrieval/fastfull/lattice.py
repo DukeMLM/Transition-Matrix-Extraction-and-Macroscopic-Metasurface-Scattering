@@ -192,8 +192,9 @@ class Lattice2D:
         which holds for any in-plane displacement.
 
         For a square lattice this reproduces square_lattice_shells exactly
-        (gated in test_fastfull_core.py).  For a generic oblique lattice most
-        shells hold only the exact +/-R pair, so the number of distinct radii
+        (gated in tests/retrieval/test_fastfull_core.py).  For a generic
+        oblique lattice most shells hold only the exact +/-R pair, so the
+        number of distinct radii
         -- and hence the number of translation-operator projections -- grows
         like half the site count.  That is the cost driver that makes the
         tapered real-space sum impractical for a large diffractive cell and

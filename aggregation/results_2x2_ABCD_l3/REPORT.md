@@ -100,8 +100,9 @@ arrangement that separates them.
 ## Against the direct CST supercell run
 
 6 565 s (1.8 h), 63 adaptive frequency points, 4.2 M tetrahedral DOF. Built by
-`build_2x2_supercell.py --pair ABCD`, same settings as every other cell, sharing
-the `runs/empty` companion run for de-embedding.
+`tmatrix.aggregation.cst_supercell.build_2x2_supercell --pair ABCD`, same
+settings as every other cell, sharing the `runs/empty` companion run for
+de-embedding.
 
 | | MSE | max \|Δ\| | mean \|Δ\| |
 |---|---|---|---|

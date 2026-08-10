@@ -1,7 +1,9 @@
 """Read the direct CST supercell run and de-embed it to the array plane z = 0.
 
-    python read_supercell_results.py --list          # dump the result tree
-    python read_supercell_results.py --out ../results_2x2_super_l3
+    python -m tmatrix.aggregation.cst_supercell.read_supercell_results \
+        --list                                       # dump the result tree
+    python -m tmatrix.aggregation.cst_supercell.read_supercell_results \
+        --out aggregation/results_2x2_super_l3
 
 What has to be got right
 ------------------------

@@ -97,7 +97,7 @@ def _calibrate(make_dS, sigma, t_hi=8.0, iters=60):
     congruence, and its entrywise ratio to S stops being rank 1.  Calibrating
     the parameter itself (a port-plane offset, a mixing angle, a mesh-error
     amplitude) keeps the model exactly the one-parameter family it claims to
-    be.  Gated in test_fastfull_synthetic.py (b).
+    be.  Gated in tests/retrieval/test_fastfull_synthetic.py (b).
     """
     lo, hi = 0.0, float(t_hi)
     f = lambda t: float(np.sqrt(np.mean(np.abs(make_dS(t)) ** 2)))

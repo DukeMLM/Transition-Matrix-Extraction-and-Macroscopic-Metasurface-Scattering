@@ -8,7 +8,7 @@ conjugation-direction check is additionally required to FAIL when the
 conjugation is deliberately skipped -- the check must be able to catch the
 error it exists for.
 
-Run:  python test_deembed.py        (or pytest test_deembed.py)
+Run:  python tests/retrieval/test_deembed.py   (or pytest -k deembed)
 """
 from __future__ import annotations
 

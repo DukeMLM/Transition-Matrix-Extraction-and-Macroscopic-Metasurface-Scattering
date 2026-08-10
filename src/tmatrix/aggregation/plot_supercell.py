@@ -7,7 +7,8 @@ Overlays whatever it finds:
   cst_direct_reference.csv        direct CST run, one atom per cell
   cst_direct_supercell.csv        direct CST run, heterogeneous supercell
 
-    python plot_supercell.py results_2x2_super_l3 --title "a,b;b,a, 16 um cell"
+    python -m tmatrix.aggregation.plot_supercell results_2x2_super_l3 \
+        --title "a,b;b,a, 16 um cell"
 """
 import argparse
 import os

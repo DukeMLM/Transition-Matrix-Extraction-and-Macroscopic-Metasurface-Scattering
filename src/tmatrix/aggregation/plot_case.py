@@ -5,7 +5,8 @@ Overlays whatever is present in the directory:
   treams_reference.npz        independent Ewald cross-check (treams_case.py)
   cst_direct_reference.csv    direct CST periodic run (cst_packed_reference.py)
 
-    python plot_case.py results_2x2 --title "spoke-and-wheel, pitch 8 um"
+    python -m tmatrix.aggregation.plot_case results_2x2 \
+        --title "spoke-and-wheel, pitch 8 um"
 """
 import argparse
 import os

@@ -1,7 +1,7 @@
 """The two competing predictors of aggregation accuracy, for every distinct
 arrangement of four atoms on the 2x2 site square.
 
-    python arrangement_predictors.py
+    python -m tmatrix.aggregation.arrangement_predictors
 
 `OPEN_QUESTIONS.md` section 1 poses geometry against symmetry as explanations
 of why `a,d;b,c` reconstructs far better than `a,b;c,d` from the same four
@@ -38,7 +38,8 @@ import itertools
 
 import numpy as np
 
-# scale and circumscribing radius, from cst_supercell/build_2x2_supercell.py
+# scale and circumscribing radius, from
+# tmatrix.aggregation.cst_supercell.build_2x2_supercell
 SCALE = {"A": 4.00, "B": 5.00, "C": 3.25, "D": 5.50}
 R = {"A": 2.87712, "B": 3.59639, "C": 2.33766, "D": 3.95603}
 PITCH = 8.0                       # atom-to-atom spacing, um

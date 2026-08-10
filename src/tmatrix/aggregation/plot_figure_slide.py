@@ -1,6 +1,7 @@
 """Presentation figure: single atoms, all three four-species cells, and their layouts.
 
-    python plot_figure_slide.py [--out results_2x2_super_l3/fig5_slide.png]
+    python -m tmatrix.aggregation.plot_figure_slide \
+        [--out results_2x2_super_l3/fig5_slide.png]
 
 Eight panels, top row spectra and bottom row the geometry that explains them:
 
@@ -25,11 +26,11 @@ on the diagonal, which separates the geometry explanation of the b-versus-c
 difference from the symmetry one (`OPEN_QUESTIONS.md` section 1).
 
 The layouts are drawn from the same ring/spoke parameters the CST models are
-built from (`cst_supercell/build_2x2_supercell.py: ATOMS`), not traced from
-screenshots, so they are to scale and stay correct if the design changes.  The
-gap annotation in (f)-(h) is the quantity under test: the addition theorem's
-truncation error falls like rho^lmax with rho = (a_i + a_j)/d, so the tightest
-pair sets the accuracy -- if that is the whole story.
+built from (`tmatrix.aggregation.cst_supercell.build_2x2_supercell: ATOMS`),
+not traced from screenshots, so they are to scale and stay correct if the
+design changes.  The gap annotation in (f)-(h) is the quantity under test: the
+addition theorem's truncation error falls like rho^lmax with rho = (a_i + a_j)/d,
+so the tightest pair sets the accuracy -- if that is the whole story.
 """
 import argparse
 import os

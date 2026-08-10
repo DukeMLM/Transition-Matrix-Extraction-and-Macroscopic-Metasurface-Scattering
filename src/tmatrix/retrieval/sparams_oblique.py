@@ -36,10 +36,10 @@ same formulas with direction -> -direction (k_hat_r has k_z of the opposite
 sign but the same in-plane part).
 
 theta -> 0 mapping to sparams.sparams_normal (derived here, asserted to
-<= 1e-12 in test_sparams_oblique.py test (e)).  At theta = 0, phi = 0,
-direction = +1: e_TE^t = e_TE^r = y_hat, e_TM^t = +x_hat, but
-e_TM^r = -x_hat (k_hat_r = -z_hat flips k_hat_z, hence the reflected-TM
-sign).  With
+<= 1e-12 in tests/retrieval/test_sparams_oblique.py test (e)).  At
+theta = 0, phi = 0, direction = +1: e_TE^t = e_TE^r = y_hat,
+e_TM^t = +x_hat, but e_TM^r = -x_hat (k_hat_r = -z_hat flips k_hat_z,
+hence the reflected-TM sign).  With
 
     Sn_x = sparams_normal(k, A, modes, f_x, e_co=x_hat, e_cross=y_hat)
            (f_x from incidence e = x_hat = e_TM), and

@@ -36,8 +36,9 @@ sqrt(w), so that
 
 matches the par. 4 weighted least-squares objective for the LM driver.
 
-Selftest:  python forward.py --selftest        (needs checkpoints for the
-smoke frequencies 48 and 32; see test_precompute.py)
+Selftest:  python -m tmatrix.retrieval.forward --selftest   (needs
+checkpoints for the smoke frequencies 48 and 32; see
+tests/retrieval/test_precompute.py)
 """
 import os
 import sys

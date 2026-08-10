@@ -3,11 +3,11 @@
 Stage-3 reconstruction of `test/2x2/saw_gold_wl13p10um_10to34THz.tmat.h5`.
 
 ```bash
-python run_case.py ../test/2x2/saw_gold_wl13p10um_10to34THz.tmat.h5 --pitch 8.0 --r0 3.0 --lmax auto --finite 2 3 5 9 --out results_2x2
-python treams_case.py ../test/2x2/saw_gold_wl13p10um_10to34THz.tmat.h5 --pitch 8.0 --out results_2x2/treams_reference.npz --lmax auto
-python cst_packed_reference.py ../test/2x2/SAW_gold_noSub_packed.cst --list
-python cst_packed_reference.py ../test/2x2/SAW_gold_noSub_packed.cst --run 6 --out results_2x2/cst_direct_reference.csv
-python plot_case.py results_2x2
+python -m tmatrix.aggregation.run_case test/2x2/saw_gold_wl13p10um_10to34THz.tmat.h5 --pitch 8.0 --r0 3.0 --lmax auto --finite 2 3 5 9 --out results_2x2
+python -m tmatrix.aggregation.treams_case test/2x2/saw_gold_wl13p10um_10to34THz.tmat.h5 --pitch 8.0 --out results_2x2/treams_reference.npz --lmax auto
+python -m tmatrix.aggregation.cst_packed_reference test/2x2/SAW_gold_noSub_packed.cst --list
+python -m tmatrix.aggregation.cst_packed_reference test/2x2/SAW_gold_noSub_packed.cst --run 6 --out results_2x2/cst_direct_reference.csv
+python -m tmatrix.aggregation.plot_case results_2x2
 ```
 
 ## Input
@@ -96,11 +96,11 @@ not a single run. Signals are versioned by `choice` = the 3D Run ID in CST's
 Result Navigator; taking the newest one gives run 10 (`scale` 3.25), whose
 resonance is at 10.93 µm and which has nothing to do with this h5.
 
-`cst_packed_reference.py --list` prints the table (`p = 8` in all ten). Matching
-the reconstructed resonance selects **run 6**: `scale` 4.0, ring outer radius
-r = 2.877 µm, dip at 13.126 µm. The T-matrix's own low-frequency dipole
-polarizability independently implies a scatterer ~1.25× larger than run 10's
-r = 2.338 µm, i.e. r ≈ 2.9 µm — the same run.
+`python -m tmatrix.aggregation.cst_packed_reference --list` prints the table
+(`p = 8` in all ten). Matching the reconstructed resonance selects **run 6**:
+`scale` 4.0, ring outer radius r = 2.877 µm, dip at 13.126 µm. The T-matrix's
+own low-frequency dipole polarizability independently implies a scatterer
+~1.25× larger than run 10's r = 2.338 µm, i.e. r ≈ 2.9 µm — the same run.
 
 | 3D Run ID | 4 | 5 | 9 | 1 | 10 | 8 | **6** | 7 | 2 | 3 |
 |---|---|---|---|---|---|---|---|---|---|---|

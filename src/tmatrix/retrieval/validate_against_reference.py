@@ -254,10 +254,13 @@ same function (so the plumbing is proven, not declared).
 
 CLI
 ---
-    python validate_against_reference.py --selftest
-    python validate_against_reference.py --selftest --freqs 8,24,32,48
-    python validate_against_reference.py --selftest --sigma 3e-3
-    python validate_against_reference.py --selftest --tol-bright 0.05
+    python -m tmatrix.retrieval.validate_against_reference --selftest
+    python -m tmatrix.retrieval.validate_against_reference --selftest \
+        --freqs 8,24,32,48
+    python -m tmatrix.retrieval.validate_against_reference --selftest \
+        --sigma 3e-3
+    python -m tmatrix.retrieval.validate_against_reference --selftest \
+        --tol-bright 0.05
 Options: --fit-angles, --holdout-angles, --tol-heldout, --tag, --sigma-obs,
 --starts, --seed, --no-figures, --no-channel-dict.  Frequencies whose
 requested angles are not cached are skipped gracefully (fm.have) and listed
@@ -2313,7 +2316,8 @@ def main(argv=None):
     if "--selftest" in argv:
         sys.exit(selftest(argv))
     print(__doc__)
-    print("Run:  python validate_against_reference.py --selftest")
+    print("Run:  python -m tmatrix.retrieval.validate_against_reference "
+          "--selftest")
 
 
 if __name__ == "__main__":

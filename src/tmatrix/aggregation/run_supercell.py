@@ -4,15 +4,16 @@ One driver for both halves of the experiment, so the single-atom reference and
 the supercell go through identical code:
 
   # one atom per cell (reproduces run_case.py's problem with Ewald coupling)
-  python run_supercell.py --cell 8 --site ../test/2x2/saw_gold_wl17p30um_10to34THz.tmat.h5 0 0 \
+  python -m tmatrix.aggregation.run_supercell --cell 8 \
+      --site test/2x2/saw_gold_wl17p30um_10to34THz.tmat.h5 0 0 \
       --lmax 3 --out results_B_ewald
 
   # the a,b;b,a checkerboard, supercell period 16 um
-  python run_supercell.py --cell 16 \
-      --site ../test/2x2/saw_gold_wl13p10um_10to34THz.tmat.h5 -4 -4 \
-      --site ../test/2x2/saw_gold_wl17p30um_10to34THz.tmat.h5  4 -4 \
-      --site ../test/2x2/saw_gold_wl17p30um_10to34THz.tmat.h5 -4  4 \
-      --site ../test/2x2/saw_gold_wl13p10um_10to34THz.tmat.h5  4  4 \
+  python -m tmatrix.aggregation.run_supercell --cell 16 \
+      --site test/2x2/saw_gold_wl13p10um_10to34THz.tmat.h5 -4 -4 \
+      --site test/2x2/saw_gold_wl17p30um_10to34THz.tmat.h5  4 -4 \
+      --site test/2x2/saw_gold_wl17p30um_10to34THz.tmat.h5 -4  4 \
+      --site test/2x2/saw_gold_wl13p10um_10to34THz.tmat.h5  4  4 \
       --lmax 3 --cluster-lmax 14 --out results_2x2_super
 
 Per frequency it

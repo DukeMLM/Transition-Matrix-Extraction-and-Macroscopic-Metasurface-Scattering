@@ -2,7 +2,8 @@
 
 Implements every "required edit" of INVERSE_TMATRIX_FROM_FLOQUET.md par. 7 on
 top of the validated normal-incidence script
-aggregation/cst_direct/build_saw_unitcell.py (run_v3, REPORT par. 4b):
+src/tmatrix/aggregation/cst_direct/build_saw_unitcell.py (run_v3, REPORT
+par. 4b):
 
 1.  Geometry: free-standing gold spoke-and-wheel array, no spacer, no ground
     plane (T_iso's world).  Geometry/material VBA is COPIED from the base
@@ -73,7 +74,7 @@ aggregation/cst_direct/build_saw_unitcell.py (run_v3, REPORT par. 4b):
     FD solves.  Starter subset (--starter): theta in {0,30,60} x
     phi in {0,22.5} minus duplicate = 5 structure + 3 empty runs.
     The 13 structure angles coincide with rows 0-12 of the normative
-    17-angle table in retrieval/precompute_C.py.
+    17-angle table in tmatrix.retrieval.precompute_C.
 
 6.  Frequency sampling: the base script's AddSampleInterval scheme,
     14.99-37.47 THz, "Automatic","True" -- covering the tmat.h5 49-frequency

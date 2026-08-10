@@ -2,9 +2,10 @@
 
 Implementation of FAST_FULL_TMATRIX_WHEEL_PROPOSAL.md.  This package is
 deliberately SEPARATE from the validated one-pitch specular retrieval
-(retrieval/*.py): that pipeline is complete and its conventions are pinned by
-a measured CST campaign (see retrieval/RESULTS.md, HANDOFF.md).  Nothing here
-modifies it; the conventions are IMPORTED from it and re-verified by gates.
+(src/tmatrix/retrieval/*.py): that pipeline is complete and its conventions
+are pinned by a measured CST campaign (see retrieval/RESULTS.md, HANDOFF.md).
+Nothing here modifies it; the conventions are IMPORTED from it and re-verified
+by gates.
 
 Milestone map (proposal par. 14)
 -------------------------------
@@ -20,7 +21,7 @@ Milestone map (proposal par. 14)
 
 Inherited normative conventions (retrieval/HANDOFF.md; do not re-derive)
 -----------------------------------------------------------------------
-* e^{-i omega t}, outgoing h^(1), tmat.h5 mode order (aggregation/vswf.py).
+* e^{-i omega t}, outgoing h^(1), tmat.h5 mode order (tmatrix.aggregation.vswf).
 * Jones index order 0 = TE, 1 = TM; rows = receive, columns = incident.
 * Polarization basis: e_TE = (-sin ph, cos ph, 0),
   e_TM = (k_z_hat cos ph, k_z_hat sin ph, -sin th), evaluated separately for

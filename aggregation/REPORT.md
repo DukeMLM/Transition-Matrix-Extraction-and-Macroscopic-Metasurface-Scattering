@@ -45,8 +45,9 @@ standard literature, with these findings:
 
 ## 2. Implementation
 
-All in `aggregation/` (pure numpy/scipy; conventions locked to the tmat.h5 standard —
-e^{−iωt}, h_l^{(1)}, Jackson-normalized VSWFs with Condon–Shortley, parity basis):
+All in `src/tmatrix/aggregation/` (pure numpy/scipy; conventions locked to the
+tmat.h5 standard — e^{−iωt}, h_l^{(1)}, Jackson-normalized VSWFs with
+Condon–Shortley, parity basis):
 
 | file | contents |
 |---|---|
@@ -58,7 +59,7 @@ e^{−iωt}, h_l^{(1)}, Jackson-normalized VSWFs with Condon–Shortley, parity 
 | `tmat_io.py` | tmat.h5 reader |
 | `run_demo.py`, `run_mirror_demo.py`, `plot_results.py` | drivers |
 
-## 3. Validation (all tests in `test_*.py`, all passing)
+## 3. Validation (all tests in `tests/aggregation/test_*.py`, all passing)
 
 **Layer 0 — VSWF core** (`test_vswf.py`)
 - Maxwell curl consistency (FD): 2e-9 · plane-wave reconstruction (E and H): 3e-8
@@ -101,9 +102,10 @@ toward 8 µm — the tail of a resonance below 8 µm). This is not a pipeline ar
 the same flat curves). The designed λc = 15 µm response of this structure is an
 **MIM ground-plane resonance** — the demo file is `T_iso` (Stage 1: substrate/ground
 omitted by design). Once a ground plane is added via image theory (Stage-2-lite,
-`run_mirror_demo.py`), an absorption resonance emerges at ~13 µm (peak A = 0.093)
-for the design's mirror distance h = 350 nm — and vanishes at h = 550 nm —
-qualitatively recovering the absorber behavior near the design λc = 15 µm.
+`tmatrix.aggregation.run_mirror_demo`), an absorption resonance emerges at
+~13 µm (peak A = 0.093) for the design's mirror distance h = 350 nm — and
+vanishes at h = 550 nm — qualitatively recovering the absorber behavior near
+the design λc = 15 µm.
 The residual position/amplitude discrepancy is expected: PEC mirror + vacuum
 spacer replace the real dielectric spacer (its permittivity is not in the file),
 and the image distance 2h = 0.70 µm sits at the Rayleigh-hypothesis boundary of
@@ -117,10 +119,10 @@ shape" tolerance requested.
 ## 4b. Direct CST validation ("the real S-parameters")
 
 A direct CST frequency-domain periodic simulation of the same free-standing
-array (`cst_direct/build_saw_unitcell.py`: unit-cell Floquet boundaries,
-pitch 2 µm, lossy gold σ = 4.561e7 S/m, geometry from the tmat.h5 attributes,
-verified visually against the design sketch) agrees with the T-matrix
-aggregation to
+array (`src/tmatrix/aggregation/cst_direct/build_saw_unitcell.py`: unit-cell
+Floquet boundaries, pitch 2 µm, lossy gold σ = 4.561e7 S/m, geometry from the
+tmat.h5 attributes, verified visually against the design sketch) agrees with
+the T-matrix aggregation to
 
     max | |S21|_CST − |S21|_aggregation | = 0.0011
     max | |S11|_CST − |S11|_aggregation | = 0.0029
@@ -147,7 +149,7 @@ here is a fresh periodic solve.
 
 ```
 conda activate cst_inference
-cd "D:/Claude/T matrix/aggregation"
+cd "D:/Claude/T matrix"
 pytest -m "not slow"                              # validation suite
 python -m tmatrix.aggregation.run_demo            # ~8 min: 49 freqs, periodic + finite arrays
 python tests/aggregation/test_feature_fidelity.py
