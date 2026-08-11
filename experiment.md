@@ -43,6 +43,25 @@ Because all three are members of the same packed parametric sweep, a direct CST
 periodic reference already exists for each of them — no new simulation was
 needed for step 1.
 
+Three more rows of the same sweep were extracted later, to open the arrangement
+space beyond the three cells A, B, C, D can form. They are the same family and
+the same extraction, and they are what `e,b;c,a` is built from:
+
+| | **E** | **F** | **G** |
+|---|---|---|---|
+| file | `…wl10p30um` | `…wl11p60um` | `…wl14p90um` |
+| `scale` (3D Run ID) | 3.00 (run 1) | 3.50 (run 8) | 4.50 (run 7) |
+| ring outer radius | 2.158 µm | 2.517 µm | 3.237 µm |
+| stored `residual` | 0.0052–0.0490 | 0.0041–0.0288 | 0.0049–0.0257 |
+| stored `reciprocity` | 0.022–0.226 | 0.023–0.124 | 0.026–0.098 |
+| passivity, max SV(I+2T) | 1.026 | 1.027 | 1.049 |
+
+The `.tmat.h5` files carry no geometry, so that mapping was *measured*: each
+file's own 8 µm-lattice prediction was scored against all ten runs of the packed
+sweep, and the assigned run beats the runner-up by 37–135×. The `wl` in a file
+name is the atom's own transmission dip on that lattice, which is what makes the
+naming self-identifying.
+
 ## The layout
 
 Four atoms in a 16 × 16 µm repeated cell, 8 µm apart, one species on each
@@ -363,16 +382,23 @@ with ρ = (aᵢ + aⱼ)/d.
 
 | case | worst pair | ρ | ρ³ | MSE S21 | mean \|ΔS21\| |
 |---|---|---|---|---|---|
+| E alone | E–E | 0.539 | 0.157 | 0.00028 | 0.016 |
 | C alone | C–C | 0.584 | 0.200 | 0.00038 | 0.017 |
+| F alone | F–F | 0.629 | 0.249 | 0.00066 | 0.023 |
 | a,c;c,a | A–C | 0.652 | 0.277 | 0.00067 | 0.019 |
 | A alone | A–A | 0.719 | 0.372 | 0.00107 | 0.030 |
 | b,c;c,b | B–C | 0.742 | 0.408 | 0.00171 | 0.036 |
+| G alone | G–G | 0.809 | 0.530 | 0.00094 | 0.028 |
 | a,b;b,a | A–B | 0.809 | 0.530 | 0.00367 | 0.046 |
+| **e,b;c,a** | **A–B** | **0.809** | **0.530** | **0.0612** | **0.181** |
 | a,d;b,c | A–D | 0.854 | 0.623 | 0.0118 | 0.080 |
 | B alone | B–B | 0.899 | 0.727 | 0.00393 | 0.054 |
-| a,c;d,b | B–D | 0.944 | 0.841 | 0.1207 | 0.244 |
+| a,c;d,b | B–D | 0.944 | 0.841 | 0.1206 | 0.244 |
 | a,b;c,d | B–D | 0.944 | 0.841 | **0.1654** | 0.308 |
 | D alone | D–D | 0.989 | 0.967 | 0.0351 | 0.149 |
+
+The three rows at ρ = 0.809 are the clearest single statement of what ρ can and
+cannot do: same convergence ratio, MSE from 0.00094 to 0.0612, a factor of 65.
 
 At ρ = 0.989 each extra multipole order buys 1 %, so lmax of order 100 would be
 needed — and long before that the lattice sum's amplification of the noisy
@@ -388,19 +414,39 @@ inherits the same convergence limit. Agreement with treams validates the
 The trend in ρ is strong but not strictly monotone — B alone beats `a,d;b,c`,
 and D alone beats `a,b;c,d` — so ρ is the right diagnostic for *which regime you
 are in* (above ~0.85 things degrade, above ~0.94 they break) rather than a
-quantitative error law.
+quantitative error law. Within the *single atoms* it is much better than that:
+seven of them, ρ from 0.539 to 0.989, are monotone in resonance-position error
+(+0.2, −0.3, −0.4, −0.7, −1.0, −4.1, −18.7 %) over two decades of MSE.
 
-**ρ, and not arrangement symmetry, is what drives this.** Across the two
-four-atom cells originally available, ρ was confounded with how nearly
+**Within one atom set, ρ and not arrangement symmetry drives this.** Across the
+two four-atom cells originally available, ρ was confounded with how nearly
 mirror-symmetric the arrangement was, because putting the two largest atoms on a
 diagonal does both at once. The third and last distinct arrangement separates
 them: `a,c;d,b` reproduces `a,b;c,d`'s worst pair, ρ and 0.448 µm gap exactly
 while placing a different pair on the diagonal, and it lands with `a,b;c,d`
-(0.1207 against 0.1654) rather than with `a,d;b,c` (0.0118) — the two cells
+(0.1206 against 0.1654) rather than with `a,d;b,c` (0.0118) — the two cells
 sharing ρ = 0.944 are within 1.4× of each other, the cell at ρ = 0.854 is 10–14×
-better than either. [`OPEN_QUESTIONS.md`](OPEN_QUESTIONS.md) §1 records the
-verdict and its one qualification; §3 notes that the pipeline still produces
-these answers with no warning at all, which is now the live defect.
+better than either.
+
+**Across atom sets, ρ is not sufficient.** `a,d;b,c` was still confounded the
+other way: it is both the loosest of the three *and* the most nearly symmetric,
+so its accuracy had two candidate explanations. Three more measured atoms open
+the space from 3 distinct cells to 105, and `e,b;c,a` is the cell built to break
+that tie — lower ρ than `a,d;b,c` (0.809 against 0.854) and further from every
+mirror than either failing cell (25.0 % / 20.0 % against 27.3 / 20.0 % and
+18.8 / 18.8 %). It scores **0.0612, five times worse than `a,d;b,c`**, and the
+failure is qualitative: the prediction and CST have the same two collective
+resonances at ≈ 16.3 and ≈ 19.7 µm, and the prediction puts the depth on the
+wrong one (0.145 / 0.431 against CST's 0.444 / **0.097**). Raising lmax does not
+repair it and cannot test it — the absorption goes negative at lmax 4 and 5,
+the noise-amplification confound again. So ρ is a floor to refuse below, not a
+certificate to accept above. See
+[`aggregation/results_2x2_EBCA_l3/REPORT.md`](aggregation/results_2x2_EBCA_l3/REPORT.md).
+
+[`OPEN_QUESTIONS.md`](OPEN_QUESTIONS.md) §1 records both verdicts; §3 notes that
+the pipeline still produces these answers with no warning at all — and that the
+guard specified there would have passed `e,b;c,a` silently, which makes it a
+necessary condition rather than an acceptance test.
 
 Both failing cells misplace their deepest transmission dip by about 5 µm, in
 *opposite* directions (−5.51 µm for `a,b;c,d`, +4.92 µm for `a,c;d,b`, against

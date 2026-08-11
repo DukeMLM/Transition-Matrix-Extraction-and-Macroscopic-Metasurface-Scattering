@@ -32,14 +32,18 @@ from tmatrix.paths import AGG_DATA, BENCHMARK_2X2
 TMAT = {"A": "saw_gold_wl13p10um_10to34THz.tmat.h5",
         "B": "saw_gold_wl17p30um_10to34THz.tmat.h5",
         "C": "saw_gold_wl10p90um_10to34THz.tmat.h5",
-        "D": "saw_gold_wl23p50um_10to34THz.tmat.h5"}
+        "D": "saw_gold_wl23p50um_10to34THz.tmat.h5",
+        "E": "saw_gold_wl10p30um_10to34THz.tmat.h5",
+        "F": "saw_gold_wl11p60um_10to34THz.tmat.h5",
+        "G": "saw_gold_wl14p90um_10to34THz.tmat.h5"}
 BANK = BENCHMARK_2X2
 H = 4.0
 
 # key in the npz -> (spec read as w,x;y,z, results dir of the x-polarized run)
 CELLS = {"abcd": ("ABCD", "results_2x2_ABCD_l3"),
          "adbc": ("ADBC", "results_2x2_ADBC_l3"),
-         "acdb": ("ACDB", "results_2x2_ACDB_l3")}
+         "acdb": ("ACDB", "results_2x2_ACDB_l3"),
+         "ebca": ("EBCA", "results_2x2_EBCA_l3")}
 LMAX = "3"
 
 

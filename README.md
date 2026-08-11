@@ -19,17 +19,25 @@ below.
 Validated end-to-end on the `dary` branch against direct CST periodic
 simulations and the independent [treams](https://github.com/tfp-photonics/treams)
 code: `test/single` (pitch 2 µm, 8–20 µm) to **|ΔS| ≤ 0.003** and **~3×10⁻⁴**
-respectively, four single-atom `test/2x2` lattices (pitch 8 µm, 10–34 THz, a
-resonant band) and six *mixed* supercells built from those measured atoms —
-ten direct CST benchmarks in all. Seven of the ten agree to **mean |ΔS|
-0.017–0.080**, limited by the input T-matrix rather than by the aggregation,
-which reproduces an independent implementation to **10⁻¹²**. The three that do
-not are documented failures with a diagnosed cause: they contain a pair of atoms
-whose circumscribing spheres nearly touch, where the spherical addition theorem
-converges too slowly to truncate. That cause is now established rather than
-inferred — a purpose-built third arrangement holds the pair geometry fixed while
-changing the symmetry, and the error does not move. See
-[`experiment.md`](experiment.md).
+respectively, seven single-atom `test/2x2` lattices (pitch 8 µm, 10–34 THz, a
+resonant band) and ten *mixed* supercells built from those measured atoms —
+**seventeen direct CST benchmarks** in all. Thirteen of the seventeen agree to
+**mean |ΔS| 0.016–0.080**, limited by the input T-matrix rather than by the
+aggregation, which reproduces an independent implementation to **10⁻¹²**. The
+best four-distinct-atom cell, `e,a;f,c`, reaches **mean |ΔS| 0.023 — inside the
+range of its own constituent atoms measured alone**, so composing them costs no
+accuracy beyond measuring them.
+
+The four that do not agree are documented failures. Three share a diagnosed
+cause — a pair of atoms whose circumscribing spheres nearly touch, where the
+spherical addition theorem converges too slowly to truncate. The fourth,
+`e,b;c,a`, is a deliberate counterexample showing that this cause is
+**necessary but not sufficient**: it has a wider tightest gap than the cell it
+is 5× worse than. Its matched control `e,b;g,a` — *identical* worst pair, ρ and
+gap, but 10 % mirror mismatch instead of 25 % — recovers a factor of 3.4, which
+makes arrangement symmetry a measured second axis rather than a conjecture. See
+[`experiment.md`](experiment.md) and
+[`results_2x2_EBCA_l3/REPORT.md`](aggregation/results_2x2_EBCA_l3/REPORT.md).
 
 <p align="center">
 <img src="aggregation/results/fig7_cst_direct_comparison.png" width="85%">
@@ -42,23 +50,101 @@ changing the symmetry, and the error does not move. See
 
 ### → [`experiment.md`](experiment.md): composing metasurfaces from measured meta-atoms
 
-Four spoke-and-wheel resonators of different size, whose isolated T-matrices were
+Spoke-and-wheel resonators of different size, whose isolated T-matrices were
 extracted separately, are combined in one repeated 16 µm cell — three two-species
-checkerboards (`a,b;b,a`, `a,c;c,a`, `b,c;c,b`) and all three distinct
-arrangements of the four at once (`a,b;c,d`, `a,d;b,c`, `a,c;d,b`). The pipeline
-predicts each mixed metasurface's S-parameters; a direct CST simulation of that
-metasurface then checks the prediction. Read [`experiment.md`](experiment.md) for
-the whole story — it is the shortest route into what this repository does and how
-far it can be trusted.
+checkerboards (`a,b;b,a`, `a,c;c,a`, `b,c;c,b`), all three distinct arrangements
+of A, B, C, D at once (`a,b;c,d`, `a,d;b,c`, `a,c;d,b`), and `e,b;c,a`, built
+from a wider atom pool to be looser than the best of those and less symmetric
+than the worst. The pipeline predicts each mixed metasurface's S-parameters; a
+direct CST simulation of that metasurface then checks the prediction. Read
+[`experiment.md`](experiment.md) for the whole story — it is the shortest route
+into what this repository does and how far it can be trusted.
 
 <p align="center">
 <img src="aggregation/results_2x2_super_l3/fig4_comparison.png" width="100%">
-<br><em>All ten benchmarks. Markers are the T-matrix prediction, pale lines the
-direct CST run of the same structure. Bottom right: accuracy against the
-translation convergence ratio rho — above rho ~ 0.85 the method degrades, above
-0.94 it breaks. The two cells sharing rho = 0.944 land together despite being in
-different symmetry classes.</em>
+<br><em>All seventeen benchmarks. Markers are the T-matrix prediction, pale lines
+the direct CST run of the same structure. Bottom right: accuracy against the
+translation convergence ratio rho. The seven single atoms rise monotonically
+with it over two decades; the four-species cells do not — e,b;c,a has the
+lowest rho of the four original ones and is 5x worse than a,d;b,c. rho bounds
+the error at fixed composition and does not order cells against one another.</em>
 </p>
+
+### The best case: four distinct atoms predicted to the accuracy of their own inputs
+
+<p align="center">
+<img src="aggregation/results_2x2_EAFC_l3/cell_eafc.png" width="100%">
+<br><em>`e,a;f,c` — the best-conditioned four-distinct-atom cell in the study
+(rho 0.652, mirror mismatch 7.7 %). <b>MSE of the complex 0th-order S21 against
+direct CST = 0.0011</b>, mean |ΔS21| = 0.023. (a) the cell to scale; (b) each of
+its four atoms alone on its own 8 µm lattice, markers predicted and pale CST;
+(c), (d) the cell itself. Atoms are relabelled a–d by rising resonance
+frequency <b>within this figure only</b> — elsewhere a letter is a fixed row of
+the parametric sweep. Editable EPS alongside the PNG.</em>
+</p>
+
+This is the cleanest statement of what the method can do. The cell's mean error,
+**0.023**, sits *inside the range of its own four constituent atoms measured
+alone* — 0.016, 0.017, 0.023 and 0.030 (panel b). **Composing four separately
+measured meta-atoms into a new metasurface costs no accuracy beyond what was
+paid to measure them.** All three resonances land: 0.127 @ 11.43 µm against
+0.112 @ 11.42 measured, 0.386 @ 13.95 against 0.401 @ 13.89, and 0.805 @ 18.18
+against 0.480 @ 17.98. The last one is the residual — a narrow collective notch
+the truncated coupling under-reaches, and essentially the whole of the MSE.
+
+Its sibling [`e,c;f,a`](aggregation/results_2x2_ECFA_l3/cell_ecfa.png) is the
+**same four atoms rearranged** and scores 0.0028. `Σ_s T_s` is identical for the
+two, so the 0.066 mean difference CST measures between them is arrangement
+alone, and the method reproduces it.
+
+```bash
+python -m tmatrix.aggregation.plot_cell_detail EAFC ECFA --format eps
+```
+
+### How the refined frequency grid is built
+
+The `.tmat.h5` files store 25 frequencies over 10–34 THz, 1 THz apart. A lattice
+resonance is far narrower than that, so the stored grid *aliases* it, while an
+isolated atom's own T is broad (Q ≈ 5–10) and genuinely smooth over 1 THz.
+`run_supercell.py --refine N` exploits exactly that asymmetry
+([`refine_grid`](src/tmatrix/aggregation/run_supercell.py)):
+
+```python
+freq = np.unique(np.concatenate(
+    [np.linspace(f0[i], f0[i + 1], refine + 1) for i in range(len(f0) - 1)]))
+j = np.clip(np.searchsorted(f0, freq) - 1, 0, len(f0) - 2)
+w = ((freq - f0[j]) / (f0[j + 1] - f0[j]))[:, None, None]
+T_new = (1 - w) * T[j] + w * T[j + 1]
+```
+
+Each stored interval is subdivided N ways and duplicate endpoints merged, so 25
+points become 97 at `--refine 4`. **Only the input T is interpolated** — linearly
+in the complex matrix, between its two bracketing stored samples, which is why
+the curve is labelled *complex interpolation*. Everything downstream is then
+recomputed exactly at every new frequency: the Ewald lattice sums W_st(k∥), the
+block solve (I − W T₀) a = a_inc, and the Floquet projection. **The sharp
+structure the refined curve shows is solved for, not drawn in.**
+
+It converges, and it matters:
+
+| refine | points | MSE vs CST | dips of \|S21\| (µm, depth) |
+|---|---|---|---|
+| 1 | 25 | 0.0011 | 11.43 (0.156), 14.24 (0.488), 18.39 (0.884) |
+| 4 | 97 | 0.0020 | 11.43 (0.127), 13.95 (0.386), 18.18 (0.805) |
+| 8 | 193 | 0.0018 | 11.39 (0.126), 13.93 (0.386), 18.06 (0.766) |
+| CST | 1005 | — | 11.42 (0.112), 13.89 (0.401), 17.98 (0.480) |
+
+4 → 8 moves the dips by ≤ 0.12 µm, so `--refine 4` is converged for these cells.
+Note the MSE *rises* from 0.0011 to 0.0020: the stored grid was flattering the
+prediction by sampling both curves at the same aliased points. 0.0020 is the
+honest number. For `e,b;c,a` the effect is larger — its deepest predicted
+feature reads 0.399 @ 16.66 µm on the stored grid and 0.145 @ 16.27 µm refined.
+
+**One caveat.** Each `tmat.h5` is merged from two CST band extractions, and
+interpolating T across the join mixes two independent runs. The refined line is
+not meaningful inside the seam: **20–21 THz (14.28–14.99 µm)** for every atom
+except **A**, whose seam is **18–19 THz (15.78–16.66 µm)**. The stored points
+themselves are unaffected.
 
 Highlights: a mixed cell is **not** an interpolation of its constituents — each
 species red-shifts onto the sparser 11.31 µm sublattice, and `a,c;c,a` grows a
@@ -70,9 +156,13 @@ becomes birefringent by an amount that tracks which pair sits on the diagonal,
 and **rearranging the same four atoms changes |S21| by up to 0.43** — `Σ_s T_s`
 is identical for all three arrangements and cannot tell them apart. Arrangement
 also decides whether the prediction is usable: a purpose-built third cell holds
-the pair geometry fixed while changing the symmetry class and shows that the
-accuracy follows the geometry. The write-up also takes the residual error apart
-into the mechanisms that produce it, reproducibly
+the pair geometry fixed while changing the symmetry class, and the error does
+not move — so within one atom set the accuracy follows the geometry. A fifth
+four-atom cell then shows that this does not generalise across atom sets: at the
+*lowest* convergence ratio of all four it is 5× worse than the best of them, so
+neither the ratio nor the symmetry orders the cells on its own. The write-up
+also takes the residual error apart into the mechanisms that produce it,
+reproducibly
 (`tmatrix.aggregation.error_budget`), and documents the three cases where the method
 breaks and why ([`OPEN_QUESTIONS.md`](OPEN_QUESTIONS.md) carries what is still
 unresolved).
@@ -223,7 +313,7 @@ src/tmatrix/
     treams_supercell.py       independent end-to-end treams reference
     error_budget.py           where the residual disagreement with CST comes
                               from, frequency by frequency
-    compare_cases.py          all ten benchmarked cases in one table
+    compare_cases.py          all fourteen benchmarked cases in one table
     arrangement_predictors.py rho and mirror mismatch per arrangement
     jones_xy.py               both polarizations -> the cells' Jones diagonal
     plot_supercell.py         per-case figures + agreement metrics
@@ -247,11 +337,16 @@ ref/                          theory manual (LaTeX + PDF)
 test/single/                  demo unit cell: spoke-and-wheel gold resonator
   saw_gold_wl15p0025um.tmat.h5   49 freqs (8-20 um), lmax 3, tmat.h5 format
 test/2x2/                     second case: same shape, four sizes, 8 um pitch
-  saw_gold_wl10p90um_10to34THz.tmat.h5   atom C, scale 3.25 (packed run 10)
+  saw_gold_wl10p30um_10to34THz.tmat.h5   atom E, scale 3.00 (packed run 1)
+  saw_gold_wl10p90um_10to34THz.tmat.h5   atom C, scale 3.25 (run 10)
+  saw_gold_wl11p60um_10to34THz.tmat.h5   atom F, scale 3.50 (run 8)
   saw_gold_wl13p10um_10to34THz.tmat.h5   atom A, scale 4.00 (run 6)
+  saw_gold_wl14p90um_10to34THz.tmat.h5   atom G, scale 4.50 (run 7)
   saw_gold_wl17p30um_10to34THz.tmat.h5   atom B, scale 5.00 (run 2)
   saw_gold_wl23p50um_10to34THz.tmat.h5   atom D, scale 5.50 (run 3)
-                              each 25 freqs (10-34 THz), lmax 5
+                              each 25 freqs (10-34 THz), lmax 5.  The `wl` is
+                              the atom's own transmission dip on its own 8 um
+                              lattice, so the file names identify the sweep row
   SAW_gold_noSub_packed.cst   packed CST project: 10-run parametric sweep
                               over `scale`, holding the periodic run that is
                               the direct reference for each atom
@@ -259,11 +354,13 @@ test/2x2/                     second case: same shape, four sizes, 8 um pitch
 aggregation/                  stage 3 outputs
   results/                    the test/single demo: figures, CSV/NPZ spectra
   results_2x2/                the test/2x2 case (REPORT.md, CSV/NPZ, figures)
-  results_{A,B,C,D}_ewald_l3/ the four single-atom lattices
+  results_{A..G}_ewald_l3/    the seven single-atom lattices
   results_2x2_super_l3/       a,b;b,a  (also the method REPORT for all cells)
   results_2x2_{AC,BC}_l3/     a,c;c,a and b,c;c,b
   results_2x2_{ABCD,ADBC,ACDB}_l3/
-                              the three distinct four-species arrangements
+                              the three distinct arrangements of A, B, C, D
+  results_2x2_EBCA_l3/        e,b;c,a -- lowest rho of the four, most
+                              asymmetric, and 5x worse than a,d;b,c
   *_fine/                     the same sweeps on a 4x refined frequency grid
   cst_direct/, cst_supercell/ the CST projects and their solver logs
   REPORT.md                   results and findings
@@ -422,14 +519,15 @@ T-matrix violates passivity by 2.8 % and reciprocity by up to 11 % (vs 0.007 %
 and 0.6–1.2 % for `test/single`), and the largest error sits exactly at the
 seam between its two merged extraction bands.
 
-### Heterogeneous supercells — four atoms, six mixed cells, ten CST benchmarks
+### Heterogeneous supercells — seven atoms, seven mixed cells, fourteen CST benchmarks
 
 Method and full validation ladder in
 [`aggregation/results_2x2_super_l3/REPORT.md`](aggregation/results_2x2_super_l3/REPORT.md);
 per-cell results in the sibling `results_2x2_*_l3/REPORT.md`. Atoms A
-(`scale` 4.00), B (5.00), C (3.25) and D (5.50) combined in a 16 µm repeated
-cell at 8 µm atom pitch, 10–34 THz. `python -m tmatrix.aggregation.compare_cases --all`
-prints every case in one table.
+(`scale` 4.00), B (5.00), C (3.25), D (5.50), E (3.00), F (3.50) and G (4.50)
+combined in a 16 µm repeated cell at 8 µm atom pitch, 10–34 THz.
+`python -m tmatrix.aggregation.compare_cases --all` prints every case in one
+table.
 
 **The aggregation itself is exact.** Every algebraic identity the manual's
 §6.5.5 ladder asks for holds to round-off, and an independent treams
@@ -449,41 +547,67 @@ sums over all open orders:
 
 **Against direct CST**, the MSE of the complex 0th-order S21 —
 mean(\|S21_pred − S21_CST\|²) over the stored frequencies, on the complex
-amplitude so a phase error counts — for each of the ten benchmarks, ordered by
-the addition theorem's convergence ratio ρ = (aᵢ + aⱼ)/d over the 8 µm
+amplitude so a phase error counts — for each of the fourteen benchmarks, ordered
+by the addition theorem's convergence ratio ρ = (aᵢ + aⱼ)/d over the 8 µm
 neighbour pairs:
 
 | case | ρ | MSE | mean \|ΔS21\| | | case | ρ | MSE | mean \|ΔS21\| |
 |---|---|---|---|---|---|---|---|---|
-| C alone | 0.584 | 0.00038 | 0.017 | | B alone | 0.899 | 0.0039 | 0.054 |
-| a,c;c,a | 0.652 | 0.00067 | 0.019 | | a,c;d,b | 0.944 | **0.1207** | 0.244 |
-| A alone | 0.719 | 0.00107 | 0.030 | | a,b;c,d | 0.944 | **0.1654** | 0.308 |
-| b,c;c,b | 0.742 | 0.00171 | 0.036 | | D alone | 0.989 | **0.0351** | 0.149 |
-| a,b;b,a | 0.809 | 0.00367 | 0.046 | | | | | |
-| a,d;b,c | 0.854 | 0.0118 | 0.080 | | | | | |
+| E alone | 0.539 | 0.00028 | 0.016 | | G alone | 0.809 | 0.00094 | 0.028 |
+| C alone | 0.584 | 0.00038 | 0.017 | | a,b;b,a | 0.809 | 0.00367 | 0.046 |
+| F alone | 0.629 | 0.00066 | 0.023 | | **e,b;g,a** | **0.809** | **0.0182** | 0.078 |
+| **e,a;f,c** | **0.652** | **0.0011** | **0.023** | | **e,b;c,a** | **0.809** | **0.0612** | 0.181 |
+| a,c;c,a | 0.652 | 0.00067 | 0.019 | | a,d;b,c | 0.854 | 0.0118 | 0.080 |
+| **e,c;f,a** | **0.674** | **0.0028** | **0.040** | | B alone | 0.899 | 0.0039 | 0.054 |
+| A alone | 0.719 | 0.00107 | 0.030 | | a,c;d,b | 0.944 | **0.1206** | 0.244 |
+| b,c;c,b | 0.742 | 0.00171 | 0.036 | | a,b;c,d | 0.944 | **0.1654** | 0.308 |
+| | | | | | D alone | 0.989 | **0.0351** | 0.149 |
 
 MSE is the metric the figures are scored by; it separates the four-atom cells by
 **14×** (0.1654 against 0.0118) where the mean absolute error separates them by
 only 3.8×, because the `a,b;c,d` disagreement is concentrated in a few badly
 misplaced resonances rather than spread across the band.
 
-**ρ is the cause, not a correlate.** `a,c;d,b` was built to test exactly that: it
-reproduces `a,b;c,d`'s worst pair, ρ and 0.448 µm gap while putting a different
-pair on the diagonal, so it separates pair geometry from arrangement symmetry,
-which are confounded in the other two cells. It lands with `a,b;c,d`. The two
-cells at ρ = 0.944 are within 1.4× of each other; the one at ρ = 0.854 is 10–14×
-better than either. See
+**Within one atom set ρ is the cause, not a correlate.** `a,c;d,b` was built to
+test exactly that: it reproduces `a,b;c,d`'s worst pair, ρ and 0.448 µm gap
+while putting a different pair on the diagonal, so it separates pair geometry
+from arrangement symmetry, which are confounded in the other two cells. It lands
+with `a,b;c,d`. The two cells at ρ = 0.944 are within 1.4× of each other; the one
+at ρ = 0.854 is 10–14× better than either. See
 [`results_2x2_ACDB_l3/REPORT.md`](aggregation/results_2x2_ACDB_l3/REPORT.md).
 
-Seven of the ten land at 0.017–0.080, limited by the input T-matrices rather
-than by the aggregation. The three that fail are documented, with the cause
-diagnosed in [`experiment.md`](experiment.md): they contain a pair of atoms
-whose circumscribing spheres nearly touch. Eq. (57) is *satisfied* there — the
-addition theorem simply converges too slowly to truncate, since its error falls
-like ρ^lmax and ρ = 0.99 buys 1 % per multipole order. Raising lmax makes it
-worse, and treams reproduces the wrong answer to 10⁻¹⁵, which is the sharpest
+**Across atom sets it is not sufficient, and that is measured.** `e,b;c,a` was
+built from the wider pool to have the *lowest* ρ of the four four-atom cells
+(0.809 against 0.854) while being the *most* mirror-asymmetric of them. It is
+5.2× worse than the cell at ρ = 0.854, and it fails qualitatively: it puts the
+depth on the wrong one of the cell's two collective modes (0.145 at 16.3 µm and
+0.431 at 19.7 µm, against CST's 0.444 and **0.097**). Note the four rows at
+ρ = 0.809 in the table above: MSE 0.00094 for a single atom, 0.00367 for a
+two-species checkerboard, 0.0182 and 0.0612 for two four-atom cells — the same
+convergence ratio, 65× apart. See
+[`results_2x2_EBCA_l3/REPORT.md`](aggregation/results_2x2_EBCA_l3/REPORT.md).
+
+**Arrangement symmetry is the second axis, and that is a controlled result.**
+`e,b;g,a` reproduces `e,b;c,a`'s pair geometry *exactly* — same worst pair A–B,
+same ρ = 0.8092, same 1.5265 µm gap — and is *tighter* on all three remaining
+8 µm pairs, so every distance-based metric ranks it same-or-worse. Its mirror
+mismatch is 10.0 % against 25.0 %. It scores **0.0182, 3.4× better**, and it
+places its deep mode to 0.46 µm where `e,b;c,a` misses by 3.46 µm. Neither
+predictor orders all seven four-atom cells alone (3 inversions for ρ, 2 for the
+mismatch), but together they never contradict the data: in all 17 pairs where
+one cell is better-or-equal on both, it has the lower error.
+
+Ten of the fourteen land at 0.016–0.080, limited by the input T-matrices rather
+than by the aggregation. Three of the four that fail are documented with the
+cause diagnosed in [`experiment.md`](experiment.md): they contain a pair of
+atoms whose circumscribing spheres nearly touch. Eq. (57) is *satisfied* there —
+the addition theorem simply converges too slowly to truncate, since its error
+falls like ρ^lmax and ρ = 0.99 buys 1 % per multipole order. Raising lmax makes
+it worse, and treams reproduces the wrong answer to 10⁻¹⁵, which is the sharpest
 demonstration in the study that cross-code agreement validates the
-implementation and only full-wave validates the physics.
+implementation and only full-wave validates the physics. The fourth, `e,b;c,a`,
+has no such pair and fails anyway — so a ρ threshold is a floor to refuse below,
+not a certificate to accept above.
 
 Three things the heterogeneous case forced:
 
@@ -541,6 +665,12 @@ Three things the heterogeneous case forced:
   names the fixes (plane-wave-mediated coupling, or a composite T-matrix
   enclosing the pair); neither is implemented. **The pipeline does not currently
   warn about this** — see [`OPEN_QUESTIONS.md`](OPEN_QUESTIONS.md) §3.
+* **A low ρ is not a guarantee.** The converse of the point above is *not*
+  established, and one cell measures it directly: `e,b;c,a` at ρ = 0.809 is 5×
+  worse than `a,d;b,c` at 0.854. So ρ is a condition to refuse below, not a
+  certificate to accept above; a cell that clears the threshold still needs a
+  full-wave check before its answer is trusted
+  ([`results_2x2_EBCA_l3/REPORT.md`](aggregation/results_2x2_EBCA_l3/REPORT.md)).
 * Ground plane is an idealized PEC mirror with vacuum spacer; a layered
   substrate needs the Sommerfeld reflection operator (manual, Stage 2).
 

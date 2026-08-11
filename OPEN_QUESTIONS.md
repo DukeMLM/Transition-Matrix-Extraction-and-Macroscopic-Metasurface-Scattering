@@ -7,8 +7,52 @@ experiment that would close it, so it can be picked up cold.
 
 ## 1. Does arrangement *symmetry* affect accuracy, or only pair geometry?
 
-**Status: SETTLED — pair geometry. The third arrangement was run; see
-[`aggregation/results_2x2_ACDB_l3/REPORT.md`](aggregation/results_2x2_ACDB_l3/REPORT.md).**
+**Status: BOTH, IN A HIERARCHY. Three experiments; each single-predictor answer
+is falsified on its own, and each axis is now measured by a matched control.**
+
+* At ρ = 0.944, changing the symmetry class does not rescue a cell —
+  [`results_2x2_ACDB_l3`](aggregation/results_2x2_ACDB_l3/REPORT.md).
+* ρ is not sufficient: `e,b;c,a` has a *lower* ρ than `a,d;b,c` (0.809 against
+  0.854) and is **5.2× worse** —
+  [`results_2x2_EBCA_l3`](aggregation/results_2x2_EBCA_l3/REPORT.md).
+* Symmetry is a real second axis: `e,b;g,a` has the **identical** worst pair
+  (A–B), ρ (0.8092) and gap (1.5265 µm) as `e,b;c,a`, and is *tighter* on all
+  three other 8 µm pairs — so every distance metric ranks it same-or-worse. Its
+  mismatch is 10.0 % against 25.0 %, and it is **3.4× better**.
+
+| cell | ρ | diag mm | all mm | MSE, complex S21 |
+|---|---|---|---|---|
+| `a,b;c,d` | 0.944 | 27.3 % | 18.8 % | 0.1654 |
+| `a,c;d,b` | 0.944 | 20.0 % | 18.8 % | 0.1206 |
+| `e,b;c,a` | 0.809 | 25.0 % | 20.0 % | 0.0612 |
+| **`e,b;g,a`** | **0.809** | **10.0 %** | **10.0 %** | **0.0182** |
+| `a,d;b,c` | 0.854 | 9.1 % | 9.1 % | 0.0118 |
+| `e,c;f,a` | 0.674 | 7.1 % | 7.1 % | 0.0028 |
+| **`e,a;f,c`** | **0.652** | **7.7 %** | **7.7 %** | **0.0011** |
+
+**Neither predictor orders these seven alone** — ρ inverts 3 pairs, the mismatch
+inverts 2. **Together they never contradict the measurement**: in all 17 pairs
+where one cell is better-or-equal on *both*, it has the lower error; the
+remaining 4 pairs are ones where the predictors disagree and this data does not
+decide them. Four benchmarks sit at exactly ρ = 0.809 — atom G alone (0.00094),
+`a,b;b,a` (0.00367), `e,b;g,a` (0.0182), `e,b;c,a` (0.0612) — the same
+convergence ratio, 65× apart, which is the compact statement of why ρ alone
+cannot be an acceptance test.
+
+Still open: what sets the *floor*. `e,a;f,c` reaches mean |ΔS21| 0.023, inside
+the spread of its own four atoms measured alone (0.016–0.030), so at the good
+end the residual is the input T-matrices, not the aggregation — but no
+experiment separates the two contributions directly (see §4). The one matched
+control still unrun on the ρ axis is `c,a;g,f`: 7.1 % mismatch, identical to
+`e,c;f,a`, but ρ = 0.719 against 0.674.
+
+The single-atom series is untouched by this and is now seven points; E, F and G
+were extracted after the claim was made, cost no full-wave time (the packed
+sweep already held runs 1, 8, 7), and land on the curve: ρ = 0.539 / 0.584 /
+0.629 / 0.719 / 0.809 / 0.899 / 0.989 gives dip errors +0.2 / −0.3 / −0.4 /
+−0.7 / −1.0 / −4.1 / −18.7 %, monotone throughout.
+
+The record of the first experiment follows.
 
 `a,c;d,b` reproduces `a,b;c,d`'s pair geometry exactly (same worst pair B–D,
 same ρ = 0.944, same 0.448 µm gap) in a different symmetry class, and it
@@ -21,18 +65,23 @@ reconstructs like `a,b;c,d`, not like `a,d;b,c`:
 | `a,d;b,c` | 0.854 | 0.0118 | 0.080 | +0.11 µm |
 
 The two cells sharing ρ = 0.944 are within 1.4× of each other; the one with
-ρ = 0.854 is 10–14× better than either. So ρ is the driver, and the symmetry of
-the arrangement is not what made `a,d;b,c` accurate. Both failing cells misplace
-their deepest transmission dip by ~5 µm in *opposite* directions, so this is a
-truncation error, not a correctable bias.
+ρ = 0.854 is 10–14× better than either. So within these four atoms symmetry is
+not what made `a,d;b,c` accurate. Both failing cells misplace their deepest
+transmission dip by ~5 µm in *opposite* directions, so this is a truncation
+error, not a correctable bias.
 
-Two qualifications, both in the report: the residual 0.1207-vs-0.1654 gap
+Two qualifications were recorded at the time: the residual 0.1207-vs-0.1654 gap
 between the two ρ = 0.944 cells is unexplained (27 %, but second-order against
 the 10× step), and the falsification is of the *diagonal-mirror* symmetry metric
 quoted below — under an all-mirrors metric `a,b;c,d` and `a,c;d,b` tie at
-18.8 %, so that variant predicts what was observed and is untested. The usable
-conclusion is unaffected: **ρ predicts accuracy, and ρ = 0.944 cannot be trusted
-however symmetric the cell looks.** That makes §3 below the live follow-up.
+18.8 %, so that variant predicts what was observed and is untested.
+
+> **Superseded.** This section originally concluded "ρ predicts accuracy". The
+> `e,b;c,a` run above shows that is too strong: ρ = 0.809 scores 0.0612, five
+> times worse than ρ = 0.854. The claim that survives is the one stated at the
+> top — ρ bounds the error at fixed composition and does not order cells against
+> each other — which makes §3 below a *more* live defect, not less: the guard it
+> specifies would have passed `e,b;c,a` without a warning.
 
 The original framing is kept below for the record.
 
@@ -115,8 +164,8 @@ completes the set of three arrangements either way.
 **Status: empirical result, no derivation.**
 
 With four *distinct* atoms the cell's point group is C1, so nothing forbids
-cross-polarization at normal incidence — yet \|t_xy\| ≤ 2×10⁻¹² in both
-arrangements, across the whole band. It is a genuine cancellation, not an
+cross-polarization at normal incidence — yet \|t_xy\| ≤ 3×10⁻¹² in all four
+arrangements (including `e,b;c,a`, a different atom set), across the whole band. It is a genuine cancellation, not an
 insensitivity of the method:
 
 | configuration | \|t_xy\| |
@@ -150,9 +199,19 @@ policy should cover the translation convergence ratio.
 
 Concretely: compute ρ = max over 8 µm neighbour pairs of (aᵢ + aⱼ)/d, and warn
 above ~0.85, refuse above ~0.95, with `--force` to override. The thresholds can
-be calibrated on the nine benchmarked cases in this study. The blocker is that
-aᵢ is not currently stored in the `tmat.h5` files — the circumscribing radius
-would have to be added to the format, or passed on the command line.
+be calibrated on the fourteen benchmarked cases in this study. The blocker is
+that aᵢ is not currently stored in the `tmat.h5` files — the circumscribing
+radius would have to be added to the format, or passed on the command line.
+
+**A ρ-only gate is not enough, and this is now measured, not suspected.**
+`e,b;c,a` has ρ = 0.809 — below even the warning threshold — and puts the depth
+on the wrong one of two collective modes, scoring 0.0612 against `a,d;b,c`'s
+0.0118 at ρ = 0.854 (§1). So the guard as specified would have passed it
+silently. It still catches everything it was built for (0.944 and 0.989 both
+fail), so implement it as a floor — but it must be documented as a necessary
+condition, not an acceptance test, and the reported diagnostic should include
+the per-pair ρ list rather than only the maximum, so a user can see what the
+single number is hiding.
 
 ---
 

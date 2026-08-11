@@ -10,6 +10,9 @@ The atoms come from the parametric family stored in
 `test/2x2/SAW_gold_noSub_packed.cst`: A = `scale` 4.0 (3D Run ID 6),
 B = `scale` 5.0 (run 2), C = `scale` 3.25 (run 10), i.e. exactly the meta-atoms
 whose isolated T-matrices are saw_gold_wl13p10um / wl17p30um / wl10p90um.
+Each `wl` in a file name is that atom's own transmission dip on its own 8 um
+lattice, so the sweep row is identified by measurement, not by assumption:
+run 1 / 8 / 7 dip at 10.29 / 11.59 / 14.90 um, which names E / F / G.
 Every solver, mesh, material and boundary setting is copied from that project's
 own periodic run (its ModelHistory.json, steps 4/5/163/169/176-179), so the
 comparison is like for like: the only difference is the cell contents.
@@ -76,6 +79,17 @@ ATOMS = {
               w=0.65, t=0.2, run=10),
     "D": dict(name="D", scale=5.50, r=3.95603, w_ring=0.886259, gap=3.850,
               w=1.10, t=0.2, run=3),
+    # E, F, G complete the family downwards and inwards: they are the three
+    # remaining sweep rows whose isolated T-matrices have been extracted
+    # (saw_gold_wl10p30um / wl11p60um / wl14p90um).  E is the smallest atom in
+    # the set, so it is what makes a four-distinct-atom cell with rho well
+    # below D's reach -- see OPEN_QUESTIONS section 1.
+    "E": dict(name="E", scale=3.00, r=2.15784, w_ring=0.483414, gap=2.100,
+              w=0.60, t=0.2, run=1),
+    "F": dict(name="F", scale=3.50, r=2.51748, w_ring=0.563983, gap=2.450,
+              w=0.70, t=0.2, run=8),
+    "G": dict(name="G", scale=4.50, r=3.23676, w_ring=0.725121, gap=3.150,
+              w=0.90, t=0.2, run=7),
 }
 BASE_PITCH = 8.0                     # atom-to-atom spacing
 SUPER = 2 * BASE_PITCH               # supercell period, um

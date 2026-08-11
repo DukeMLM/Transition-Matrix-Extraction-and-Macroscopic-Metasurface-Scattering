@@ -28,7 +28,7 @@ pair geometry **exactly** — same worst pair, same ρ, same 0.448 µm gap — w
 placing a different pair on the diagonal. The predictors are computed by
 [`src/tmatrix/aggregation/arrangement_predictors.py`](../../src/tmatrix/aggregation/arrangement_predictors.py).
 
-## Verdict: the convergence ratio is the driver
+## Verdict: at ρ = 0.944 the symmetry class is not what decides
 
 | cell | ρ | MSE, complex S21 | mean \|ΔS21\| | deepest-dip misplacement |
 |---|---|---|---|---|
@@ -38,8 +38,10 @@ placing a different pair on the diagonal. The predictors are computed by
 
 `a,c;d,b` lands with `a,b;c,d`, not with `a,d;b,c`. The two cells that share
 ρ = 0.944 are within 1.4× of each other and both fail; the cell with ρ = 0.854
-is 10–14× better than either. **Arrangement symmetry is not what made `a,d;b,c`
-accurate — its wider tightest gap is.**
+is 10–14× better than either. **Within these four atoms, arrangement symmetry is
+not what separates a usable cell from an unusable one — the tightest gap is.**
+(A wider tightest gap is not on its own sufficient, though: see the follow-up
+note at the end of this report.)
 
 The clearest single statement is where each cell puts its deepest transmission
 dip. Both ρ = 0.944 cells misplace it by about 5 µm — in *opposite* directions,
@@ -73,8 +75,18 @@ predicted `a,c;d,b` would sit strictly between the other two, and it does not �
 that version is falsified. Under the all-mirrors metric, `a,b;c,d` and
 `a,c;d,b` tie at 18.8 %, so that version predicts they behave alike, which they
 do, and it is *not* tested by this run. What is established either way is the
-useful half: **ρ predicts accuracy, and a cell with ρ = 0.944 cannot be trusted
-regardless of how symmetric it looks.**
+useful half: **a cell with ρ = 0.944 cannot be trusted regardless of how
+symmetric it looks.**
+
+> **Follow-up, and a limit on the heading above.** This report originally
+> concluded "the convergence ratio is the driver". A later cell, built from a
+> wider atom pool to have the *lowest* ρ of the four and the *highest* mirror
+> mismatch, is 5× worse than `a,d;b,c` —
+> [`../results_2x2_EBCA_l3/REPORT.md`](../results_2x2_EBCA_l3/REPORT.md). So the
+> result here stands as stated (at ρ = 0.944 the symmetry class does not rescue
+> a cell, and within A, B, C, D the ratio orders the three arrangements) but it
+> does not license the general claim: ρ bounds the error at fixed composition
+> and does not order cells against one another.
 
 ## Validation
 

@@ -1,12 +1,12 @@
-"""The whole study in one figure: 4 atoms, 6 mixed cells, 10 CST benchmarks.
+"""The whole study in one figure: 7 atoms, 7 mixed cells, 14 CST benchmarks.
 
     python -m tmatrix.aggregation.plot_comparison \
         [--out results_2x2_super_l3/fig4_comparison.png]
 
 Top row     single atoms, the two-species checkerboards, then ONE PANEL PER
-            four-distinct-atom cell -- all three distinct arrangements of the
-            same four atoms, which carry the most structure, and overlaying
-            them hides which pale CST curve belongs to which.
+            four-distinct-atom cell -- the three distinct arrangements of
+            A, B, C, D plus `e,b;c,a`, which carry the most structure, and
+            overlaying them hides which pale CST curve belongs to which.
             Markers are the T-matrix prediction, pale lines the direct CST run
             of the same structure.
 Bottom row  power into higher diffraction orders against the two Rayleigh
@@ -15,6 +15,13 @@ Bottom row  power into higher diffraction orders against the two Rayleigh
             cell, again one panel each; and the accuracy summary -- the MSE of
             complex S21 against the addition theorem's convergence ratio
             rho = (a_i + a_j)/d, maximised over the 8 um neighbour pairs.
+
+The last panel is the study's main claim and its counterexample together.  The
+seven single atoms rise monotonically with rho over two decades of MSE.  The
+four-species cells do not: `e,b;c,a` has the LOWEST rho of the four (0.809
+against 0.854) and scores five times worse than `a,d;b,c`.  So rho bounds the
+error within a fixed cell composition and does not order cells against each
+other -- see results_2x2_EBCA_l3/REPORT.md.
 
 MSE is mean(|S21_predicted - S21_CST|^2) over the 25 stored frequencies, on the
 complex amplitude rather than its magnitude, so a phase error counts.
@@ -33,10 +40,14 @@ from tmatrix.results_io import interp_c, load_cst_reference as load_cst
 from tmatrix.paths import AGG_DATA
 
 PERIOD, PITCH = 16.0, 8.0
-R = {"A": 2.87712, "B": 3.59639, "C": 2.33766, "D": 3.95603}
+R = {"E": 2.15784, "C": 2.33766, "F": 2.51748, "A": 2.87712,
+     "G": 3.23676, "B": 3.59639, "D": 3.95603}
 
-SINGLE = [("results_C_ewald_l3", "C  (scale 3.25)", "C2", "C"),
+SINGLE = [("results_E_ewald_l3", "E  (scale 3.00)", "C7", "E"),
+          ("results_C_ewald_l3", "C  (scale 3.25)", "C2", "C"),
+          ("results_F_ewald_l3", "F  (scale 3.50)", "C8", "F"),
           ("results_A_ewald_l3", "A  (scale 4.00)", "C0", "A"),
+          ("results_G_ewald_l3", "G  (scale 4.50)", "C9", "G"),
           ("results_B_ewald_l3", "B  (scale 5.00)", "C1", "B"),
           ("results_D_ewald_l3", "D  (scale 5.50)", "C3", "D")]
 PAIRS = [("results_2x2_super_l3", "a,b;b,a", "C0", "AB"),
@@ -44,7 +55,8 @@ PAIRS = [("results_2x2_super_l3", "a,b;b,a", "C0", "AB"),
          ("results_2x2_BC_l3", "b,c;c,b", "C2", "BC")]
 QUADS = [("results_2x2_ABCD_l3", "a,b;c,d", "C3", "ABCD"),
          ("results_2x2_ADBC_l3", "a,d;b,c", "C4", "ADBC"),
-         ("results_2x2_ACDB_l3", "a,c;d,b", "C5", "ACDB")]
+         ("results_2x2_ACDB_l3", "a,c;d,b", "C5", "ACDB"),
+         ("results_2x2_EBCA_l3", "e,b;c,a", "C6", "EBCA")]
 
 
 def rho(spec):
@@ -100,11 +112,13 @@ def main():
     ap.add_argument("--out", default="results_2x2_super_l3/fig4_comparison.png")
     args = ap.parse_args()
 
-    fig, ax = plt.subplots(2, 5, figsize=(26.5, 9.2), constrained_layout=True)
+    ncol = 2 + len(QUADS)
+    fig, ax = plt.subplots(2, ncol, figsize=(5.3 * ncol, 9.2),
+                           constrained_layout=True)
     spanel(ax[0, 0], SINGLE,
            "one atom per 8 um cell — markers: T-matrix, pale: CST")
     spanel(ax[0, 1], PAIRS, "two species per 16 um cell (x,y;y,x)")
-    for col, case in zip((2, 3, 4), QUADS):
+    for col, case in zip(range(2, ncol), QUADS):
         got = load(case[0])
         err = ""
         if got is not None and got[1] is not None:
@@ -144,9 +158,11 @@ def main():
     # ---- birefringence, one panel per four-atom cell ----------------------
     jp = os.path.join(AGG_DATA, "results_2x2_ABCD_l3", "jones_xy.npz")
     j = np.load(jp) if os.path.exists(jp) else None
-    for col, (key, label, c) in zip((1, 2, 3), (("abcd", "a,b;c,d", "C3"),
-                                                ("adbc", "a,d;b,c", "C4"),
-                                                ("acdb", "a,c;d,b", "C5"))):
+    for col, (key, label, c) in zip(range(1, ncol - 1),
+                                    (("abcd", "a,b;c,d", "C3"),
+                                     ("adbc", "a,d;b,c", "C4"),
+                                     ("acdb", "a,c;d,b", "C5"),
+                                     ("ebca", "e,b;c,a", "C6"))):
         a = ax[1, col]
         if j is not None and key in j.files:         # jones_xy.py may predate a cell
             sep = np.abs(j[key][:, 0] - j[key][:, 1])
@@ -167,7 +183,7 @@ def main():
         thz_axis(a)
 
     # ---- accuracy vs the translation convergence ratio --------------------
-    a = ax[1, 4]
+    a = ax[1, ncol - 1]
     seen = {}                          # rho -> how many points already at it
     for cases, mk in ((SINGLE, "o"), (PAIRS, "s"), (QUADS, "D")):
         for d, label, c, spec in cases:
@@ -194,10 +210,11 @@ def main():
     a.set_yscale("log")
     a.set_xlabel(r"$\rho = (a_i + a_j)\,/\,d$  over the 8 um neighbour pairs")
     a.set_ylabel(r"MSE of complex $S_{21}$ vs direct CST")
-    a.set_xlim(0.55, 1.005)
+    a.set_xlim(0.52, 1.005)               # E sits at 0.539, the smallest atom
     a.grid(alpha=0.3, which="both")
-    a.set_title("accuracy tracks the addition theorem's convergence rate\n"
-                "(circles: 1 atom, squares: 2 species, diamonds: 4)",
+    a.set_title("rho orders the single atoms — but NOT the four-species cells:\n"
+                "e,b;c,a has the lowest rho of the four and is 5x worse than "
+                "a,d;b,c\n(circles: 1 atom, squares: 2 species, diamonds: 4)",
                 fontsize=9)
 
     out = args.out if os.path.isabs(args.out) else os.path.join(AGG_DATA, args.out)
