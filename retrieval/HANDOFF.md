@@ -24,9 +24,11 @@ re-running gates. That protocol caught real bugs in every wave so far.
 
 ## Environment (all verified working)
 
-- Repo: `D:\Claude\T matrix` (space in path — always quote). Branch `dary`,
-  do NOT commit unless the user asks. Do NOT modify `src/tmatrix/aggregation/`
-  or any validated file; new work goes in `src/tmatrix/retrieval/`.
+- Repo: `D:\Claude\T matrix` (space in path — always quote). Branch
+  `Fast-T-Matrix-Trail`, do NOT commit unless the user asks. Do NOT modify
+  `src/tmatrix/aggregation/` or any validated file — it is shared with the
+  `dary` branch, which owns the aggregation study; new work goes in
+  `src/tmatrix/retrieval/`.
 - Python: conda env `cst_inference`. Bash:
   `eval "$(conda shell.bash hook 2>/dev/null)" && conda activate cst_inference && cd "/d/Claude/T matrix" && python -m tmatrix.retrieval.<module> ...`
 - Bash calls cap at 10 min; long jobs → `run_in_background` or checkpointed
