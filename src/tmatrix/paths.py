@@ -1,13 +1,15 @@
 """Where the data lives.
 
 Only the *code* moved under src/.  The data directories stayed exactly where
-they were, because the run records under `aggregation/` note the absolute path
-of every project CST solved, and that record is a run's provenance --
-relocating the tree would invalidate it.  So the repository root holds:
+they were, because `retrieval/cst_runs/campaign_manifest.json` records the
+absolute path of every project CST solved, and that record is the campaign's
+provenance -- relocating the tree would invalidate it.  So the repository root
+holds:
 
     src/tmatrix/...        all Python code
     tests/                 all test suites
     aggregation/           aggregation run outputs (results_*, cst_* runs)
+    retrieval/             retrieval run outputs (results, cst_runs, assets)
     test/                  the tmat.h5 / .cst benchmark inputs
 
 This module is the only place that knows those names.  Import the constants
@@ -42,7 +44,7 @@ def _find_root():
 
 REPO_ROOT = _find_root()
 
-#: the package source tree, used for provenance hashing
+#: the package source tree, used for provenance hashing (opt_marginalized)
 SRC = Path(__file__).resolve().parent
 
 # ---- benchmark inputs (tracked; the extraction project's outputs) ----------
@@ -59,6 +61,17 @@ AGG_RESULTS = AGG_DATA / "results"
 CST_DIRECT_DATA = AGG_DATA / "cst_direct"
 CST_SUPERCELL_DATA = AGG_DATA / "cst_supercell"
 
+# ---- retrieval outputs -----------------------------------------------------
+RETRIEVAL_DATA = REPO_ROOT / "retrieval"
+RETRIEVAL_RESULTS = RETRIEVAL_DATA / "results"
+RETRIEVAL_ASSETS = RETRIEVAL_DATA / "assets"
+CST_RUNS = RETRIEVAL_DATA / "cst_runs"
+
+#: the fastfull subpackage's own published artifacts (m1_study.json, the
+#: candidate registry, the gate-A study); the modules there sit one directory
+#: deeper than the rest of retrieval, so they cannot spell this relatively
+FASTFULL_RESULTS = RETRIEVAL_RESULTS / "fastfull"
+
 
 def resolve(arg, base):
     """A command-line path argument, resolved against `base` when relative.
@@ -73,3 +86,8 @@ def resolve(arg, base):
 def agg_case(arg):
     """Resolve a run_case.py / run_supercell.py output directory argument."""
     return resolve(arg, AGG_DATA)
+
+
+def retrieval_case(arg):
+    """Resolve a retrieval output directory argument."""
+    return resolve(arg, RETRIEVAL_DATA)

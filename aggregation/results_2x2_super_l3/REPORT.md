@@ -189,8 +189,9 @@ them. The last row is a second, independent warning: the tapered sum also
 degrades as the primitive lattice approaches its own Rayleigh anomaly
 (λ_min/pitch = 1.10 here).
 
-`ewald_supercell.converged_W` therefore supplies `W` by Ewald summation, under
-a refuse-rather-than-guess η policy: the automatic split must agree with
+`ewald_supercell.converged_W` therefore supplies `W` by Ewald summation, with
+the same refuse-rather-than-guess η policy as
+`src/tmatrix/retrieval/fastfull/ewald.py`: the automatic split must agree with
 an η ∈ {0.5, 0.7, 1.0} bracket, which it does to 3×10⁻¹² on every cell here.
 It is also much cheaper — the same 25-frequency one-atom sweep takes **2.0 s**
 by Ewald against **64 s** tapered, and the gap widens with M² pair blocks.

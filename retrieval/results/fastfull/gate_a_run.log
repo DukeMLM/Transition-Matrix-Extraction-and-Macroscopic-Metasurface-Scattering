@@ -1,0 +1,56 @@
+lambda 8.000 um, sigma 2.8417e-03, 3 candidates + holdout
+reference wheel D4h residual 3.861e-03 (its own C4v-violation noise) -- the control below separates it from recovery error
+
+=== control: exactly-D4h synthetic target ===
+  [small@8] ...
+Blind synthetic recovery at lambda = 8.000 um, sigma = 2.8417e-03
+
+small@8      channels [24], 576 observables, rank 40/40, |C|max 1.88
+             noise-free err 1.414e-16, multistart spread 1.3e-16 (basin unique: True)
+             predicted bracket: 6.106% iid ... 40.337% systematic
+               iid              dT   5.345%  worst block  17.131%  dS rank 24  bracket position -0.02  unique True
+               reference_plane  dT  21.364%  worst block  33.672%  dS rank 24  bracket position +0.45  unique True
+               mode_mixing      dT   3.028%  worst block   9.886%  dS rank 24  bracket position -0.09  unique True
+               angular_smooth   dT   7.910%  worst block  15.843%  dS rank 24  bracket position +0.05  unique True
+               adversarial      dT  40.197%  worst block 136.715%  dS rank 12  bracket position +1.00  unique True
+               holdout cell (24 channels): max |dS| 9.761e-03 = 3.43 sigma, on |S| ~ 5.459e-02
+
+=== reference wheel as the blind target ===
+  [small@8] ...
+  [generic@8] ...
+  [pool-3@8] ...
+Blind synthetic recovery at lambda = 8.000 um, sigma = 2.8417e-03
+
+small@8      channels [24], 576 observables, rank 40/40, |C|max 1.88
+             noise-free err 3.927e-03, multistart spread 2.2e-16 (basin unique: True)
+             predicted bracket: 5.884% iid ... 40.253% systematic
+               iid              dT   5.146%  worst block   6.327%  dS rank 24  bracket position -0.02  unique True
+               reference_plane  dT  23.989%  worst block  23.002%  dS rank 24  bracket position +0.53  unique True
+               mode_mixing      dT   4.267%  worst block   3.978%  dS rank 24  bracket position -0.05  unique True
+               angular_smooth   dT  19.877%  worst block  21.547%  dS rank 24  bracket position +0.41  unique True
+               adversarial      dT  40.588%  worst block  52.327%  dS rank 24  bracket position +1.01  unique True
+               holdout cell (24 channels): max |dS| 4.684e-03 = 1.65 sigma, on |S| ~ 1.959e-02
+
+generic@8    channels [48], 2304 observables, rank 40/40, |C|max 1.2
+             noise-free err 3.862e-03, multistart spread 1.9e-16 (basin unique: True)
+             predicted bracket: 6.684% iid ... 102.321% systematic
+               iid              dT   7.125%  worst block   5.343%  dS rank 48  bracket position +0.00  unique True
+               reference_plane  dT  53.305%  worst block  51.327%  dS rank 46  bracket position +0.49  unique True
+               mode_mixing      dT  11.176%  worst block  14.930%  dS rank 48  bracket position +0.05  unique True
+               angular_smooth   dT  47.055%  worst block  49.638%  dS rank 48  bracket position +0.42  unique True
+               adversarial      dT  95.717%  worst block  23.588%  dS rank 23  bracket position +0.93  unique True
+               generic branch: noise-free 3.489e-15, perturbed 53.312%, sigma_min(I+TeffC) 0.9436
+               holdout cell (24 channels): max |dS| 1.046e-02 = 3.68 sigma, on |S| ~ 1.959e-02
+
+pool-3@8     channels [24, 8, 8], 704 observables, rank 40/40, |C|max 42.4
+             noise-free err 6.571e-03, multistart spread 1.3e-09 (basin unique: True)
+             predicted bracket: 6.138% iid ... 54.377% systematic
+               iid              dT   6.713%  worst block  11.202%  dS rank  8  bracket position +0.01  unique True
+               reference_plane  dT  26.574%  worst block  19.655%  dS rank  8  bracket position +0.42  unique True
+               mode_mixing      dT   6.339%  worst block  16.443%  dS rank  8  bracket position +0.00  unique True
+               angular_smooth   dT  27.288%  worst block  22.785%  dS rank  8  bracket position +0.44  unique True
+               adversarial      dT  49.937%  worst block  89.445%  dS rank  8  bracket position +0.91  unique True
+               holdout cell (24 channels): max |dS| 4.598e-03 = 1.62 sigma, on |S| ~ 1.959e-02
+
+wrote D:\Claude\T matrix\retrieval\results\fastfull\gate_a_8um.json
+wrote D:\Claude\T matrix\retrieval\results\fastfull\GATE_A_STUDY.md

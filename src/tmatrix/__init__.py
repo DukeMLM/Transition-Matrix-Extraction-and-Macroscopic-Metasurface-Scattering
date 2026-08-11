@@ -1,10 +1,11 @@
-"""T-matrix extraction and aggregation for metasurfaces.
+"""T-matrix extraction, aggregation and Floquet retrieval for metasurfaces.
 
-Two subpackages, in pipeline order:
+Three subpackages, in pipeline order:
 
   tmatrix.extraction    CST near fields -> VSWF projection -> *.tmat.h5
   tmatrix.aggregation   a single-scatterer T-matrix -> periodic / finite array
                         S-parameters (Foldy-Lax, block-Bloch supercells)
+  tmatrix.retrieval     the inverse direction: Floquet S-parameters -> T
 
 Shared, convention-free machinery lives at the top level so that no module has
 to re-derive it:
@@ -17,7 +18,7 @@ to re-derive it:
   tmatrix.cst_env       where the CST python libraries live
 
 Physical conventions are pinned repository-wide and documented in
-aggregation/REPORT.md: e^{-i omega t}, outgoing h^(1), tmat.h5 mode ordering
+retrieval/HANDOFF.md: e^{-i omega t}, outgoing h^(1), tmat.h5 mode ordering
 (tmatrix.aggregation.vswf), Jones index 0 = TE / 1 = TM with rows = receive,
 and a POSITIVE Bloch sign.  CST exports use e^{+j omega t} and are conjugated
 on load.

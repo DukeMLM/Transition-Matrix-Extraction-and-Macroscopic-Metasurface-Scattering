@@ -1,0 +1,77 @@
+  ensemble: 6 draws over loss grid (0.05, 0.15, 0.5); identity cosine max 0.640, pairwise max 0.271, effective rank 5.38/40
+lambda 8.000 um, sigma 2.8417e-03, 8 nuisance classes
+
+=== incumbents (audited at the reference T, reporting only) ===
+  small@8  24 channels, 6 orders, kz/k spread 0.516 (6 distinct)
+    sigma_40 free 523.1 -> marginalized 3.502 over 88 nuisance parameters (loss 240.5x, identifiable True)
+    class            params     max proj     angle      worst dT   (leading)
+    phase_tx             24    99.98870%    0.862°        24.38%       6.66%
+    phase_rx             24    99.98865%    0.863°        24.37%       6.65%
+    angular_tx            7    99.98845%    0.871°        24.17%      21.16%
+    angular_rx            7    99.98844%    0.871°        24.17%      21.15%
+    ref_plane             1    99.97900%    1.174°        23.92%      23.92%
+    tm_row                1    74.28920%   42.022°        14.74%      14.74%
+    mix_tx               12    34.78084%   69.647°         8.86%       2.34%
+    mix_rx               12    34.76132%   69.659°         8.85%       2.34%
+    (max proj = cos of the smallest principal angle between the family and col(J_c); 'worst dT' is the constrained worst member at fixed output RMS, 'leading' the old leading-singular-vector figure)
+  generic@8  48 channels, 12 orders, kz/k spread 0.549 (6 distinct)
+    sigma_40 free 411.5 -> marginalized 3.123 over 160 nuisance parameters (loss 253.2x, identifiable True)
+    class            params     max proj     angle      worst dT   (leading)
+    ref_plane             1    99.99657%    0.475°        53.27%      53.27%
+    phase_tx             48    99.99886%    0.274°        51.09%      10.79%
+    phase_rx             48    99.99879%    0.281°        51.08%      10.78%
+    angular_tx            7    99.99874%    0.288°        51.05%      49.86%
+    angular_rx            7    99.99873%    0.289°        51.04%      49.86%
+    tm_row                1    72.36334%   43.645°        35.79%      35.79%
+    mix_tx               24     3.70466%   87.877°         1.75%       0.51%
+    mix_rx               24     3.69050%   87.885°         1.73%       0.51%
+    (max proj = cos of the smallest principal angle between the family and col(J_c); 'worst dT' is the constrained worst member at fixed output RMS, 'leading' the old leading-singular-vector figure)
+
+=== searching on the MARGINALIZED objective ===
+  screened 30/300, 13 feasible, best 1.83335
+  screened 60/300, 28 feasible, best 2.3206
+  screened 90/300, 43 feasible, best 2.4783
+  screened 120/300, 56 feasible, best 2.4783
+  screened 150/300, 74 feasible, best 2.4783
+  screened 180/300, 86 feasible, best 2.4783
+  screened 210/300, 103 feasible, best 2.86802
+  screened 240/300, 121 feasible, best 2.86802
+  screened 270/300, 137 feasible, best 2.86802
+  screened 300/300, 154 feasible, best 2.86802
+  polish: 2.86802 -> 4.17368   Design(p1=11.8451, p2=7.0968, gamma=105.00, alpha=16.87, f=(-0.3705, 0.2728))
+  polish: 2.4783 -> 3.10757   Design(p1=12.8857, p2=6.8219, gamma=84.92, alpha=22.60, f=(0.3246, 0.4659))
+  polish: 2.3206 -> 2.89811   Design(p1=10.0012, p2=7.4026, gamma=91.05, alpha=71.94, f=(0.2711, -0.2967))
+  search 592.4 s -> Design(p1=11.8451, p2=7.0968, gamma=105.00, alpha=16.87, f=(-0.3705, 0.2728))
+
+=== archive re-evaluation on the current ensemble ===
+  cand-0458    objective 5.8048
+  cand-0424    objective 5.4877
+  small@8      objective 5.3861
+  search       objective 4.1737
+  generic@8    objective 0.41755
+  ARCHIVE WINS: cand-0458 beats this run's search output (5.8048 vs 5.8048); reporting it as the best known point
+
+=== winner, audited under the same nuisance classes ===
+  winner  20 channels, 5 orders, kz/k spread 0.625 (5 distinct)
+    sigma_40 free 248.9 -> marginalized 3.186 over 76 nuisance parameters (loss 244.4x, identifiable True)
+    class            params     max proj     angle      worst dT   (leading)
+    ref_plane             1    99.95003%    1.811°        21.82%      21.82%
+    phase_tx             20    99.98023%    1.139°        21.09%       8.35%
+    phase_rx             20    99.98018%    1.141°        21.08%       8.35%
+    angular_tx            7    99.97893%    1.176°        20.98%      20.38%
+    angular_rx            7    99.97897%    1.175°        20.97%      20.38%
+    tm_row                1    74.19511%   42.102°        15.16%      15.16%
+    mix_tx               10    39.66236%   66.633°        14.09%       8.05%
+    mix_rx               10    39.59956%   66.672°        14.08%       8.04%
+    (max proj = cos of the smallest principal angle between the family and col(J_c); 'worst dT' is the constrained worst member at fixed output RMS, 'leading' the old leading-singular-vector figure)
+
+=== objective comparison (target-independent, ensemble) ===
+  small@8    area    78.2 um^2  ch  24  sigma_free    451.6  sigma_marg     34.7  loss   32.2x  cost     78 min
+  generic@8  area   187.1 um^2  ch  48  sigma_free    370.5  sigma_marg    5.605  loss  170.4x  cost    341 min
+  winner     area    76.7 um^2  ch  20  sigma_free    217.4  sigma_marg     35.4  loss   27.3x  cost     70 min
+
+=== Gate A blind recovery, incumbent vs winner ===
+  small@8    iid 5.72%  reference_plane 23.99%  mode_mixing 4.48%  angular_smooth 15.05%  adversarial 40.59%
+  winner     iid 9.59%  reference_plane 21.88%  mode_mixing 12.39%  angular_smooth 18.74%  adversarial 70.07%
+
+wrote D:\Claude\T matrix\retrieval\results\fastfull\opt_marginalized_8um.json
