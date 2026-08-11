@@ -131,20 +131,14 @@ def panel_atoms(ax, spec, loc):
         ax.plot(m["lam"], np.abs(m["S21"]), "o-", ms=3.6, lw=1.4,
                 color=COLOR[atom], zorder=2,
                 label=f"{loc[atom]}   dip {DIP[atom]:.2f} um,  "
-                      f"r = {R[atom]:.2f} um,  rho = {2 * R[atom] / PITCH:.3f}")
+                      f"r = {R[atom]:.2f} um")
     ax.set_title("(b)  isolated atoms", fontsize=11)
     ax.set_xlabel("Wavelength (um)")
     ax.set_ylabel("|S21|  (0th order)")
     ax.set_xlim(8.8, 30)
     ax.set_ylim(0, 1.05)
     ax.grid(color=GRID, lw=0.6)
-    key = ",  ".join(f"{loc[a]} = {a}" for a in
-                     sorted(set(spec), key=lambda a: -DIP[a]))
-    lg = ax.legend(frameon=True, framealpha=1.0, fontsize=8.5,
-                   loc="lower right",
-                   title=f"labelled by rising resonance frequency\n"
-                         f"study labels:  {key}")
-    lg.get_title().set_fontsize(8)
+    ax.legend(frameon=True, framealpha=1.0, fontsize=8.5, loc="lower right")
     thz_axis(ax)
 
 
@@ -166,13 +160,13 @@ def panel_part(ax, spec, colour, part, tag):
 
     if cst is not None:
         ax.plot(cst["lam"], take(cst["S21"]), "-", lw=2.6, color="0.4",
-                zorder=2, label="direct CST")
+                zorder=2, label="CST Simulation (ground truth)")
     if mf is not None:
         o = np.argsort(mf["lam"])
         ax.plot(mf["lam"][o], take(mf["S21"][o]), "-", lw=1.2, color=colour,
-                zorder=3, label="Complex Interpolation")
+                zorder=3, label="Reconstruction from linear interpolated T")
     ax.plot(m["lam"], take(m["S21"]), "o", ms=6, color=colour, mec="k",
-            mew=0.5, zorder=4, label="Prediction")
+            mew=0.5, zorder=4, label="Reconstruction from original T")
 
     if part not in ("abs",):
         ax.axhline(0.0, color="0.7", lw=0.8, zorder=1)
@@ -183,7 +177,7 @@ def panel_part(ax, spec, colour, part, tag):
     if part == "abs":
         ax.set_ylim(0, 1.05)
     ax.grid(color=GRID, lw=0.6)
-    ax.legend(frameon=True, framealpha=1.0, fontsize=9, loc="lower right")
+    ax.legend(frameon=True, framealpha=1.0, fontsize=8.5, loc="lower right")
     thz_axis(ax)
 
 
