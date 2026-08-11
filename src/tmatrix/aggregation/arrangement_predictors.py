@@ -98,11 +98,11 @@ H = PITCH / 2
 # ones that have been benchmarked against a direct CST supercell run.
 CELLS = {"a,b;c,d": "ABCD", "a,d;b,c": "ADBC", "a,c;d,b": "ACDB",
          "e,b;c,a": "EBCA", "e,b;g,a": "EBGA", "e,a;f,c": "EAFC",
-         "e,c;f,a": "ECFA"}
+         "e,c;f,a": "ECFA", "c,a;g,f": "CAGF"}
 # MSE of the complex 0th-order S21 against the direct CST run, from
 # tmatrix.aggregation.compare_cases.  None until the run exists.
 MSE = {"ABCD": 0.1654, "ADBC": 0.0118, "ACDB": 0.1206, "EBCA": 0.0612,
-       "EBGA": 0.0182, "EAFC": 0.0011, "ECFA": 0.0028}
+       "EBGA": 0.0182, "EAFC": 0.0011, "ECFA": 0.0028, "CAGF": 0.0015}
 
 # Mirrors of the site square, as maps on (x, y).  The two diagonal mirrors
 # exchange one pair of sites and fix the other two; the two axis mirrors

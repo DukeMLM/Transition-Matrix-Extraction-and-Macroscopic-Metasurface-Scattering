@@ -20,6 +20,10 @@ is falsified on its own, and each axis is now measured by a matched control.**
   three other 8 µm pairs — so every distance metric ranks it same-or-worse. Its
   mismatch is 10.0 % against 25.0 %, and it is **3.4× better**.
 
+* But on the ρ axis the matched control comes out **backwards**: `c,a;g,f` holds
+  the mismatch at 7.1 %, identical to `e,c;f,a`, and raises ρ from 0.674 to
+  0.719 — and is **1.9× better**, not worse.
+
 | cell | ρ | diag mm | all mm | MSE, complex S21 |
 |---|---|---|---|---|
 | `a,b;c,d` | 0.944 | 27.3 % | 18.8 % | 0.1654 |
@@ -28,23 +32,33 @@ is falsified on its own, and each axis is now measured by a matched control.**
 | **`e,b;g,a`** | **0.809** | **10.0 %** | **10.0 %** | **0.0182** |
 | `a,d;b,c` | 0.854 | 9.1 % | 9.1 % | 0.0118 |
 | `e,c;f,a` | 0.674 | 7.1 % | 7.1 % | 0.0028 |
+| **`c,a;g,f`** | **0.719** | **7.1 %** | **7.1 %** | **0.0015** |
 | **`e,a;f,c`** | **0.652** | **7.7 %** | **7.7 %** | **0.0011** |
 
-**Neither predictor orders these seven alone** — ρ inverts 3 pairs, the mismatch
-inverts 2. **Together they never contradict the measurement**: in all 17 pairs
-where one cell is better-or-equal on *both*, it has the lower error; the
-remaining 4 pairs are ones where the predictors disagree and this data does not
-decide them. Four benchmarks sit at exactly ρ = 0.809 — atom G alone (0.00094),
-`a,b;b,a` (0.00367), `e,b;g,a` (0.0182), `e,b;c,a` (0.0612) — the same
-convergence ratio, 65× apart, which is the compact statement of why ρ alone
-cannot be an acceptance test.
+**Neither predictor orders these eight alone**, and together they hold in
+**22 of 23 decidable pairs** — the one exception being `e,c;f,a` against
+`c,a;g,f` above, where the cell that is better-or-equal on both predictors
+scores worse. Four benchmarks sit at exactly ρ = 0.809 — atom G alone
+(0.00094), `a,b;b,a` (0.00367), `e,b;g,a` (0.0182), `e,b;c,a` (0.0612) — the
+same convergence ratio, 65× apart, which is the compact statement of why ρ
+alone cannot be an acceptance test.
 
-Still open: what sets the *floor*. `e,a;f,c` reaches mean |ΔS21| 0.023, inside
+**Where the predictors stop working is now bounded.** They order the four cells
+above 0.01 cleanly and fail to resolve the four below 0.003. Those four span
+only 0.0011–0.0028 while their constituent atoms alone score 0.00028–0.00107,
+so the cells sit within a small factor of their own input floor and the ranking
+among them is set by whichever narrow collective mode each happens to host.
+Two alternatives are ruled out for the exception: it is not input quality —
+`c,a;g,f`'s atoms are individually *worse* on average (0.00076 against 0.00060)
+— and it is not a grid artifact, since the ordering survives on the 97-point
+grid and on the magnitude metric.
+
+Still open: what sets that floor. `e,a;f,c` reaches mean |ΔS21| 0.023, inside
 the spread of its own four atoms measured alone (0.016–0.030), so at the good
-end the residual is the input T-matrices, not the aggregation — but no
-experiment separates the two contributions directly (see §4). The one matched
-control still unrun on the ρ axis is `c,a;g,f`: 7.1 % mismatch, identical to
-`e,c;f,a`, but ρ = 0.719 against 0.674.
+end the residual looks like the input T-matrices rather than the aggregation —
+but no experiment separates the two contributions directly (see §4), and until
+one does, "the aggregation adds nothing" is an inference from coincident
+magnitudes, not a measurement.
 
 The single-atom series is untouched by this and is now seven points; E, F and G
 were extracted after the claim was made, cost no full-wave time (the packed

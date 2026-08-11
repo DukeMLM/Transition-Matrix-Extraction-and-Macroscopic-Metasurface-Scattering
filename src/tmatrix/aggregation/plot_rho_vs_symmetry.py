@@ -37,7 +37,7 @@ PAIR = [("e,b;c,a", "EBCA", "#e377c2"), ("e,b;g,a", "EBGA", "#1f77b4")]
 ALL = [("a,b;c,d", "ABCD", "#d62728"), ("a,c;d,b", "ACDB", "#8c564b"),
        ("a,d;b,c", "ADBC", "#9467bd"), ("e,b;c,a", "EBCA", "#e377c2"),
        ("e,b;g,a", "EBGA", "#1f77b4"), ("e,a;f,c", "EAFC", "#2ca02c"),
-       ("e,c;f,a", "ECFA", "#17becf")]
+       ("e,c;f,a", "ECFA", "#17becf"), ("c,a;g,f", "CAGF", "#ff7f0e")]
 
 
 def load(spec):
@@ -136,11 +136,12 @@ def summary_panel(ax, rows):
     ax.set_ylabel(r"MSE of complex $S_{21}$ vs direct CST")
     ax.set_xlim(4, 31)
     ax.grid(alpha=0.3, which="both")
-    ax.set_title("neither predictor orders the cells alone (3 and 2 inversions), "
-                 "but together they never disagree with the measurement:\n"
-                 "in all 17 pairs where one cell is better-or-equal on BOTH "
-                 "rho and mismatch, it has the lower error",
-                 fontsize=10.5)
+    ax.set_title("neither predictor orders the cells alone; together they hold "
+                 "in 22 of 23 decidable pairs.\nThe exception is the rho-axis "
+                 "matched pair itself: c,a;g,f has the SAME mismatch as e,c;f,a "
+                 "and a\nHIGHER rho, and is still 1.9x better — below ~0.003 "
+                 "neither predictor resolves the cells",
+                 fontsize=10)
 
 
 def main(argv=None):

@@ -21,7 +21,7 @@ simulations and the independent [treams](https://github.com/tfp-photonics/treams
 code: `test/single` (pitch 2 µm, 8–20 µm) to **|ΔS| ≤ 0.003** and **~3×10⁻⁴**
 respectively, seven single-atom `test/2x2` lattices (pitch 8 µm, 10–34 THz, a
 resonant band) and ten *mixed* supercells built from those measured atoms —
-**seventeen direct CST benchmarks** in all. Thirteen of the seventeen agree to
+**eighteen direct CST benchmarks** in all.  Fourteen of the eighteen agree to
 **mean |ΔS| 0.016–0.080**, limited by the input T-matrix rather than by the
 aggregation, which reproduces an independent implementation to **10⁻¹²**. The
 best four-distinct-atom cell, `e,a;f,c`, reaches **mean |ΔS| 0.023 — inside the
@@ -62,7 +62,8 @@ into what this repository does and how far it can be trusted.
 
 <p align="center">
 <img src="aggregation/results_2x2_super_l3/fig4_comparison.png" width="100%">
-<br><em>All seventeen benchmarks. Markers are the T-matrix prediction, pale lines
+<br><em>Seventeen of the eighteen benchmarks (c,a;g,f is in the summary table
+but not this figure). Markers are the T-matrix prediction, pale lines
 the direct CST run of the same structure. Bottom right: accuracy against the
 translation convergence ratio rho. The seven single atoms rise monotonically
 with it over two decades; the four-species cells do not — e,b;c,a has the
@@ -559,7 +560,8 @@ neighbour pairs:
 | **e,a;f,c** | **0.652** | **0.0011** | **0.023** | | **e,b;c,a** | **0.809** | **0.0612** | 0.181 |
 | a,c;c,a | 0.652 | 0.00067 | 0.019 | | a,d;b,c | 0.854 | 0.0118 | 0.080 |
 | **e,c;f,a** | **0.674** | **0.0028** | **0.040** | | B alone | 0.899 | 0.0039 | 0.054 |
-| A alone | 0.719 | 0.00107 | 0.030 | | a,c;d,b | 0.944 | **0.1206** | 0.244 |
+| **c,a;g,f** | **0.719** | **0.0015** | **0.031** | | a,c;d,b | 0.944 | **0.1206** | 0.244 |
+| A alone | 0.719 | 0.00107 | 0.030 | | a,b;c,d | 0.944 | **0.1654** | 0.308 |
 | b,c;c,b | 0.742 | 0.00171 | 0.036 | | a,b;c,d | 0.944 | **0.1654** | 0.308 |
 | | | | | | D alone | 0.989 | **0.0351** | 0.149 |
 
@@ -592,12 +594,22 @@ convergence ratio, 65× apart. See
 same ρ = 0.8092, same 1.5265 µm gap — and is *tighter* on all three remaining
 8 µm pairs, so every distance-based metric ranks it same-or-worse. Its mirror
 mismatch is 10.0 % against 25.0 %. It scores **0.0182, 3.4× better**, and it
-places its deep mode to 0.46 µm where `e,b;c,a` misses by 3.46 µm. Neither
-predictor orders all seven four-atom cells alone (3 inversions for ρ, 2 for the
-mismatch), but together they never contradict the data: in all 17 pairs where
-one cell is better-or-equal on both, it has the lower error.
+places its deep mode to 0.46 µm where `e,b;c,a` misses by 3.46 µm.
 
-Ten of the fourteen land at 0.016–0.080, limited by the input T-matrices rather
+**The same control on the ρ axis comes out backwards, and that bounds where the
+predictors work.** `c,a;g,f` holds the mismatch at 7.1 % — identical to
+`e,c;f,a` — and *raises* ρ from 0.674 to 0.719. It scores 0.0015 against
+0.0028, **1.9× better**, so it is the one pair in 23 where the cell that is
+better-or-equal on both predictors has the *higher* error. Neither predictor
+orders the eight four-atom cells alone; together they hold in 22 of 23
+decidable pairs, and the exception sits at the bottom of the range. The four
+cells below 0.003 span only 0.0011–0.0028 while their constituent atoms alone
+score 0.00028–0.00107 — within a small factor of their own input floor, where
+the ranking is set by whichever narrow collective mode each cell hosts rather
+than by pair geometry. **Read the predictors as a filter that rejects bad
+cells, not as a ranking among good ones.**
+
+Fourteen of the eighteen land at 0.016–0.080, limited by the input T-matrices rather
 than by the aggregation. Three of the four that fail are documented with the
 cause diagnosed in [`experiment.md`](experiment.md): they contain a pair of
 atoms whose circumscribing spheres nearly touch. Eq. (57) is *satisfied* there —
