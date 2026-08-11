@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "tmatrix"
 version = "0.1.0"
-description = "T-matrix extraction, aggregation and Floquet retrieval for metasurfaces"
+description = "T-matrix extraction and aggregation for metasurfaces"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
@@ -19,7 +19,7 @@ dependencies = [
 
 [project.optional-dependencies]
 # treams is the independent Ewald cross-check; the core pipeline does not
-# need it, but treams_*.py and the fastfull Ewald gates do.
+# need it, but treams_*.py does.
 reference = ["treams>=0.3"]
 dev = ["pytest>=7.4"]
 
@@ -31,7 +31,7 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-# The suites under tests/aggregation and tests/retrieval are standalone
+# The suites under tests/aggregation are standalone
 # scripts with their own PASS/FAIL reporting; tests/test_suites.py runs each
 # one and asserts its exit status.  See its docstring for why.
 python_files = ["test_suites.py"]

@@ -19,9 +19,9 @@ alternative").
 This module supplies that alternative.  `treams.sw.translate_periodic` accepts a
 list of shift vectors `rs` and returns the full block matrix in one call; the
 repository has already gated its convention against the tapered sum for the
-one-atom case (`tmatrix.retrieval.fastfull.ewald`): no transpose, no conjugation, no
-Bloch-sign change, and the parity polarization index may be flipped or not
-without changing C for in-plane displacements.
+one-atom case: no transpose, no conjugation, no Bloch-sign change, and the
+parity polarization index may be flipped or not without changing C for
+in-plane displacements.
 
 Block layout.  treams returns an (M n) x (M n) matrix ordered by (position,
 mode); it is reshaped to (M, M, n, n) with `W[s, t]` = target s, source t --
@@ -64,9 +64,8 @@ def converged_W(k, a1, a2, rho, modes, kpar=(0.0, 0.0),
                 eta_bracket=(0.5, 0.7, 1.0), rtol=1e-8, return_info=False):
     """W with an explicit eta-stability verdict; refuses rather than guessing.
 
-    Same policy as `tmatrix.retrieval.fastfull.ewald.converged_C`: the
-    automatic split is evaluated first and must agree with a bracket at or
-    below eta = 1, where treams' real-space part is reliable.
+    Policy: the automatic split is evaluated first and must agree with a
+    bracket at or below eta = 1, where treams' real-space part is reliable.
     """
     W0 = block_lattice_sums_ewald(k, a1, a2, rho, modes, kpar, eta=0)
     scale = float(np.abs(W0).max())

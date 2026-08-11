@@ -1,6 +1,6 @@
 """pytest front end for the standalone validation suites.
 
-Each file under tests/aggregation and tests/retrieval is a self-contained
+Each file under tests/aggregation is a self-contained
 suite: it prints its own PASS/FAIL table and exits non-zero if anything
 failed.  That contract predates pytest here and is what the reports in
 README.md and experiment.md quote, so pytest runs each suite as a subprocess
@@ -22,7 +22,7 @@ import sys
 
 import pytest
 
-from tmatrix.paths import AGG_RESULTS, BENCHMARK_2X2, DEMO_TMAT, REPO_ROOT
+from tmatrix.paths import BENCHMARK_2X2, DEMO_TMAT, REPO_ROOT
 
 TESTS = REPO_ROOT / "tests"
 
@@ -33,20 +33,6 @@ SUITES = [
     ("aggregation/test_mirror.py", (), (DEMO_TMAT,), ()),
     ("aggregation/test_supercell.py", ("slow",), (BENCHMARK_2X2,), ()),
     ("aggregation/test_feature_fidelity.py", ("treams",), (DEMO_TMAT,), ()),
-    ("retrieval/test_parametrize.py", (), (DEMO_TMAT,), ()),
-    ("retrieval/test_deembed.py", (), (), ()),
-    ("retrieval/test_bloch_lattice.py", ("slow",), (DEMO_TMAT,), ()),
-    ("retrieval/test_sparams_oblique.py", ("slow",), (DEMO_TMAT,), ()),
-    # the recomputing stages (ii..v) are a separate, much longer gate; `quick`
-    # is stage i, the stored-C comparison, and is the one worth running here
-    ("retrieval/test_precompute.py", (),
-     (AGG_RESULTS / "periodic_results.npz",), ("--stage", "quick")),
-    ("retrieval/test_fit_smoke.py", ("slow",), (DEMO_TMAT,), ()),
-    ("retrieval/test_fastfull_core.py", ("treams",), (DEMO_TMAT,), ()),
-    ("retrieval/test_fastfull_design.py", ("slow", "treams"), (DEMO_TMAT,), ()),
-    ("retrieval/test_fastfull_ewald.py", ("treams",), (DEMO_TMAT,), ()),
-    ("retrieval/test_fastfull_synthetic.py", ("slow", "treams"),
-     (DEMO_TMAT,), ()),
 ]
 
 
