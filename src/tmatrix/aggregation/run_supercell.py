@@ -81,11 +81,14 @@ def parse_args():
                         "times, interpolating T linearly, to resolve lattice "
                         "resonances the stored grid aliases")
     p.add_argument("--denoise", default=None,
-                   help="comma-separated physical-constraint repairs applied "
-                        "to every site T before the solve: 'reciprocity' "
-                        "(project onto the reciprocal subspace) and/or "
-                        "'passivity' (clip singular values of I + 2T at 1), "
-                        "in the given order -- see aggregation/denoise.py")
+                   help="comma-separated repairs applied to every site T "
+                        "before the solve, in the given order: 'reciprocity' "
+                        "(project onto the reciprocal subspace), 'passivity' "
+                        "(clip singular values of I + 2T at 1), 'shrink' "
+                        "(noise-calibrated per-block Wiener shrinkage; "
+                        "subsumes reciprocity), 'smooth' (per-band Savitzky-"
+                        "Golay along frequency).  Recommended full stack: "
+                        "smooth,shrink,passivity -- see aggregation/denoise.py")
     p.add_argument("--out", default="results_supercell")
     return p.parse_args()
 
@@ -158,18 +161,21 @@ def main():
     # files, so the stored grid aliases it; T itself is smooth over 1 THz
     # EXCEPT across a band seam of a merged extraction, where the interpolation
     # is not meaningful and the refined curve should not be read.
-    freq, Tsite = refine_grid(data, args.refine)
     denoise_steps = ([s.strip() for s in args.denoise.split(",") if s.strip()]
                      if args.denoise else [])
     if denoise_steps:
         from tmatrix.aggregation.denoise import (apply_denoise,
                                                  reciprocity_residual)
-        for j in range(len(Tsite)):
-            before = float(np.mean(reciprocity_residual(Tsite[j], modes_file)))
-            Tsite[j] = apply_denoise(Tsite[j], modes_file, denoise_steps)
-            after = float(np.mean(reciprocity_residual(Tsite[j], modes_file)))
+        # applied on the STORED grid, before any --refine interpolation:
+        # 'smooth' operates per extraction band of the stored samples
+        for j, d in enumerate(data):
+            before = float(np.mean(reciprocity_residual(d.T, modes_file)))
+            d.T = apply_denoise(d.T, modes_file, denoise_steps,
+                                band_slices=d.band_slices)
+            after = float(np.mean(reciprocity_residual(d.T, modes_file)))
             print(f"  denoise {denoise_steps}: file {j} mean reciprocity "
                   f"residual {before:.3f} -> {after:.3f}")
+    freq, Tsite = refine_grid(data, args.refine)
     nf = len(freq)
     lam = 299792458.0 / freq * 1e6
     A_uc = abs(a1[0] * a2[1] - a1[1] * a2[0])
@@ -230,9 +236,18 @@ def main():
                 from tmatrix.aggregation import ewald_supercell as ew
                 W, einfo = ew.converged_W(k, a1, a2, rho, mb, return_info=True)
                 if W is None:
+                    # A split that fails its own consistency gate at this
+                    # truncation disqualifies THE CANDIDATE, not the
+                    # frequency: the gate tightens with L (higher-order
+                    # Hankel content), and a lower L regularly passes --
+                    # observed on the 3x3 cell at lambda = 11.103 um, where
+                    # probing L=5 fails the eta gate while the fixed-L3 run
+                    # sails through the same frequency.
+                    if L != cand[-1]:
+                        continue
                     raise RuntimeError(
-                        f"Ewald split did not converge at lambda={lam[i]:.3f}: "
-                        + "; ".join(einfo["reasons"]))
+                        f"Ewald split did not converge at lambda={lam[i]:.3f} "
+                        f"at any candidate lmax: " + "; ".join(einfo["reasons"]))
                 eta_spread = max(einfo["eta_deviations"].values())
             else:
                 proj = RegularProjector(mb, quad)

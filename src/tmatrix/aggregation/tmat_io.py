@@ -1,4 +1,6 @@
 """Reader for tmat.h5 files (the unified T-matrix data format)."""
+import json
+
 import h5py
 import numpy as np
 
@@ -25,6 +27,26 @@ class TMatrixData:
             emb = f["embedding"]
             self.eps_emb = complex(emb["relative_permittivity"][()])
             self.mu_emb = complex(emb["relative_permeability"][()])
+            # band-merged extractions record their segments in
+            # computation.bands; a seam separates different monitor/mesh
+            # settings, so per-band processing (denoise.smooth_frequency)
+            # must never mix samples across it
+            self.band_slices = [(0, len(self.freq))]
+            comp = f.get("computation")
+            if comp is not None and "bands" in comp.attrs:
+                try:
+                    raw = comp.attrs["bands"]
+                    if isinstance(raw, bytes):
+                        raw = raw.decode()
+                    edges, start = [], 0
+                    for b in json.loads(raw):
+                        n = int(b["n_freq"])
+                        edges.append((start, start + n))
+                        start += n
+                    if start == len(self.freq):
+                        self.band_slices = edges
+                except Exception:
+                    pass
 
     @property
     def wavelength_um(self):

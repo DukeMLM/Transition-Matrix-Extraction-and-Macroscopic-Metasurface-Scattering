@@ -27,6 +27,14 @@ import sys
 import numpy as np
 
 
+def _modes_from(basis):
+    """ModeBasis mirroring a treams SphericalWaveBasis (pol used as-is:
+    the reciprocity/shrink maps only need pol PRESERVED, not interpreted)."""
+    from tmatrix.aggregation.vswf import ModeBasis
+    return ModeBasis(np.asarray(basis.l), np.asarray(basis.m),
+                     np.asarray(basis.pol))
+
+
 def main():
     from tmatrix.aggregation.vswf import (ModeBasis, far_field_amplitude,
                                           plane_wave_coeffs)
@@ -110,6 +118,57 @@ def main():
           1e-12)
     check("after reciprocity+passivity: still reciprocal (clip commutes)",
           float(reciprocity_residual(Xp, mb)), 1e-12)
+
+    # --- 4. noise-calibrated shrinkage and smoothing vs synthetic truth -----
+    print("4. shrinkage and smoothing against synthetic truth:")
+    from tmatrix.aggregation.denoise import (estimate_block_noise,
+                                             smooth_frequency, wiener_shrink)
+    check("shrink is a no-op on the exact treams sphere T",
+          float(np.linalg.norm(wiener_shrink(T, _modes_from(sph.basis)) - T))
+          / max(float(np.linalg.norm(T)), 1e-300), 1e-12)
+
+    # reciprocal ground truth with a decaying per-l envelope, plus iid noise
+    # sized so the high-l blocks are noise-dominated (the measured regime)
+    rng2 = np.random.default_rng(23)
+    X2 = rng2.normal(size=(mb.n, mb.n)) + 1j * rng2.normal(size=(mb.n, mb.n))
+    env = np.exp(-0.9 * (np.add.outer(mb.l, mb.l) - 2))
+    T_true = enforce_reciprocity(X2 * env, mb)
+    sigma = 0.02 * float(np.linalg.norm(T_true)) / mb.n
+    N = sigma * (rng2.normal(size=T_true.shape)
+                 + 1j * rng2.normal(size=T_true.shape))
+    T_noisy = T_true + N
+
+    est_total = sum(estimate_block_noise(T_noisy, mb).values())
+    true_half = 0.5 * float(np.linalg.norm(N)) ** 2
+    check("calibrated noise power matches the injected level (|ratio-1|)",
+          abs(est_total / true_half - 1.0), 0.35)
+
+    e_noisy = float(np.linalg.norm(T_noisy - T_true))
+    e_proj = float(np.linalg.norm(enforce_reciprocity(T_noisy, mb) - T_true))
+    e_shr = float(np.linalg.norm(wiener_shrink(T_noisy, mb) - T_true))
+    check("reciprocal projection reduces error to truth (ratio)",
+          e_proj / e_noisy, 0.85)
+    check("shrinkage reduces it further (ratio)", e_shr / e_proj, 0.97)
+
+    # smooth truth in frequency with a genuine seam step at index 12
+    nf = 25
+    t = np.linspace(0.0, 1.0, nf)[:, None, None]
+    scale = 1.0 + 0.6 * t + 0.4 * t ** 2
+    scale[12:] *= 2.5
+    stack_true = T_true[None, :, :] * scale
+    Ns = (0.05 * float(np.linalg.norm(T_true)) / mb.n
+          * (rng2.normal(size=stack_true.shape)
+             + 1j * rng2.normal(size=stack_true.shape)))
+    stack_noisy = stack_true + Ns
+    sm = smooth_frequency(stack_noisy, [(0, 12), (12, nf)])
+    check("smoothing reduces error to truth (ratio)",
+          float(np.linalg.norm(sm - stack_true))
+          / float(np.linalg.norm(stack_noisy - stack_true)), 0.85)
+    sm1 = smooth_frequency(stack_noisy[:12])
+    sm2 = smooth_frequency(stack_noisy[12:])
+    check("no leakage across the band seam",
+          float(np.linalg.norm(sm[:12] - sm1))
+          + float(np.linalg.norm(sm[12:] - sm2)), 1e-12)
 
     print("ALL PASS" if ok else "FAILURES PRESENT")
     return 0 if ok else 1
