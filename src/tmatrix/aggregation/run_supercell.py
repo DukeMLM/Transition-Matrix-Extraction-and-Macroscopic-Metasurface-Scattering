@@ -80,6 +80,12 @@ def parse_args():
                    help="subdivide each stored frequency interval this many "
                         "times, interpolating T linearly, to resolve lattice "
                         "resonances the stored grid aliases")
+    p.add_argument("--denoise", default=None,
+                   help="comma-separated physical-constraint repairs applied "
+                        "to every site T before the solve: 'reciprocity' "
+                        "(project onto the reciprocal subspace) and/or "
+                        "'passivity' (clip singular values of I + 2T at 1), "
+                        "in the given order -- see aggregation/denoise.py")
     p.add_argument("--out", default="results_supercell")
     return p.parse_args()
 
@@ -153,6 +159,17 @@ def main():
     # EXCEPT across a band seam of a merged extraction, where the interpolation
     # is not meaningful and the refined curve should not be read.
     freq, Tsite = refine_grid(data, args.refine)
+    denoise_steps = ([s.strip() for s in args.denoise.split(",") if s.strip()]
+                     if args.denoise else [])
+    if denoise_steps:
+        from tmatrix.aggregation.denoise import (apply_denoise,
+                                                 reciprocity_residual)
+        for j in range(len(Tsite)):
+            before = float(np.mean(reciprocity_residual(Tsite[j], modes_file)))
+            Tsite[j] = apply_denoise(Tsite[j], modes_file, denoise_steps)
+            after = float(np.mean(reciprocity_residual(Tsite[j], modes_file)))
+            print(f"  denoise {denoise_steps}: file {j} mean reciprocity "
+                  f"residual {before:.3f} -> {after:.3f}")
     nf = len(freq)
     lam = 299792458.0 / freq * 1e6
     A_uc = abs(a1[0] * a2[1] - a1[1] * a2[0])
@@ -328,7 +345,7 @@ def main():
                        cond_max=args.cond_max, r0=args.r0, quad=list(args.quad),
                        cluster_lmax=args.cluster_lmax,
                        polarization=[args.pol[0], args.pol[1]],
-                       refine=args.refine,
+                       refine=args.refine, denoise=args.denoise,
                        first_rayleigh_onset_um=lam_first,
                        nearest_distance_um=d_min), fh, indent=2)
 
